@@ -48,6 +48,6 @@ import { Users, Phone, Mail, MapPin } from 'lucide-vue-next'
 
 <style scoped>
 .footer-bg {
-  background: linear-gradient(90deg, #C2E7F6 0%, #E3F2FD 100%);
+  background: linear-gradient(90deg, #1976D2 0%, #2196F3 100%);
 }
 </style>

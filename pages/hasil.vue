@@ -136,9 +136,21 @@
 
 <script setup>
 import { BarChart3, Users2, TrendingUp, CheckCircle2, PieChart } from 'lucide-vue-next'
-import VueApexCharts from 'vue3-apexcharts'
-import { ref } from 'vue'
 
+import { ref } from 'vue'
+import { Pie, Bar } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale
+} from 'chart.js'
+
+ChartJS.register(Title, Tooltip, Legend, ArcElement, BarElement, CategoryScale, LinearScale)
 
 const chartOptions = ref({
   chart: { type: 'pie' },

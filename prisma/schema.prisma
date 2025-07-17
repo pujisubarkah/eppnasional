@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model epp_atasan_bawahan {
+  id         Int       @id @default(autoincrement())
+  likert_1   Int
+  likert_2   Int
+  likert_3   Int
+  likert_4   Int
+  saran      String
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+}
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model epp_atasan_bawahan_profile {
+// }
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model epp_atasan_bawahan_questions {
+  id       Int?
+  question String? @db.VarChar
+  type     String? @db.VarChar
+  scale    Int?
+
+  @@ignore
+}
+
+model epp_master_options {
+  id             Int     @id(map: "epp_master_options_pk")
+  category       String? @db.VarChar
+  answer_options String? @db.VarChar
+  id_questions   Int?
+  pelatihan      String? @db.VarChar
+}
+
+model evaluasi_pasca {
+  id              Int       @id @default(autoincrement())
+  relevan_1       String    @db.VarChar(100)
+  relevan_2       String    @db.VarChar(100)
+  relevan_3       String    @db.VarChar(100)
+  tidak_relevan_1 String    @db.VarChar(100)
+  tidak_relevan_2 String    @db.VarChar(100)
+  tidak_relevan_3 String    @db.VarChar(100)
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model informasi_profile {
+  id             Int       @id @default(autoincrement())
+  nama_alumni    String    @db.VarChar(255)
+  jabatan_alumni String    @db.VarChar(255)
+  nama           String    @db.VarChar(255)
+  instansi       String    @db.VarChar(100)
+  jabatan        String    @db.VarChar(255)
+  hubungan       String    @db.VarChar(50)
+  pelatihan      String    @db.VarChar(100)
+  telepon        String    @db.VarChar(30)
+  created_at     DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model instansi {
+  id                 BigInt             @id(map: "instansi_pk")
+  agency_id          BigInt?            @unique(map: "instansi_unique")
+  agency_name        String?            @db.VarChar(226)
+  agency_category_id Int?
+  instansi_kategori  instansi_kategori? @relation(fields: [agency_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "instansi_instansi_kategori_fk")
+}
+
+model instansi_kategori {
+  id           Int        @id(map: "instansi_kategori_pk")
+  kat_instansi String?    @db.VarChar
+  instansi     instansi[]
+}
+
+model kontribusi_pasca {
+  id             Int       @id @default(autoincrement())
+  asta_cita      String    @db.VarChar(255)
+  prioritas      String    @db.VarChar(255)
+  prioritas_lain String?   @db.VarChar(255)
+  created_at     DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model master_kabkot {
+  id              Int              @id(map: "master_kabkot_pk")
+  created_at      DateTime?        @db.Timestamptz(6)
+  id_provinsi     Int?
+  id_kabkot       Int?             @unique(map: "master_kabkot_unique")
+  nama_kabkot     String?
+  master_provinsi master_provinsi? @relation(fields: [id_provinsi], references: [id_provinsi], onDelete: NoAction, onUpdate: NoAction, map: "master_kabkot_master_provinsi_fk")
+}
+
+model master_provinsi {
+  id            Int             @id(map: "master_provinsi_pk")
+  created_at    DateTime?       @db.Timestamptz(6)
+  id_provinsi   Int?            @unique(map: "master_provinsi_unique")
+  nama_provinsi String?         @db.VarChar
+  master_kabkot master_kabkot[]
+  provinsi      provinsi[]
+}
+
+model provinsi {
+  id              Int              @id(map: "provinsis_pkey") @unique(map: "provinsis_id_key")
+  nama            String?          @db.VarChar(255)
+  svg_path        String?
+  id_provinsi     Int?
+  created_at      DateTime?        @db.Timestamp(6)
+  updated_at      DateTime?        @db.Timestamp(6)
+  published_at    DateTime?        @db.Timestamp(6)
+  master_provinsi master_provinsi? @relation(fields: [id_provinsi], references: [id_provinsi], onDelete: NoAction, onUpdate: NoAction)
+}
