@@ -2,7 +2,7 @@
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200 px-4">
     <section class="w-full max-w-3xl mb-20 mt-8 md:mt-14">
-      <div class="h-2 w-full bg-gradient-to-r from-[#2196F3] via-[#C2E7F6] to-[#1976D2] rounded-t-2xl mb-0.5"></div>
+      <div class="h-2 w-full bg-gradient-to-r from-[#0D47A1] via-[#C2E7F6] to-[#1976D2] rounded-t-2xl mb-0.5"></div>
       <div class="relative">
         <Swiper
           :modules="[Navigation, Pagination, Autoplay]"
@@ -23,7 +23,7 @@
           </div>
         </div>
       </div>
-      <div class="h-2 w-full bg-gradient-to-r from-[#1976D2] via-[#C2E7F6] to-[#2196F3] rounded-b-2xl mt-0.5"></div>
+      <div class="h-2 w-full bg-gradient-to-r from-[#1976D2] via-[#C2E7F6] to-[#0D47A1] rounded-b-2xl mt-0.5"></div>
     </section>
 
 

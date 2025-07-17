@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar flex items-center justify-between px-6 py-4 shadow-md border-b border-[#C2E7F6] bg-[#C2E7F6]/60 backdrop-blur z-40 relative">
     <!-- Logo / Judul -->
-    <div class="text-2xl font-extrabold text-[#2196F3] tracking-wide drop-shadow-sm">
+    <div class="text-2xl font-extrabold text-[#0D47A1] tracking-wide drop-shadow-sm">
       KuesionerKu
     </div>
 
@@ -89,7 +89,7 @@ onBeforeUnmount(() => {
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   transition: all 0.2s;
-  background: linear-gradient(90deg, #2196F3 60%, #C2E7F6 100%);
+  background: linear-gradient(90deg, #0D47A1 60%, #C2E7F6 100%);
   color: #fff;
   border: none;
 }
