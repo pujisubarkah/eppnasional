@@ -27,7 +27,10 @@
       </div>
       <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
         <label class="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">Jabatan Alumni Saat Ini <span class="text-red-500">*</span></label>
-        <input type="text" v-model="form.jabatanAlumni" required class="flex-1 border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition" placeholder="Masukkan jabatan alumni" />
+        <select v-model="form.jabatanAlumni" required class="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
+          <option value="" disabled>Pilih Jabatan Alumni</option>
+          <option v-for="item in jabatanList" :key="item.id" :value="item.nama">{{ item.nama }}</option>
+        </select>
       </div>
       <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
         <label class="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">Nama Lengkap Anda <span class="text-red-500">*</span></label>
@@ -42,7 +45,10 @@
       </div>
       <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
         <label class="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">Jabatan Anda <span class="text-red-500">*</span></label>
-        <input type="text" v-model="form.jabatanAnda" required class="flex-1 border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition" placeholder="Masukkan jabatan Anda" />
+        <select v-model="form.jabatanAnda" required class="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
+          <option value="" disabled>Pilih Jabatan Anda</option>
+          <option v-for="item in jabatanList" :key="item.id" :value="item.nama">{{ item.nama }}</option>
+        </select>
       </div>
       <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
         <label class="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">Hubungan dengan Alumni <span class="text-red-500">*</span></label>
@@ -76,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 const instansiList = [
   'Kementerian',
   'Lembaga',
@@ -84,6 +90,7 @@ const instansiList = [
   'Badan Usaha',
   'Lainnya',
 ]
+const jabatanList = ref([])
 const form = ref({
   namaAlumni: '',
   jabatanAlumni: '',
@@ -93,6 +100,17 @@ const form = ref({
   hubungan: '',
   pelatihan: '',
   telepon: '',
+})
+
+onMounted(async () => {
+  try {
+    const res = await fetch('/api/jabatan')
+    if (res.ok) {
+      jabatanList.value = await res.json()
+    }
+  } catch (e) {
+    jabatanList.value = []
+  }
 })
 </script>
 

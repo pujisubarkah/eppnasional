@@ -1,20 +1,37 @@
 <template>
   <div class="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-10 space-y-10 border border-[#B3E5FC]">
+    <div class="mb-2 p-2 bg-gray-100 rounded text-xs text-gray-600">
+      <span>Pinia Profile: </span>
+      <span>ID: {{ profileStore.id }}</span> |
+      <span>Pelatihan ID: {{ profileStore.pelatihan_id }}</span>
+    </div>
     <h2 class="text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">Evaluasi Materi Pelatihan</h2>
+    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl text-[#1976D2] text-base font-medium">
+      <span>
+        <span class="font-bold">Petunjuk:</span>
+        Pada bagian ini, kami akan menyajikan daftar materi yang diajarkan pada
+        <span class="font-bold">{{ namaPelatihan }}</span>.
+        Silahkan pilih 3 materi yang menurut Anda paling relevan dan paling tidak relevan dalam mendukung kinerja.
+      </span>
+    </div>
     <div class="bg-white/90 rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
       <h3 class="font-bold text-lg mb-4 text-[#1976D2]">Daftar Materi Pelatihan</h3>
       <table class="w-full border rounded shadow text-sm bg-white">
         <thead>
           <tr class="bg-[#C2E7F6] text-[#1976D2]">
-            <th class="py-2 px-3 text-left">No</th>
-            <th class="py-2 px-3 text-left">Materi</th>
+            <th class="py-2 px-3 text-left">Agenda</th>
+            <th class="py-2 px-3 text-left">Sub Agenda</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(materi, idx) in materiList" :key="materi">
-            <td class="py-1 px-3">{{ idx + 1 }}</td>
-            <td class="py-1 px-3">{{ materi }}</td>
-          </tr>
+          <template v-for="agenda in materiList" :key="agenda.id">
+            <tr v-for="(sub, subIdx) in agenda.sub_agendas" :key="sub.id">
+              <td class="py-1 px-3 font-semibold align-top">
+                <span v-if="subIdx === 0">{{ agenda.name }}</span>
+              </td>
+              <td class="py-1 px-3">{{ String.fromCharCode(97 + subIdx) }}) {{ sub.name }}</td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -52,29 +69,49 @@
 
 
 <script setup>
-import { onMounted, ref } from 'vue'
-import { toast } from 'vue-sonner'
-import axios from 'axios'
-
-const pertanyaanRelevan = ref(null)
-const pertanyaanTidakRelevan = ref(null)
+const profileStore = useProfileStore()
+const namaPelatihan = ref('Pelatihan Kepemimpinan Nasional (PKN) Tingkat I')
+const materiList = ref([])
+const optionsWithSubAgenda = ref([])
 const relevan = ref([])
 const tidakRelevan = ref([])
 const showToastRelevan = ref(false)
 const showToastTidakRelevan = ref(false)
 
-onMounted(async () => {
+async function fetchQuestionData(pelatihanId) {
   try {
-    const [res1, res2] = await Promise.all([
-      axios.get('/api/pertanyaan/1'),
-      axios.get('/api/pertanyaan/2'),
-    ])
-    pertanyaanRelevan.value = res1.data
-    pertanyaanTidakRelevan.value = res2.data
+    // Fetch agenda, sub agenda, dan opsi pertanyaan dari endpoint baru
+    const res = await axios.get(`/api/question/${pelatihanId}`)
+    materiList.value = res.data?.result || []
+    optionsWithSubAgenda.value = res.data?.optionsWithSubAgenda || []
+    // Fetch nama pelatihan
+    const resPelatihan = await axios.get(`/api/pelatihan/${pelatihanId}`)
+    namaPelatihan.value = resPelatihan.data?.nama || 'Pelatihan Kepemimpinan Nasional (PKN) Tingkat I'
   } catch (err) {
-    toast.error('Gagal memuat pertanyaan')
+    materiList.value = []
+    optionsWithSubAgenda.value = []
+    namaPelatihan.value = 'Pelatihan Kepemimpinan Nasional (PKN) Tingkat I'
+  }
+}
+
+watch(() => profileStore.pelatihan_id, (id) => {
+  if (id) fetchQuestionData(id)
+})
+
+onMounted(async () => {
+  if (profileStore.pelatihan_id) {
+    await fetchQuestionData(profileStore.pelatihan_id)
   }
 })
+
+const pertanyaanRelevan = computed(() => ({
+  text: 'Pilih 3 materi paling relevan dalam mendukung kinerja Anda',
+  options: optionsWithSubAgenda.value
+}))
+const pertanyaanTidakRelevan = computed(() => ({
+  text: 'Pilih 3 materi paling tidak relevan dalam mendukung kinerja Anda',
+  options: optionsWithSubAgenda.value
+}))
 
 function submit() {
   showToastRelevan.value = relevan.value.length !== 3
@@ -90,3 +127,7 @@ function submit() {
   toast.success('Pilihan berhasil disimpan!')
 }
 </script>
+
+<style scoped>
+/* Add any component-specific styles here */
+</style>

@@ -21,10 +21,10 @@
       </div>
       <div class="bg-white/80 rounded-b-xl shadow p-6">
         <div v-if="activeTab === 0">
-          <Profile />
+          <Profile @nextTab="activeTab = 1" />
         </div>
         <div v-else-if="activeTab === 1">
-          <EvaluasiPasca />
+          <EvaluasiPasca @nextTab="activeTab = 2" />
         </div>
         <div v-else-if="activeTab === 2">
           <DukunganLingkungan />
