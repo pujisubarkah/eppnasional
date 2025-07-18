@@ -20,22 +20,26 @@
     </div>
 
     <div class="bg-white/90 rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
-      <label class="block font-semibold mb-4 text-[#1976D2]">Silakan pilih <span class="text-[#2196F3]">3 materi yang paling relevan</span> dalam mendukung kinerja Anda:</label>
+      <label class="block font-semibold mb-4 text-[#1976D2]">
+        {{ pertanyaanRelevan?.text || 'Memuat pertanyaan...' }}
+      </label>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <label v-for="materi in materiList" :key="materi" class="flex items-center gap-3 bg-blue-50 rounded-lg px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer">
-          <input type="checkbox" :value="materi" v-model="relevan" :disabled="relevan.length >= 3 && !relevan.includes(materi)" class="accent-[#2196F3] scale-125" />
-          <span class="text-[#1976D2] font-medium">{{ materi }}</span>
+        <label v-for="opt in pertanyaanRelevan?.options || []" :key="opt.id" class="flex items-center gap-3 bg-blue-50 rounded-lg px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer">
+          <input type="checkbox" :value="opt.option_text" v-model="relevan" :disabled="relevan.length >= 3 && !relevan.includes(opt.option_text)" class="accent-[#2196F3] scale-125" />
+          <span class="text-[#1976D2] font-medium">{{ opt.option_text }}</span>
         </label>
       </div>
       <div v-if="showToastRelevan" class="text-red-500 text-xs mt-2">Pilih tepat 3 materi relevan!</div>
     </div>
 
     <div class="bg-white/90 rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
-      <label class="block font-semibold mb-4 text-[#1976D2]">Silakan pilih <span class="text-[#2196F3]">3 materi yang paling tidak relevan</span> dalam mendukung kinerja Anda:</label>
+      <label class="block font-semibold mb-4 text-[#1976D2]">
+        {{ pertanyaanTidakRelevan?.text || 'Memuat pertanyaan...' }}
+      </label>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <label v-for="materi in materiList" :key="materi" class="flex items-center gap-3 bg-red-50 rounded-lg px-3 py-2 shadow-sm hover:bg-red-100 transition cursor-pointer">
-          <input type="checkbox" :value="materi" v-model="tidakRelevan" :disabled="tidakRelevan.length >= 3 && !tidakRelevan.includes(materi)" class="accent-red-400 scale-125" />
-          <span class="text-[#D32F2F] font-medium">{{ materi }}</span>
+        <label v-for="opt in pertanyaanTidakRelevan?.options || []" :key="opt.id" class="flex items-center gap-3 bg-red-50 rounded-lg px-3 py-2 shadow-sm hover:bg-red-100 transition cursor-pointer">
+          <input type="checkbox" :value="opt.option_text" v-model="tidakRelevan" :disabled="tidakRelevan.length >= 3 && !tidakRelevan.includes(opt.option_text)" class="accent-red-400 scale-125" />
+          <span class="text-[#D32F2F] font-medium">{{ opt.option_text }}</span>
         </label>
       </div>
       <div v-if="showToastTidakRelevan" class="text-red-500 text-xs mt-2">Pilih tepat 3 materi tidak relevan!</div>
@@ -48,26 +52,29 @@
 
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
+import axios from 'axios'
 
-const materiList = [
-  'Pengembangan Kepemimpinan Kolaboratif',
-  'Etika dan Integritas',
-  'Kerangka Manajemen Kebijakan Publik',
-  'Komunikasi dan Advokasi Kebijakan',
-  'Isu Strategis Kebijakan',
-  'Berpikir Holistik',
-  'Kepemimpinan Koloboratif',
-  'Transformasi Digital',
-  'Benchmarking Kebijakan',
-  'Policy Brief',
-  'Proyek Perubahan',
-]
+const pertanyaanRelevan = ref(null)
+const pertanyaanTidakRelevan = ref(null)
 const relevan = ref([])
 const tidakRelevan = ref([])
 const showToastRelevan = ref(false)
 const showToastTidakRelevan = ref(false)
+
+onMounted(async () => {
+  try {
+    const [res1, res2] = await Promise.all([
+      axios.get('/api/pertanyaan/1'),
+      axios.get('/api/pertanyaan/2'),
+    ])
+    pertanyaanRelevan.value = res1.data
+    pertanyaanTidakRelevan.value = res2.data
+  } catch (err) {
+    toast.error('Gagal memuat pertanyaan')
+  }
+})
 
 function submit() {
   showToastRelevan.value = relevan.value.length !== 3

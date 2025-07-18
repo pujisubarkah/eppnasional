@@ -8,6 +8,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model answers {
+  id          Int        @id(map: "jawaban_pkey") @default(autoincrement())
+  question_id Int?
+  user_id     Int?
+  answer      String
+  created_at  DateTime?  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime?  @default(now()) @db.Timestamp(6)
+  questions   questions? @relation(fields: [question_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model categories {
+  id        Int         @id @default(autoincrement())
+  name      String      @db.VarChar(100)
+  questions questions[]
+}
+
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model epp_atasan_bawahan {
   id         Int       @id @default(autoincrement())
@@ -114,4 +130,24 @@ model provinsi {
   updated_at      DateTime?        @db.Timestamp(6)
   published_at    DateTime?        @db.Timestamp(6)
   master_provinsi master_provinsi? @relation(fields: [id_provinsi], references: [id_provinsi], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model question_options {
+  id           Int       @id @default(autoincrement())
+  question_id  Int
+  option_text  String    @db.VarChar(255)
+  option_value Int?
+  ordering     Int?
+  questions    questions @relation(fields: [question_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model questions {
+  id               Int                @id(map: "pertanyaan_pkey") @default(autoincrement())
+  text             String
+  type             String             @db.VarChar(50)
+  category_id      Int?
+  created_at       DateTime?          @default(now()) @db.Timestamp(6)
+  answers          answers[]
+  question_options question_options[]
+  categories       categories?        @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "pertanyaan_category_id_fkey")
 }

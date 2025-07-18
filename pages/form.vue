@@ -47,7 +47,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import LikertQuestion from '~/components/LikertQuestion.vue'
 import SikapPerilaku from '~/components/SikapPerilaku.vue'
 import DukunganLingkungan from '~/components/DukunganLingkungan.vue'
 import EvaluasiPasca from '~/components/EvaluasiPasca.vue'
