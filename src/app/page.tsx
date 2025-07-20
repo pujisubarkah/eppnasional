@@ -1,103 +1,141 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import DashboardSummaryCard from "@/components/DashboardSummaryCard";
+import DashboardMap from "@/components/DashboardMap";
+import DashboardCharts from "@/components/DashboardCharts";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+
+export default function Home() {
+  const [eligible, setEligible] = useState<null | boolean>(null);
+
+  return (
+    <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200 px-4">
+      <section className="w-full max-w-6xl mt-8 mb-10">
+        <div className="flex flex-col items-end mb-4">
+          {/* Dua card utama sejajar */}
+          <div className="w-full flex flex-col md:flex-row gap-8 mb-6">
+            {/* Card Alumni */}
+            <div className="flex-1 bg-white/80 rounded-2xl shadow p-6 flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-shrink-0 flex flex-col items-center">
+                <Image
+                  src="/alumni.png"
+                  alt="Alumni"
+                  width={200}
+                  height={200}
+                  className="rounded-2xl shadow-lg border-4 border-[#B3E5FC] bg-white"
+                />
+                <span className="mt-2 text-sm text-[#1976D2] font-semibold">
+                  Alumni Pelatihan
+                </span>
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-gray-800 text-lg mb-4">
+                  Apakah Anda mengikuti <br />
+                  <span className="font-bold text-[#1976D2]">
+                    Pelatihan Kepemimpinan Nasional Tingkat I
+                  </span>
+                  ,{" "}
+                  <span className="font-bold text-[#1976D2]">Tingkat II</span>
+                  ,{" "}
+                  <span className="font-bold text-[#1976D2]">Administrator</span>
+                  ,{" "}
+                  <span className="font-bold text-[#1976D2]">Pengawas</span>
+                  , atau{" "}
+                  <span className="font-bold text-[#1976D2]">
+                    Pelatihan Dasar CPNS
+                  </span>
+                  <br />
+                  pada rentang tahun{" "}
+                  <span className="font-bold text-[#1976D2]">2021–2024</span>?
+                </div>
+                <div className="flex gap-4 mt-2">
+                  <button
+                    onClick={() => setEligible(true)}
+                    className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] hover:from-[#1976D2] hover:to-[#2196F3] text-white font-bold py-2 px-8 rounded-xl shadow transition-colors duration-200"
+                  >
+                    Ya
+                  </button>
+                  <button
+                    onClick={() => setEligible(false)}
+                    className="bg-gray-200 hover:bg-gray-300 text-[#1976D2] font-bold py-2 px-8 rounded-xl shadow transition-colors duration-200"
+                  >
+                    Tidak
+                  </button>
+                </div>
+                <div className="mt-4">
+                  <Link
+                    href={eligible ? "/alumni/profile" : "#"}
+                    className={`inline-block font-bold py-3 px-8 rounded-xl shadow transition-colors duration-200 ${
+                      eligible
+                        ? "bg-[#1976D2] hover:bg-[#1565C0] text-white cursor-pointer"
+                        : "bg-gray-300 text-gray-400 cursor-not-allowed"
+                    }`}
+                    tabIndex={eligible ? 0 : -1}
+                    aria-disabled={!eligible}
+                    onClick={(e) => {
+                      if (!eligible) e.preventDefault();
+                    }}
+                  >
+                    Survey
+                  </Link>
+                </div>
+                {eligible === false && (
+                  <div className="w-full bg-red-50 border border-red-200 text-red-700 rounded-lg shadow p-4 text-center mt-4">
+                    Terima kasih atas perhatian Anda.<br />
+                    Maaf, Anda tidak memenuhi syarat sebagai responden.<br />
+                    Survey ini ditujukan bagi alumni pelatihan pada rentang tahun 2021–2024.
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Card Atasan/Rekan Kerja/Bawahan */}
+            <div className="flex-1 bg-white/80 rounded-2xl shadow p-6 flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-shrink-0 flex flex-col items-center">
+                <Image
+                  src="/atasan.png"
+                  alt="Atasan/Rekan/Bawahan"
+                  width={200}
+                  height={200}
+                  className="rounded-2xl shadow-lg border-4 border-[#B3E5FC] bg-white"
+                />
+                <span className="mt-2 text-sm text-[#1976D2] font-semibold">
+                  Atasan / Rekan Kerja / Bawahan
+                </span>
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-gray-800 text-lg mb-4">
+                  Survey ini juga ditujukan bagi{" "}
+                  <span className="font-bold text-[#1976D2]">Atasan</span>,{" "}
+                  <span className="font-bold text-[#1976D2]">Rekan Kerja</span>, atau{" "}
+                  <span className="font-bold text-[#1976D2]">
+                    Bawahan Alumni Pelatihan Tahun 2021–2024
+                  </span>
+                  .
+                </div>
+                <div className="flex justify-end">
+                  <Link
+                    href="/review/profile"
+                    className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] hover:from-[#1976D2] hover:to-[#2196F3] text-white font-bold py-2 px-8 rounded-xl shadow transition-colors duration-200"
+                  >
+                    Isi Survey
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+          <section className="w-full max-w-6xl mx-auto mb-16">
+          {/* Komponen summary dan lainnya di bawah dua card utama */}
+          <DashboardSummaryCard />
+          <DashboardMap />
+          <DashboardCharts />
+          </section>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      
+      </section>
     </div>
   );
 }
