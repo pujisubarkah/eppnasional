@@ -12,7 +12,7 @@ type Question = { id: number; text: string; options: Option[] };
 
 export default function PenilaianInvestasiWaktuPage() {
   const [pertanyaan, setPertanyaan] = useState<Question | null>(null);
-  const { jawaban, setJawaban, clear } = useSesuaiWaktuStore();
+  const { jawaban, setJawaban } = useSesuaiWaktuStore();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const router = useRouter();

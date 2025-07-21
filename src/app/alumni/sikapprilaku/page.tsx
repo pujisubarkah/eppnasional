@@ -24,8 +24,7 @@ export default function SikapPrilakuPage() {
     ekonomi, setEkonomi,
     dampak, setDampak,
     dampakLain, setDampakLain,
-    tema, setTema,
-    clear
+    tema, setTema
   } = useSikapPrilakuStore();
 
   const [isSubmitted, setIsSubmitted] = useState(false);

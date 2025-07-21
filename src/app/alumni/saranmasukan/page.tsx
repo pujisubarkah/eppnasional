@@ -12,7 +12,7 @@ export default function SaranMasukanPage() {
   const router = useRouter();
   const { id: user_id } = useProfileStore();
 
-  const { materi, setMateri, metode, setMetode, waktu, setWaktu, pengajar, setPengajar, clear } = useSaranMasukanStore();
+  const { materi, setMateri, metode, setMetode, waktu, setWaktu, pengajar, setPengajar } = useSaranMasukanStore();
 
   // State untuk label pertanyaan dari API
   const [pertanyaanLabels, setPertanyaanLabels] = useState({
