@@ -1,7 +1,10 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // HAPUS atau KOMENTARI ini kalau ada:
+  // output: 'export',
 
-const nextConfig: NextConfig = {
-  output: "export", // Biar bisa static export
+  // Gunakan ini sebagai gantinya (default behavior)
+  reactStrictMode: true,
 };
 
-export default nextConfig;
+module.exports = nextConfig;
