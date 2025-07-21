@@ -3,19 +3,16 @@
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Send } from "lucide-react";
+import {  ArrowLeft, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useProfileStore } from "@/lib/store/profileStore";
+import { useSaranMasukanStore } from "@/lib/store/saranmasukan";
 
 export default function SaranMasukanPage() {
-  const [materi, setMateri] = useState("");
-  const [metode, setMetode] = useState("");
-  const [waktu, setWaktu] = useState("");
-  const [pengajar, setPengajar] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
   const router = useRouter();
   const { id: user_id } = useProfileStore();
+
+  const { materi, setMateri, metode, setMetode, waktu, setWaktu, pengajar, setPengajar, clear } = useSaranMasukanStore();
 
   // State untuk label pertanyaan dari API
   const [pertanyaanLabels, setPertanyaanLabels] = useState({
@@ -101,7 +98,7 @@ export default function SaranMasukanPage() {
         }),
       });
       toast.success("Saran & masukan berhasil disimpan! Silakan klik tombol lanjut.");
-      setIsSubmitted(true);
+      // setIsSubmitted(true);
     } catch {
       toast.error("Gagal menyimpan saran & masukan!");
     }
@@ -174,23 +171,13 @@ export default function SaranMasukanPage() {
             <ArrowLeft size={20} />
             Sebelumnya
           </button>
-          {!isSubmitted ? (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition"
-            >
-              <Send size={20} /> Submit
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleLanjut}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition"
-            >
-              Lanjut <ArrowRight size={20} />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition"
+          >
+            <Send size={20} /> Submit
+          </button>
         </div>
       </div>
     </div>

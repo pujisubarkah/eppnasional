@@ -5,16 +5,19 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Send } from "lucide-react";
 import { useProfileStore } from "@/lib/store/profileStore";
+import { useDukunganLingkunganStore } from "@/lib/store/dukunganlingkungan"; // <-- import store
 
 type Option = { id: number; option_text: string };
 type Question = { id: number; text: string; options: Option[] };
 
 export default function DukunganLingkunganPage() {
   const [pertanyaanList, setPertanyaanList] = useState<Question[]>([]);
-  const [answers, setAnswers] = useState<(string | null)[]>([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
   const { id: user_id } = useProfileStore();
+
+  // Ambil state dan setter dari zustand
+  const { answers, setAnswers, setAnswer, clear } = useDukunganLingkunganStore();
 
   useEffect(() => {
     async function fetchQuestions() {
@@ -26,20 +29,18 @@ export default function DukunganLingkunganPage() {
           )
         );
         setPertanyaanList(responses);
-        setAnswers(Array(responses.length).fill(null));
+        // Inisialisasi jawaban jika belum ada
+        if (!answers.length) setAnswers(Array(responses.length).fill(null));
       } catch {
         // handle error, optionally show toast
       }
     }
     fetchQuestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAnswer = (idx: number, value: string) => {
-    setAnswers((prev) => {
-      const next = [...prev];
-      next[idx] = value;
-      return next;
-    });
+    setAnswer(idx, value);
   };
 
   const handleSubmit = async () => {
@@ -69,6 +70,7 @@ export default function DukunganLingkunganPage() {
   };
 
   const handleLanjut = () => {
+    clear(); // reset jawaban jika ingin
     router.push("/alumni/sikapprilaku");
   };
 

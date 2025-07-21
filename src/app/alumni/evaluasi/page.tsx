@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useProfileStore } from '@/lib/store/profileStore'
+import { useEvaluasiStore } from '@/lib/store/evaluasiStore'
 import { toast } from 'sonner'
 import { ArrowRight, Send } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -20,6 +21,14 @@ interface Option {
   option_text: string
 }
 
+interface EvaluasiState {
+  relevan: string[];
+  tidakRelevan: string[];
+  setRelevan: (value: string[]) => void;
+  setTidakRelevan: (value: string[]) => void;
+  clearAll: () => void;
+}
+
 // Custom hook untuk cek hydration Zustand
 function useHasHydrated() {
   const [hasHydrated, setHasHydrated] = useState(false)
@@ -32,12 +41,14 @@ function useHasHydrated() {
 export default function EvaluasiPage() {
   const hasHydrated = useHasHydrated()
   const { id, nama, pelatihan_id } = useProfileStore();
+
+  // Gunakan Zustand store
+  const { relevan, setRelevan, tidakRelevan, setTidakRelevan, clearAll } = useEvaluasiStore();
+
   const [materiList, setMateriList] = useState<Agenda[]>([])
   const [namaPelatihan, setNamaPelatihan] = useState<string>('Memuat...')
   const [relevanOptions, setRelevanOptions] = useState<Option[]>([])
-  const [tidakRelevanOptions, setTidakRelevanOptions] = useState<Option[]>([])
-  const [relevan, setRelevan] = useState<string[]>([])
-  const [tidakRelevan, setTidakRelevan] = useState<string[]>([])
+  const { tidakRelevanOptions, setTidakRelevanOptions } = useEvaluasiStore();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
 
@@ -73,7 +84,7 @@ export default function EvaluasiPage() {
     } catch {
       setTidakRelevanOptions([])
     }
-  }, [pelatihan_id])
+  }, [pelatihan_id, setTidakRelevanOptions])
 
   useEffect(() => {
     if (pelatihan_id) {

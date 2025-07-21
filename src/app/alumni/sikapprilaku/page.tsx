@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Send } from "lucide-react";
 import { useProfileStore } from "@/lib/store/profileStore";
+import { useSikapPrilakuStore } from "@/lib/store/sikapprilaku";
 
 type Option = { id: number; option_text: string };
 type Question = { id: number; text: string; options: Option[] };
@@ -17,12 +18,16 @@ export default function SikapPrilakuPage() {
   const [pertanyaanDampak, setPertanyaanDampak] = useState<Question | null>(null);
   const [pertanyaanTema, setPertanyaanTema] = useState<Question | null>(null);
 
-  const [sikap, setSikap] = useState("");
-  const [kinerja, setKinerja] = useState<string[]>([]);
-  const [ekonomi, setEkonomi] = useState("");
-  const [dampak, setDampak] = useState<string[]>([]);
-  const [dampakLain, setDampakLain] = useState("");
-  const [tema, setTema] = useState("");
+  const {
+    sikap, setSikap,
+    kinerja, setKinerja,
+    ekonomi, setEkonomi,
+    dampak, setDampak,
+    dampakLain, setDampakLain,
+    tema, setTema,
+    clear
+  } = useSikapPrilakuStore();
+
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const router = useRouter();

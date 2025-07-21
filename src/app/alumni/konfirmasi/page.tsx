@@ -4,6 +4,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Send, ArrowLeft } from "lucide-react";
 import { useProfileStore } from "@/lib/store/profileStore";
+import { useDukunganLingkunganStore } from "@/lib/store/dukunganlingkungan";
+import { useEvaluasiStore } from '@/lib/store/evaluasiStore';
+import { useSaranMasukanStore } from "@/lib/store/saranmasukan";
+import { useSesuaiWaktuStore } from "@/lib/store/sesuaiwaktu";
+import { useSikapPrilakuStore } from "@/lib/store/sikapprilaku";
+
+ // <-- import store
+
 import { useRouter } from "next/navigation";
 
 export default function KonfirmasiPage() {
@@ -12,9 +20,23 @@ export default function KonfirmasiPage() {
   const { nama } = useProfileStore();
   const router = useRouter();
 
+  // Ambil fungsi clear/clearAll dari semua store
+  const { clearAll: clearEvaluasi } = useEvaluasiStore();
+  const { clear: clearDukungan } = useDukunganLingkunganStore();
+  const { clear: clearSaran } = useSaranMasukanStore();
+  const { clear: clearSesuaiWaktu } = useSesuaiWaktuStore();
+  const { clear: clearSikapPrilaku } = useSikapPrilakuStore();
+
   const handleSubmit = async () => {
     setLoading(true);
-    // Tidak perlu fetch ke API, langsung tampilkan toast dan redirect
+
+    // Reset semua store
+    clearEvaluasi?.();
+    clearDukungan?.();
+    clearSaran?.();
+    clearSesuaiWaktu?.();
+    clearSikapPrilaku?.();
+
     toast.success(
       `Terima Kasih ${nama ? nama : ""}, telah menjadi bagian dari perbaikan! Masukan Anda akan kami gunakan untuk menjadikan pelatihan ke depan lebih relevan, berkualitas, dan bermakna.`
     );
