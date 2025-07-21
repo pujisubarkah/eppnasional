@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Menu } from "lucide-react";
 
 import DashboardSummaryCard from "@/components/DashboardSummaryCard";
 import DashboardMap from "@/components/DashboardMap";
@@ -11,9 +12,54 @@ import DashboardCharts from "@/components/DashboardCharts";
 
 export default function Home() {
   const [eligible, setEligible] = useState<null | boolean>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200 px-4">
+      {/* Hamburger & Mobile Menu */}
+      <div className="w-full max-w-6xl mx-auto flex md:hidden justify-between items-center py-4 px-2">
+        <Image
+          src="/lanri.png"
+          alt="Logo LAN RI"
+          width={40}
+          height={40}
+          className="h-10 w-auto drop-shadow-sm"
+          priority
+        />
+        <button
+          className="p-2 rounded focus:outline-none"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label="Buka menu"
+        >
+          <Menu size={32} className="text-[#1976D2]" />
+        </button>
+      </div>
+      {/* Mobile Menu Drawer */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 md:hidden" onClick={() => setMenuOpen(false)}>
+          <nav
+            className="absolute top-0 right-0 w-64 h-full bg-white shadow-lg flex flex-col gap-6 p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Link href="/" className="font-bold text-[#1976D2] text-lg" onClick={() => setMenuOpen(false)}>
+              Beranda
+            </Link>
+            <Link href="/tentang" className="font-bold text-[#1976D2] text-lg" onClick={() => setMenuOpen(false)}>
+              Tentang Kami
+            </Link>
+            <Link href="/FaQ" className="font-bold text-[#1976D2] text-lg" onClick={() => setMenuOpen(false)}>
+              FaQ
+            </Link>
+            <Link href="/kontak" className="font-bold text-[#1976D2] text-lg" onClick={() => setMenuOpen(false)}>
+              Kontak
+            </Link>
+            <Link href="/login" className="font-bold text-[#1976D2] text-lg mt-4" onClick={() => setMenuOpen(false)}>
+              Login
+            </Link>
+          </nav>
+        </div>
+      )}
+
       <section className="w-full max-w-6xl mt-8 mb-10">
         <div className="flex flex-col items-end mb-4">
           {/* Dua card utama sejajar */}
