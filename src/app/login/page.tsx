@@ -38,13 +38,14 @@ export default function LoginPage() {
       <div className="absolute inset-0 w-full h-full z-0">
         <Slider {...settings}>
           {images.map((src, idx) => (
-            <div key={idx} className="w-full h-screen flex justify-center items-center">
+            <div key={idx} className="relative w-full h-screen">
               <Image
                 src={src}
                 alt={`Gambar ${idx + 1}`}
                 fill
-                className="object-cover brightness-75"
+                className="object-cover w-full h-full brightness-75"
                 priority={idx === 0}
+                sizes="100vw"
               />
             </div>
           ))}

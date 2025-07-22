@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useProfileStore } from "@/lib/store/profileStore"; // pastikan path sesuai
 import { ArrowRight } from "lucide-react"; // Tambahkan import ini
+import { AlertCircle } from "lucide-react";
 
 type JenisInstansi = { id: number; name: string };
 type Instansi = { id: number; agency_name: string };
@@ -44,6 +45,7 @@ export default function ProfileForm() {
     handphone: "",
   });
   const [saved, setSaved] = useState(false);
+  const [showNamaModal, setShowNamaModal] = useState(false);
 
   const router = useRouter();
   const nama = useProfileStore((state) => state.nama); // ambil nama dari zustand
@@ -161,7 +163,17 @@ export default function ProfileForm() {
         <h2 className="text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">Profil Responden</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Nama Lengkap</label>
+            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2] flex items-center gap-1">
+              Nama Lengkap
+              <button
+                type="button"
+                onClick={() => setShowNamaModal(true)}
+                className="ml-1 text-[#F59E42] hover:text-[#FF9800] focus:outline-none"
+                aria-label="Keterangan Nama Lengkap"
+              >
+                <AlertCircle size={18} />
+              </button>
+            </label>
           </div>
           <div>
             <Input
@@ -360,6 +372,27 @@ export default function ProfileForm() {
           )}
         </div>
       </form>
+
+      {/* Modal Keterangan Nama Lengkap */}
+      {showNamaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-xs w-full text-center">
+            <div className="flex justify-center mb-2">
+              <AlertCircle size={32} className="text-[#F59E42]" />
+            </div>
+            <div className="text-[#1976D2] font-semibold mb-2">Keterangan Nama Lengkap</div>
+            <div className="text-gray-700 text-sm mb-4">
+              Nama lengkap adalah nama Anda sebagai alumni pelatihan.
+            </div>
+            <button
+              onClick={() => setShowNamaModal(false)}
+              className="bg-[#1976D2] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#1565C0] transition"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

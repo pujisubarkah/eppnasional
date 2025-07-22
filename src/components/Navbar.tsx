@@ -36,7 +36,7 @@ export default function Navbar() {
           priority
         />
         <span className="text-2xl font-black text-white tracking-wide drop-shadow-sm">
-          Evaluasi Pasca Pelatihan
+          Evaluasi Pasca Pelatihan Nasional
         </span>
       </div>
 
