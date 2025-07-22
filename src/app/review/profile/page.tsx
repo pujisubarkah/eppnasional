@@ -1,27 +1,33 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { CheckCircle, ArrowRightCircle } from "lucide-react";
 
-const instansiList = [
-  "Kementerian",
-  "Lembaga",
-  "Pemerintah Daerah",
-  "Badan Usaha",
-  "Lainnya",
+const jenisInstansiList = [
+  { id: 1, nama: "Kementerian" },
+  { id: 2, nama: "Lembaga" },
+  { id: 3, nama: "Pemerintah Daerah" },
+  { id: 4, nama: "Badan Usaha" },
+  { id: 5, nama: "Lainnya" },
 ];
 
 export default function ReviewProfilePage() {
   const [jabatanList, setJabatanList] = useState<{ id: string; nama: string }[]>([]);
+  const [instansiList, setInstansiList] = useState<{ id: string; agency_name: string }[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     namaAlumni: "",
     jabatanAlumni: "",
     namaAnda: "",
+    jenisInstansi: "",
     instansi: "",
     jabatanAnda: "",
     hubungan: "",
     pelatihan: "",
-   
   });
+  const router = useRouter();
 
   useEffect(() => {
     fetch("/api/jabatan")
@@ -30,14 +36,69 @@ export default function ReviewProfilePage() {
       .catch(() => setJabatanList([]));
   }, []);
 
+  useEffect(() => {
+    if (form.jenisInstansi) {
+      const jenis = jenisInstansiList.find(j => j.nama === form.jenisInstansi);
+      if (jenis) {
+        fetch(`/api/instansi/${jenis.id}`)
+          .then(res => res.ok ? res.json() : [])
+          .then(data => setInstansiList(data))
+          .catch(() => setInstansiList([]));
+      } else {
+        setInstansiList([]);
+      }
+      setForm(f => ({ ...f, instansi: "" }));
+    } else {
+      setInstansiList([]);
+      setForm(f => ({ ...f, instansi: "" }));
+    }
+  }, [form.jenisInstansi]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Submit form logic
-    alert("Data berhasil disimpan (dummy)");
+    setLoading(true);
+    setIsSaved(false);
+
+    // Temukan id dari jenisInstansi dan instansi
+    const jenis = jenisInstansiList.find(j => j.nama === form.jenisInstansi);
+    const instansi = instansiList.find(i => i.agency_name === form.instansi);
+    const jabatanAnda = jabatanList.find(j => j.nama === form.jabatanAnda);
+    const jabatanAlumni = jabatanList.find(j => j.nama === form.jabatanAlumni);
+
+    try {
+      const res = await fetch("/api/peer_review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.namaAnda,
+          jenisinstansi: jenis?.id || null,
+          instansiId: instansi?.id || null,
+          jabatanId: jabatanAnda?.id || null,
+          namaAlumni: form.namaAlumni,
+          hubungan: form.hubungan,
+          jabatan_alumni: form.jabatanAlumni,
+          instansiKategoriId: jenis?.id || null,
+          pelatihanId: form.pelatihan,
+        }),
+      });
+      if (res.ok) {
+        setIsSaved(true);
+      } else {
+        alert("Gagal menyimpan data. Silakan cek kembali isian Anda.");
+      }
+    } catch {
+      alert("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLanjut = () => {
+    router.push("/review/evaluasi");
   };
 
   return (
@@ -86,23 +147,44 @@ export default function ReviewProfilePage() {
               placeholder="Masukkan nama lengkap Anda"
             />
           </div>
+          {/* Jenis Instansi */}
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+            <label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
+              Jenis Instansi <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="jenisInstansi"
+              value={form.jenisInstansi}
+              onChange={handleChange}
+              required
+              className="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
+            >
+              <option value="" disabled>Pilih Jenis Instansi</option>
+              {jenisInstansiList.map((item) => (
+                <option key={item.id} value={item.nama}>{item.nama}</option>
+              ))}
+            </select>
+          </div>
           {/* Instansi */}
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
             <label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
               Instansi <span className="text-red-500">*</span>
             </label>
-            <select
-              name="instansi"
-              value={form.instansi}
-              onChange={handleChange}
-              required
-              className="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
-            >
-              <option value="" disabled>Pilih Instansi</option>
-              {instansiList.map((item) => (
-                <option key={item} value={item}>{item}</option>
-              ))}
-            </select>
+            <div className="flex-1">
+              <select
+                name="instansi"
+                value={form.instansi}
+                onChange={handleChange}
+                required
+                className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
+                disabled={!form.jenisInstansi}
+              >
+                <option value="" disabled>Pilih Instansi</option>
+                {instansiList.map((item) => (
+                  <option key={item.id} value={item.agency_name}>{item.agency_name}</option>
+                ))}
+              </select>
+            </div>
           </div>
           {/* Jabatan Anda */}
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
@@ -195,12 +277,25 @@ export default function ReviewProfilePage() {
           </div>
         </div>
         <div className="text-center pt-2">
-          <button
-            type="submit"
-            className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition"
-          >
-            Simpan
-          </button>
+          {isSaved ? (
+            <button
+              type="button"
+              onClick={handleLanjut}
+              className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition flex items-center justify-center gap-2 bg-green-600"
+            >
+              <ArrowRightCircle className="w-6 h-6" />
+              Lanjut
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition flex items-center justify-center gap-2"
+            >
+              <CheckCircle className="w-6 h-6" />
+              {loading ? "Menyimpan..." : "Simpan"}
+            </button>
+          )}
         </div>
       </form>
     </div>

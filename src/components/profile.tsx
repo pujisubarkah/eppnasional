@@ -266,27 +266,6 @@ export default function ProfileForm() {
             </Select>
           </div>
 
-          {/* Domisili Instansi */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Domisili Instansi</label>
-          </div>
-          <div>
-            <Select
-              value={form.domisili}
-              onValueChange={(value) => setForm((f) => ({ ...f, domisili: value }))}
-              required
-            >
-              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
-                <SelectValue placeholder="Pilih Domisili" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white">
-                {domisiliList.map((item) => (
-                  <SelectItem key={item.id} value={item.id.toString()}>{item.nama}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Jabatan */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Jabatan</label>
@@ -350,27 +329,6 @@ export default function ProfileForm() {
             </Select>
           </div>
 
-          {/* Jenis Lembaga Instansi Penyelenggara */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Jenis Lembaga Instansi Penyelenggara</label>
-          </div>
-          <div>
-            <Select
-              value={form.jenisLembagaPenyelenggara}
-              onValueChange={(value) => setForm((f) => ({ ...f, jenisLembagaPenyelenggara: value }))}
-              required
-            >
-              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
-                <SelectValue placeholder="Pilih Jenis Lembaga Instansi Penyelenggara" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white">
-                <SelectItem value="Pemerintah">Pemerintah</SelectItem>
-                <SelectItem value="Swasta">Swasta</SelectItem>
-                <SelectItem value="Lainnya">Lainnya</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Instansi Lembaga Penyelenggara */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Instansi Lembaga Penyelenggara</label>
@@ -396,7 +354,9 @@ export default function ProfileForm() {
 
           {/* Domisili Instansi Lembaga Penyelenggara */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Domisili Instansi Lembaga Penyelenggara</label>
+            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">
+              Domisili Instansi Lembaga Penyelenggara
+            </label>
           </div>
           <div>
             <Select
@@ -408,11 +368,11 @@ export default function ProfileForm() {
                 <SelectValue placeholder="Pilih Domisili Instansi Lembaga Penyelenggara" />
               </SelectTrigger>
               <SelectContent className="z-50 bg-white">
-                {/* Isi dengan data domisili lembaga penyelenggara */}
-                {/* Contoh: */}
-                <SelectItem value="DKI Jakarta">DKI Jakarta</SelectItem>
-                <SelectItem value="Jawa Barat">Jawa Barat</SelectItem>
-                <SelectItem value="Lainnya">Lainnya</SelectItem>
+                {domisiliList.map((item) => (
+                  <SelectItem key={item.id} value={item.nama}>
+                    {item.nama}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
