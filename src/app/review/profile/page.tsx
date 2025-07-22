@@ -20,7 +20,7 @@ export default function ReviewProfilePage() {
     jabatanAnda: "",
     hubungan: "",
     pelatihan: "",
-    telepon: "",
+   
   });
 
   useEffect(() => {
@@ -71,43 +71,10 @@ export default function ReviewProfilePage() {
           Informasi Profil Penilai Alumni
         </h2>
         <div className="space-y-6">
-          {/* Nama Alumni */}
+          {/* Nama Lengkap */}
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
             <label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-              Nama Alumni <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="namaAlumni"
-              value={form.namaAlumni}
-              onChange={handleChange}
-              required
-              className="flex-1 border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
-              placeholder="Masukkan nama alumni"
-            />
-          </div>
-          {/* Jabatan Alumni Saat Ini */}
-          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-            <label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-              Jabatan Alumni Saat Ini <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="jabatanAlumni"
-              value={form.jabatanAlumni}
-              onChange={handleChange}
-              required
-              className="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
-            >
-              <option value="" disabled>Pilih Jabatan Alumni</option>
-              {jabatanList.map((item) => (
-                <option key={item.id} value={item.nama}>{item.nama}</option>
-              ))}
-            </select>
-          </div>
-          {/* Nama Lengkap Anda */}
-          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-            <label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-              Nama Lengkap Anda <span className="text-red-500">*</span>
+              Nama Lengkap <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -116,7 +83,7 @@ export default function ReviewProfilePage() {
               onChange={handleChange}
               required
               className="flex-1 border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
-              placeholder="Masukkan nama Anda"
+              placeholder="Masukkan nama lengkap Anda"
             />
           </div>
           {/* Instansi */}
@@ -155,6 +122,21 @@ export default function ReviewProfilePage() {
               ))}
             </select>
           </div>
+          {/* Nama Alumni */}
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+            <label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
+              Nama Alumni <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="namaAlumni"
+              value={form.namaAlumni}
+              onChange={handleChange}
+              required
+              className="flex-1 border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
+              placeholder="Masukkan nama alumni"
+            />
+          </div>
           {/* Hubungan dengan Alumni */}
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
             <label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
@@ -171,6 +153,24 @@ export default function ReviewProfilePage() {
               <option>Atasan</option>
               <option>Rekan Kerja</option>
               <option>Bawahan</option>
+            </select>
+          </div>
+          {/* Jabatan Alumni Saat Ini */}
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+            <label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
+              Jabatan Alumni Saat Ini <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="jabatanAlumni"
+              value={form.jabatanAlumni}
+              onChange={handleChange}
+              required
+              className="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
+            >
+              <option value="" disabled>Pilih Jabatan Alumni</option>
+              {jabatanList.map((item) => (
+                <option key={item.id} value={item.nama}>{item.nama}</option>
+              ))}
             </select>
           </div>
           {/* Pelatihan yang diikuti Alumni */}
@@ -192,21 +192,6 @@ export default function ReviewProfilePage() {
               <option>Pelatihan Kepemimpinan Pengawas (PKP)</option>
               <option>Pelatihan Dasar CPNS</option>
             </select>
-          </div>
-          {/* Nomor Telepon */}
-          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-            <label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-              Nomor Telepon <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="tel"
-              name="telepon"
-              value={form.telepon}
-              onChange={handleChange}
-              required
-              className="flex-1 border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
-              placeholder="Masukkan nomor telepon"
-            />
           </div>
         </div>
         <div className="text-center pt-2">

@@ -30,6 +30,7 @@ export default function ProfileForm() {
   const [pelatihanList, setPelatihanList] = useState<Pelatihan[]>([]);
   const [jabatanList, setJabatanList] = useState<Jabatan[]>([]);
   const [tahunPelatihanList, setTahunPelatihanList] = useState<TahunPelatihan[]>([]);
+  const [lemdikList, setLemdikList] = useState<{ id: number; namaLemdik: string }[]>([]);
 
   // State untuk form
   const [form, setForm] = useState({
@@ -41,7 +42,9 @@ export default function ProfileForm() {
     jabatan: "",
     pelatihan: "",
     tahunPelatihan: "",
+    jenisLembagaPenyelenggara: "",
     lembagaPenyelenggara: "",
+    domisiliLembagaPenyelenggara: "",
     handphone: "",
   });
   const [saved, setSaved] = useState(false);
@@ -63,6 +66,8 @@ export default function ProfileForm() {
       setJabatanList(await jabatanRes.json());
       const tahunRes = await fetch("/api/tahun_pelatihan");
       setTahunPelatihanList(await tahunRes.json());
+      const lemdikRes = await fetch("/api/lembaga_penyelenggara");
+      setLemdikList(await lemdikRes.json());
     }
     fetchData();
   }, []);
@@ -86,6 +91,20 @@ export default function ProfileForm() {
     fetchInstansi();
  
   }, [form.jenisInstansi]);
+
+  // Fetch lemdik dari API eksternal
+  useEffect(() => {
+    async function fetchLemdik() {
+      try {
+        const res = await fetch("https://api-smartbangkom.lan.go.id/master/lemdik");
+        const data = await res.json();
+        setLemdikList(data);
+      } catch {
+        setLemdikList([]);
+      }
+    }
+    fetchLemdik();
+  }, []);
 
   // Handle input change
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
@@ -162,6 +181,7 @@ export default function ProfileForm() {
       >
         <h2 className="text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">Profil Responden</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+          {/* Nama Lengkap */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2] flex items-center gap-1">
               Nama Lengkap
@@ -187,6 +207,7 @@ export default function ProfileForm() {
             />
           </div>
 
+          {/* NIP/NRP/NIK */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">NIP/NRP/NIK</label>
           </div>
@@ -202,6 +223,7 @@ export default function ProfileForm() {
             />
           </div>
 
+          {/* Jenis Instansi */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Jenis Instansi</label>
           </div>
@@ -222,6 +244,7 @@ export default function ProfileForm() {
             </Select>
           </div>
 
+          {/* Instansi */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Instansi</label>
           </div>
@@ -243,6 +266,7 @@ export default function ProfileForm() {
             </Select>
           </div>
 
+          {/* Domisili Instansi */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Domisili Instansi</label>
           </div>
@@ -263,6 +287,7 @@ export default function ProfileForm() {
             </Select>
           </div>
 
+          {/* Jabatan */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Jabatan</label>
           </div>
@@ -283,6 +308,7 @@ export default function ProfileForm() {
             </Select>
           </div>
 
+          {/* Nama Pelatihan */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Nama Pelatihan</label>
           </div>
@@ -303,6 +329,7 @@ export default function ProfileForm() {
             </Select>
           </div>
 
+          {/* Tahun Pelatihan */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Tahun Pelatihan</label>
           </div>
@@ -323,23 +350,76 @@ export default function ProfileForm() {
             </Select>
           </div>
 
+          {/* Jenis Lembaga Instansi Penyelenggara */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Lembaga Penyelenggara Pelatihan</label>
+            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Jenis Lembaga Instansi Penyelenggara</label>
           </div>
           <div>
-            <Input
-              type="text"
-              name="lembagaPenyelenggara"
-              value={form.lembagaPenyelenggara}
-              onChange={handleChange}
-              className="w-full border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
-              placeholder="Masukkan nama lembaga penyelenggara"
+            <Select
+              value={form.jenisLembagaPenyelenggara}
+              onValueChange={(value) => setForm((f) => ({ ...f, jenisLembagaPenyelenggara: value }))}
               required
-            />
+            >
+              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
+                <SelectValue placeholder="Pilih Jenis Lembaga Instansi Penyelenggara" />
+              </SelectTrigger>
+              <SelectContent className="z-50 bg-white">
+                <SelectItem value="Pemerintah">Pemerintah</SelectItem>
+                <SelectItem value="Swasta">Swasta</SelectItem>
+                <SelectItem value="Lainnya">Lainnya</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
+          {/* Instansi Lembaga Penyelenggara */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Nomor Handphone</label>
+            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Instansi Lembaga Penyelenggara</label>
+          </div>
+          <div>
+            <Select
+              value={form.lembagaPenyelenggara}
+              onValueChange={(value) => setForm((f) => ({ ...f, lembagaPenyelenggara: value }))}
+              required
+            >
+              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
+                <SelectValue placeholder="Pilih Instansi Lembaga Penyelenggara" />
+              </SelectTrigger>
+              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">
+                {lemdikList.map((item) => (
+                  <SelectItem key={item.id} value={item.namaLemdik}>
+                    {item.namaLemdik}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Domisili Instansi Lembaga Penyelenggara */}
+          <div className="flex items-center md:justify-end">
+            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Domisili Instansi Lembaga Penyelenggara</label>
+          </div>
+          <div>
+            <Select
+              value={form.domisiliLembagaPenyelenggara}
+              onValueChange={(value) => setForm((f) => ({ ...f, domisiliLembagaPenyelenggara: value }))}
+              required
+            >
+              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
+                <SelectValue placeholder="Pilih Domisili Instansi Lembaga Penyelenggara" />
+              </SelectTrigger>
+              <SelectContent className="z-50 bg-white">
+                {/* Isi dengan data domisili lembaga penyelenggara */}
+                {/* Contoh: */}
+                <SelectItem value="DKI Jakarta">DKI Jakarta</SelectItem>
+                <SelectItem value="Jawa Barat">Jawa Barat</SelectItem>
+                <SelectItem value="Lainnya">Lainnya</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Nomor HP */}
+          <div className="flex items-center md:justify-end">
+            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Nomor HP</label>
           </div>
           <div>
             <Input
@@ -348,7 +428,7 @@ export default function ProfileForm() {
               value={form.handphone}
               onChange={handleChange}
               className="w-full border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
-              placeholder="Masukkan nomor handphone"
+              placeholder="Masukkan nomor HP"
               required
             />
           </div>

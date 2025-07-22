@@ -21,14 +21,6 @@ interface Option {
   option_text: string
 }
 
-interface EvaluasiState {
-  relevan: string[];
-  tidakRelevan: string[];
-  setRelevan: (value: string[]) => void;
-  setTidakRelevan: (value: string[]) => void;
-  clearAll: () => void;
-}
-
 // Custom hook untuk cek hydration Zustand
 function useHasHydrated() {
   const [hasHydrated, setHasHydrated] = useState(false)
@@ -39,11 +31,11 @@ function useHasHydrated() {
 }
 
 export default function EvaluasiPage() {
-  const hasHydrated = useHasHydrated()
+  const hasHydrated = useHasHydrated();
   const { id, nama, pelatihan_id } = useProfileStore();
 
-  // Gunakan Zustand store
-  const { relevan, setRelevan, tidakRelevan, setTidakRelevan, clearAll } = useEvaluasiStore();
+  // Hapus clearAll jika tidak digunakan
+  const { relevan, setRelevan, tidakRelevan, setTidakRelevan } = useEvaluasiStore();
 
   const [materiList, setMateriList] = useState<Agenda[]>([])
   const [namaPelatihan, setNamaPelatihan] = useState<string>('Memuat...')

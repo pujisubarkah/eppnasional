@@ -9,7 +9,8 @@ interface ProfileState {
   setProfile: (data: Partial<ProfileState>) => void
   hasHydrated: boolean
   setHasHydrated: (value: boolean) => void
-}
+  clear: () => void // tambahkan ini
+  }
 
 export const useProfileStore = create<ProfileState>()(
   persist(
@@ -21,6 +22,13 @@ export const useProfileStore = create<ProfileState>()(
         set((state) => ({ ...state, ...data })),
       hasHydrated: false,
       setHasHydrated: (value) => set({ hasHydrated: value }),
+     clear: () =>
+        set({
+          id: null,
+          nama: '',
+          pelatihan_id: null,
+          hasHydrated: true,
+        }),
     }),
     {
       name: 'profile-storage',
