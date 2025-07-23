@@ -232,13 +232,14 @@ export default function EvaluasiPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {tidakRelevanOptions.length > 0 ? (
             tidakRelevanOptions.map((opt) => (
-              <label key={opt.id} className="flex items-center gap-3 bg-red-50 rounded-lg px-3 py-2 shadow-sm hover:bg-red-100 transition cursor-pointer">
+              <label key={opt.id} className={`flex items-center gap-3 bg-red-50 rounded-lg px-3 py-2 shadow-sm hover:bg-red-100 transition ${relevan.includes(opt.option_text) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                 <input
                   type="checkbox"
                   value={opt.option_text}
                   checked={tidakRelevan.includes(opt.option_text)}
                   onChange={() => handleCheckbox(tidakRelevan, setTidakRelevan, opt.option_text)}
                   className="accent-red-400 scale-125"
+                  disabled={relevan.includes(opt.option_text)}
                 />
                 <span className="text-[#D32F2F] font-medium">{opt.option_text}</span>
               </label>

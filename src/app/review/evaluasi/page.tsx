@@ -1,11 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useProfileFormStore } from "@/lib/store/profileFormStore";
 
 type Option = { id: number; option_text: string };
 type Question = { id: number; text: string; options: Option[] };
 
 export default function ReviewEvaluasiPage() {
+  const router = useRouter();
+  const { form } = useProfileFormStore();
+  const [showModal, setShowModal] = useState(false);
   const [likertQuestions, setLikertQuestions] = useState<Question[]>([]);
   const [likertAnswers, setLikertAnswers] = useState<string[]>([]);
   const [openQuestion, setOpenQuestion] = useState<Question | null>(null);
@@ -36,14 +41,35 @@ export default function ReviewEvaluasiPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Submit logic
-    alert("Jawaban berhasil disimpan (dummy)");
+    setShowModal(true);
   };
 
   return (
-    <form
-      className="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-10 space-y-10 border border-[#B3E5FC]"
-      onSubmit={handleSubmit}
-    >
+    <>
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent">
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center border border-[#B3E5FC]">
+            <h3 className="text-2xl font-bold text-[#1976D2] mb-4">Terima Kasih!</h3>
+            <p className="mb-6 text-gray-700">
+              Terima kasih atas partisipasi Anda.<br />
+              Pendapat <span className="font-semibold">{form.namaAnda}</span> sangat berarti dan akan menjadi bagian penting dari upaya perubahan yang berkelanjutan.
+            </p>
+            <button
+              className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-8 py-3 rounded-xl shadow-lg font-bold text-lg tracking-wide transition flex items-center justify-center gap-2"
+              onClick={() => {
+                setShowModal(false);
+                router.push("/");
+              }}
+            >
+              Selesai
+            </button>
+          </div>
+        </div>
+      )}
+      <form
+        className="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-10 space-y-10 border border-[#B3E5FC]"
+        onSubmit={handleSubmit}
+      >
       <h2 className="text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
         Evaluasi Alumni oleh Atasan/Rekan/Bawahan
       </h2>
@@ -115,6 +141,7 @@ export default function ReviewEvaluasiPage() {
           Simpan
         </button>
       </div>
-    </form>
+      </form>
+    </>
   );
 }

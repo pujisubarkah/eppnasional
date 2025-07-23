@@ -190,8 +190,7 @@ export default function SikapPrilakuPage() {
       {/* 2. Pilih 3 dari 7+ opsi */}
       <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
         <label className="block font-semibold text-[#1976D2] mb-4">
-          2. {pertanyaanKinerja?.text || "Memuat pertanyaan..."}{" "}
-          <span className="text-[#2196F3]">(pilih 3)</span>:
+          2. {pertanyaanKinerja?.text || "Memuat pertanyaan..."}
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {pertanyaanKinerja?.options?.map((opt) => (
@@ -248,7 +247,7 @@ export default function SikapPrilakuPage() {
       <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
         <label className="block font-semibold text-[#1976D2] mb-4">
           4. {pertanyaanDampak?.text || "Memuat pertanyaan..."}{" "}
-          <span className="text-[#2196F3]">(pilih maksimal 3)</span>:
+        
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {pertanyaanDampak?.options?.map((opt) => (

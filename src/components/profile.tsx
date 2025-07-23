@@ -115,12 +115,16 @@ export default function ProfileForm() {
   // Handle submit
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!form.domisiliLembagaPenyelenggara) {
+      toast.error("Mohon pilih domisili instansi lembaga penyelenggara!");
+      return;
+    }
     const payload = {
       namaAlumni: form.nama,
       nipNrpNik: form.nip,
       instansiKategoriId: Number(form.jenisInstansi),
       instansiId: Number(form.instansi),
-      domisiliId: Number(form.domisili),
+      domisiliId: Number(form.domisiliLembagaPenyelenggara),
       jabatanId: Number(form.jabatan),
       pelatihanId: Number(form.pelatihan),
       tahunPelatihanId: Number(form.tahunPelatihan),
@@ -183,16 +187,8 @@ export default function ProfileForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
           {/* Nama Lengkap */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2] flex items-center gap-1">
+            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">
               Nama Lengkap
-              <button
-                type="button"
-                onClick={() => setShowNamaModal(true)}
-                className="ml-1 text-[#F59E42] hover:text-[#FF9800] focus:outline-none"
-                aria-label="Keterangan Nama Lengkap"
-              >
-                <AlertCircle size={18} />
-              </button>
             </label>
           </div>
           <div>
@@ -369,7 +365,7 @@ export default function ProfileForm() {
               </SelectTrigger>
               <SelectContent className="z-50 bg-white">
                 {domisiliList.map((item) => (
-                  <SelectItem key={item.id} value={item.nama}>
+                  <SelectItem key={item.id} value={item.id.toString()}>
                     {item.nama}
                   </SelectItem>
                 ))}

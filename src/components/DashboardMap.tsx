@@ -48,30 +48,56 @@ export default function DashboardMap() {
   }, []);
 
   return (
-    <div>
-      <div className="text-center text-lg font-bold text-[#1976D2] mb-2">
-        Peta Sebaran Responden
-      </div>
-      {hovered && (
-        <div className="text-center mb-2 text-base font-semibold text-[#1976D2] bg-white/80 rounded shadow inline-block px-4 py-1">
-          {hovered.nama} <span className="text-gray-700 font-normal">({hovered.dummy_responden} responden)</span>
+    <div className="relative w-full flex flex-row">
+      <div className="flex-1">
+        <div className="text-center text-4xl md:text-5xl font-extrabold mb-6 tracking-wide drop-shadow-2xl uppercase">
+          <span
+            className="inline-block transform scale-110 tracking-widest"
+            style={{
+              background: "linear-gradient(90deg, #1976D2, #2196F3, #29B6F6)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              color: "#1976D2"
+            }}
+          >
+            PETA SEBARAN RESPONDEN
+          </span>
         </div>
-      )}
-      <svg viewBox="0 0 1000 600" className="w-full h-[32rem] object-contain">
-        {provinsi.map((prov) => (
-          <path
-            key={prov.id}
-            d={cleanPath(prov.svg_path)}
-            fill={getColor(prov.dummy_responden)}
-            fillOpacity={0.7}
-            stroke="#1976D2"
-            strokeWidth={0.5}
-            onMouseEnter={() => setHovered(prov)}
-            onMouseLeave={() => setHovered(null)}
-            style={{ cursor: "pointer" }}
-          />
+        {hovered && (
+          <div className="text-center mb-2 text-base font-semibold text-[#1976D2] bg-white/80 rounded shadow inline-block px-4 py-1">
+            {hovered.nama} <span className="text-gray-700 font-normal">({hovered.dummy_responden} responden)</span>
+          </div>
+        )}
+        <svg viewBox="0 0 1000 600" className="w-full h-[44rem] object-contain">
+          {provinsi.map((prov) => (
+            <path
+              key={prov.id}
+              d={cleanPath(prov.svg_path)}
+              fill={getColor(prov.dummy_responden)}
+              fillOpacity={0.7}
+              stroke="#1976D2"
+              strokeWidth={0.5}
+              onMouseEnter={() => setHovered(prov)}
+              onMouseLeave={() => setHovered(null)}
+              style={{ cursor: "pointer" }}
+            />
+          ))}
+        </svg>
+      </div>
+      {/* Legend di samping kanan */}
+      <div className="w-48 flex flex-col items-start justify-center ml-4 mt-8 bg-white/80 rounded-xl shadow p-4 gap-2 h-fit self-start">
+        <div className="font-bold text-[#1976D2] mb-2">Legend</div>
+        {colorScale.map((c) => (
+          <div key={c.label} className="flex items-center gap-2 mb-1">
+            <span
+              className="inline-block w-6 h-6 rounded border border-gray-300"
+              style={{ background: c.color }}
+            ></span>
+            <span className="text-sm text-gray-700 font-semibold">{c.label} responden</span>
+          </div>
         ))}
-      </svg>
+      </div>
     </div>
   );
 }

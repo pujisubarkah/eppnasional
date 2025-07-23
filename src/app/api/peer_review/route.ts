@@ -1,27 +1,32 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { alumni } from "@/db/peer_review";
+import { alumni } from "@/db/profile_alumni";
 
 // POST: Tambah data peer review alumni
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Validasi sederhana, bisa dikembangkan sesuai kebutuhan
-    if (!body.name || !body.jenisinstansi || !body.instansiId) {
-      return NextResponse.json({ error: "Data wajib diisi" }, { status: 400 });
+    // Validasi field wajib
+    const requiredFields = ["name", "instansiKategoriId", "instansiId"];
+    const missingFields = requiredFields.filter(field => !body[field]);
+
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        { error: "Data wajib diisi", missingFields },
+        { status: 400 }
+      );
     }
 
     const inserted = await db
       .insert(alumni)
       .values({
         name: body.name,
-        jenisinstansi: body.jenisinstansi,
         instansiId: body.instansiId,
         jabatanId: body.jabatanId,
-        namaAlumni: body.namaAlumni,
-        hubungan: body.hubungan,
-        jabatan_alumni: body.jabatan_alumni,
+        namaAlumni: body.namaAlumni || null,
+        hubungan: body.hubungan || null,
+        jabatan_alumni: body.jabatan_alumni || null,
         instansiKategoriId: body.instansiKategoriId,
         pelatihanId: body.pelatihanId,
       })
@@ -29,7 +34,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, data: inserted[0] });
   } catch (err) {
-    return NextResponse.json({ error: "Gagal menyimpan data", detail: String(err) }, { status: 500 });
+    console.error("DB Error:", err);
+    return NextResponse.json(
+      { error: "Gagal menyimpan data", detail: String(err) },
+      { status: 500 }
+    );
   }
 }
-

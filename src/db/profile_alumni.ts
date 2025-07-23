@@ -14,4 +14,8 @@ export const alumni = pgTable('informasi_profile', {
   lemdik: varchar('lemdik', { length: 255 }),
   handphone: varchar('telepon', { length: 30 }),
   createdAt: timestamp('created_at').defaultNow(),
+  name: varchar('nama', { length: 255 }),
+  hubungan: varchar('hubungan', { length: 100 }),
+  jabatan_alumni: varchar('jabatan_alumni', { length: 100 }),
+  
 });
