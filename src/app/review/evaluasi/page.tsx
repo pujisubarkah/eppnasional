@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useProfileFormStore } from "@/lib/store/profileFormStore";
+import { useProfileFormStore } from "@/lib/store/alumni_profile";
 
 type Option = { id: number; option_text: string };
 type Question = { id: number; text: string; options: Option[] };
@@ -15,6 +15,14 @@ export default function ReviewEvaluasiPage() {
   const [likertAnswers, setLikertAnswers] = useState<string[]>([]);
   const [openQuestion, setOpenQuestion] = useState<Question | null>(null);
   const [saran, setSaran] = useState("");
+  // Removed unused isSubmitted state
+  // Toast
+  const toast = {
+    success: (msg: string) => alert(msg),
+    error: (msg: string) => alert(msg),
+  };
+  // Gunakan id dari zustand sebagai user_id
+  const user_id = form?.id;
 
   useEffect(() => {
     // Fetch Likert questions
@@ -38,10 +46,39 @@ export default function ReviewEvaluasiPage() {
     setLikertAnswers(updated);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Submit logic
-    setShowModal(true);
+    // Gabungkan semua pertanyaan dan jawaban
+    const pertanyaanList = openQuestion
+      ? [...likertQuestions, openQuestion]
+      : [...likertQuestions];
+    const answers = openQuestion
+      ? [...likertAnswers, saran]
+      : [...likertAnswers];
+    if (answers.some((ans) => !ans)) {
+      toast.error("Mohon isi semua pertanyaan terlebih dahulu!");
+      return;
+    }
+    try {
+      for (let i = 0; i < pertanyaanList.length; i++) {
+        await fetch("/api/answers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question_id: pertanyaanList[i].id,
+            user_id, // Menggunakan id dari zustand sebagai user_id
+            answer: answers[i],
+          }),
+        });
+      }
+      toast.success(
+        "Jawaban berhasil disimpan! Terima kasih atas partisipasi Anda."
+      );
+      // setIsSubmitted removed (no longer used)
+      setShowModal(true);
+    } catch {
+      toast.error("Gagal menyimpan jawaban!");
+    }
   };
 
   return (
@@ -141,6 +178,7 @@ export default function ReviewEvaluasiPage() {
           Simpan
         </button>
       </div>
+      {/* Data dari Store (Zustand) section removed as requested */}
       </form>
     </>
   );

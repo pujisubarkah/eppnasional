@@ -21,6 +21,7 @@ export async function POST(req: Request) {
     const inserted = await db
       .insert(alumni)
       .values({
+        
         name: body.name,
         instansiId: body.instansiId,
         jabatanId: body.jabatanId,
@@ -32,7 +33,8 @@ export async function POST(req: Request) {
       })
       .returning();
 
-    return NextResponse.json({ success: true, data: inserted[0] });
+    // Pastikan id dikirim ke frontend
+    return NextResponse.json({ success: true, id: inserted[0]?.id, data: inserted[0] });
   } catch (err) {
     console.error("DB Error:", err);
     return NextResponse.json(

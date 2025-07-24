@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useProfileFormStore } from "@/lib/store/profileFormStore";
+import { useProfileFormStore } from "@/lib/store/alumni_profile";
 import { useState, useEffect } from "react";
 import { CheckCircle, ArrowRightCircle } from "lucide-react";
 
@@ -81,6 +81,7 @@ export default function ReviewProfilePage() {
 
 	try {
 	  const payload = {
+		id: form.id, // pastikan form.id tersedia di store
 		name: form.namaAnda,
 		instansiKategoriId: jenis?.id || null,
 		instansiId: instansi?.id || null,
@@ -104,6 +105,13 @@ export default function ReviewProfilePage() {
 	  const rawResponse = await res.text();
 	  console.log("Raw backend response:", rawResponse);
 	  if (res.ok) {
+		// Simpan id dari backend ke zustand agar bisa dipakai sebagai user_id
+		try {
+		  const json = JSON.parse(rawResponse);
+		  if (json.id) {
+			setForm({ id: json.id });
+		  }
+		} catch {}
 		setShowModal(true);
 	  } else {
 		alert("Gagal menyimpan data. Silakan cek kembali isian Anda.\n" + rawResponse);
@@ -162,177 +170,177 @@ export default function ReviewProfilePage() {
 					</span>
 				</div>
 			</div>
-			<form
-				className="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-10 space-y-10 border border-[#B3E5FC]"
-				onSubmit={handleSubmit}
-			>
-				<h2 className="text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
-					Informasi Profil Penilai Alumni
-				</h2>
-				<div className="space-y-6">
+	  <form
+		className="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 border border-[#B3E5FC]"
+		onSubmit={handleSubmit}
+	  >
+		<h2 className="text-2xl md:text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
+		  Informasi Profil Penilai Alumni
+		</h2>
+		<div className="space-y-4 md:space-y-6">
 					{/* Nama Lengkap */}
-					<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-						<label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-							Nama Lengkap <span className="text-red-500">*</span>
-						</label>
-						<input
-							type="text"
-							name="namaAnda"
-							value={form.namaAnda}
-							onChange={handleChange}
-							required
-							className="flex-1 border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
-							placeholder="Masukkan nama lengkap Anda"
-						/>
-					</div>
+		  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+			<label className="font-semibold text-left md:text-right w-full md:w-64 text-[#1976D2] mb-1 md:mb-0">
+			  Nama Lengkap <span className="text-red-500">*</span>
+			</label>
+			<input
+			  type="text"
+			  name="namaAnda"
+			  value={form.namaAnda}
+			  onChange={handleChange}
+			  required
+			  className="w-full border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
+			  placeholder="Masukkan nama lengkap Anda"
+			/>
+		  </div>
 					{/* Jenis Instansi */}
-					<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-						<label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-							Jenis Instansi <span className="text-red-500">*</span>
-						</label>
-						<select
-							name="jenisInstansi"
-							value={form.jenisInstansi}
-							onChange={handleChange}
-							required
-							className="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
-						>
-							<option value="" disabled>
-								Pilih Jenis Instansi
-							</option>
-							{jenisInstansiList.map((item) => (
-								<option key={item.id} value={item.name}>
-									{item.name}
-								</option>
-							))}
-						</select>
-					</div>
+		  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+			<label className="font-semibold text-left md:text-right w-full md:w-64 text-[#1976D2] mb-1 md:mb-0">
+			  Jenis Instansi <span className="text-red-500">*</span>
+			</label>
+			<select
+			  name="jenisInstansi"
+			  value={form.jenisInstansi}
+			  onChange={handleChange}
+			  required
+			  className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
+			>
+			  <option value="" disabled>
+				Pilih Jenis Instansi
+			  </option>
+			  {jenisInstansiList.map((item) => (
+				<option key={item.id} value={item.name}>
+				  {item.name}
+				</option>
+			  ))}
+			</select>
+		  </div>
 					{/* Instansi */}
-					<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-						<label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-							Instansi <span className="text-red-500">*</span>
-						</label>
-						<div className="flex-1">
-							<select
-								name="instansi"
-								value={form.instansi}
-								onChange={handleChange}
-								required
-								className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
-								disabled={!form.jenisInstansi}
-							>
-								<option value="" disabled>
-									Pilih Instansi
-								</option>
-								{instansiList.map((item) => (
-									<option key={item.id} value={item.agency_name}>
-										{item.agency_name}
-									</option>
-								))}
-							</select>
-						</div>
-					</div>
+		  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+			<label className="font-semibold text-left md:text-right w-full md:w-64 text-[#1976D2] mb-1 md:mb-0">
+			  Instansi <span className="text-red-500">*</span>
+			</label>
+			<div className="w-full">
+			  <select
+				name="instansi"
+				value={form.instansi}
+				onChange={handleChange}
+				required
+				className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
+				disabled={!form.jenisInstansi}
+			  >
+				<option value="" disabled>
+				  Pilih Instansi
+				</option>
+				{instansiList.map((item) => (
+				  <option key={item.id} value={item.agency_name}>
+					{item.agency_name}
+				  </option>
+				))}
+			  </select>
+			</div>
+		  </div>
 					{/* Jabatan Anda */}
-					<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-						<label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-							Jabatan Anda <span className="text-red-500">*</span>
-						</label>
-						<select
-							name="jabatanAnda"
-							value={form.jabatanAnda}
-							onChange={handleChange}
-							required
-							className="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
-						>
-							<option value="" disabled>
-								Pilih Jabatan Anda
-							</option>
-							{jabatanList.map((item) => (
-								<option key={item.id} value={item.nama}>
-									{item.nama}
-								</option>
-							))}
-						</select>
-					</div>
+		  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+			<label className="font-semibold text-left md:text-right w-full md:w-64 text-[#1976D2] mb-1 md:mb-0">
+			  Jabatan Anda <span className="text-red-500">*</span>
+			</label>
+			<select
+			  name="jabatanAnda"
+			  value={form.jabatanAnda}
+			  onChange={handleChange}
+			  required
+			  className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
+			>
+			  <option value="" disabled>
+				Pilih Jabatan Anda
+			  </option>
+			  {jabatanList.map((item) => (
+				<option key={item.id} value={item.nama}>
+				  {item.nama}
+				</option>
+			  ))}
+			</select>
+		  </div>
 					{/* Nama Alumni */}
-					<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-						<label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-							Nama Alumni <span className="text-red-500">*</span>
-						</label>
-						<input
-							type="text"
-							name="namaAlumni"
-							value={form.namaAlumni}
-							onChange={handleChange}
-							required
-							className="flex-1 border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
-							placeholder="Masukkan nama alumni"
-						/>
-					</div>
+		  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+			<label className="font-semibold text-left md:text-right w-full md:w-64 text-[#1976D2] mb-1 md:mb-0">
+			  Nama Alumni <span className="text-red-500">*</span>
+			</label>
+			<input
+			  type="text"
+			  name="namaAlumni"
+			  value={form.namaAlumni}
+			  onChange={handleChange}
+			  required
+			  className="w-full border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
+			  placeholder="Masukkan nama alumni"
+			/>
+		  </div>
 					{/* Hubungan dengan Alumni */}
-					<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-						<label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-							Hubungan dengan Alumni <span className="text-red-500">*</span>
-						</label>
-						<select
-							name="hubungan"
-							value={form.hubungan}
-							onChange={handleChange}
-							required
-							className="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
-						>
-							<option value="" disabled>
-								Pilih Hubungan
-							</option>
-							<option>Atasan</option>
-							<option>Rekan Kerja</option>
-							<option>Bawahan</option>
-						</select>
-					</div>
+		  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+			<label className="font-semibold text-left md:text-right w-full md:w-64 text-[#1976D2] mb-1 md:mb-0">
+			  Hubungan dengan Alumni <span className="text-red-500">*</span>
+			</label>
+			<select
+			  name="hubungan"
+			  value={form.hubungan}
+			  onChange={handleChange}
+			  required
+			  className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
+			>
+			  <option value="" disabled>
+				Pilih Hubungan
+			  </option>
+			  <option>Atasan</option>
+			  <option>Rekan Kerja</option>
+			  <option>Bawahan</option>
+			</select>
+		  </div>
 					{/* Jabatan Alumni Saat Ini */}
-					<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-						<label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-							Jabatan Alumni Saat Ini <span className="text-red-500">*</span>
-						</label>
-						<select
-							name="jabatanAlumni"
-							value={form.jabatanAlumni}
-							onChange={handleChange}
-							required
-							className="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
-						>
-							<option value="" disabled>
-								Pilih Jabatan Alumni
-							</option>
-							{jabatanList.map((item) => (
-								<option key={item.id} value={item.nama}>
-									{item.nama}
-								</option>
-							))}
-						</select>
-					</div>
+		  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+			<label className="font-semibold text-left md:text-right w-full md:w-64 text-[#1976D2] mb-1 md:mb-0">
+			  Jabatan Alumni Saat Ini <span className="text-red-500">*</span>
+			</label>
+			<select
+			  name="jabatanAlumni"
+			  value={form.jabatanAlumni}
+			  onChange={handleChange}
+			  required
+			  className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
+			>
+			  <option value="" disabled>
+				Pilih Jabatan Alumni
+			  </option>
+			  {jabatanList.map((item) => (
+				<option key={item.id} value={item.nama}>
+				  {item.nama}
+				</option>
+			  ))}
+			</select>
+		  </div>
 					{/* Pelatihan yang diikuti Alumni */}
-					<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-						<label className="md:w-64 font-semibold text-[#1976D2] mb-1 md:mb-0">
-							Pelatihan yang diikuti Alumni <span className="text-red-500">*</span>
-						</label>
-						<select
-							name="pelatihan"
-							value={form.pelatihan}
-							onChange={handleChange}
-							required
-							className="flex-1 border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
-						>
-							<option value="" disabled>
-								Pilih Pelatihan
-							</option>
-							{pelatihanList.map((item) => (
-								<option key={item.id} value={item.id}>
-									{item.nama}
-								</option>
-							))}
-						</select>
-					</div>
+		  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+			<label className="font-semibold text-left md:text-right w-full md:w-64 text-[#1976D2] mb-1 md:mb-0">
+			  Pelatihan yang diikuti Alumni <span className="text-red-500">*</span>
+			</label>
+			<select
+			  name="pelatihan"
+			  value={form.pelatihan}
+			  onChange={handleChange}
+			  required
+			  className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]"
+			>
+			  <option value="" disabled>
+				Pilih Pelatihan
+			  </option>
+			  {pelatihanList.map((item) => (
+				<option key={item.id} value={item.id}>
+				  {item.nama}
+				</option>
+			  ))}
+			</select>
+		  </div>
 				</div>
 				<div className="text-center pt-2">
 					<button

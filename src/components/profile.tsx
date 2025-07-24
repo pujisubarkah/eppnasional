@@ -180,18 +180,18 @@ export default function ProfileForm() {
         </div>
       </div>
       <form
-        className="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-10 space-y-10 border border-[#B3E5FC]"
+        className="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 border border-[#B3E5FC]"
         onSubmit={handleSubmit}
       >
-        <h2 className="text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">Profil Responden</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">Profil Responden</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-8 gap-y-4 md:gap-y-6">
           {/* Nama Lengkap */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">
               Nama Lengkap
             </label>
           </div>
-          <div>
+          <div className="w-full">
             <Input
               type="text"
               name="nama"
@@ -205,9 +205,9 @@ export default function ProfileForm() {
 
           {/* NIP/NRP/NIK */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">NIP/NRP/NIK</label>
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">NIP/NRP/NIK</label>
           </div>
-          <div>
+          <div className="w-full">
             <Input
               type="text"
               name="nip"
@@ -221,9 +221,9 @@ export default function ProfileForm() {
 
           {/* Jenis Instansi */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Jenis Instansi</label>
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Jenis Instansi</label>
           </div>
-          <div>
+          <div className="w-full">
             <Select
               value={form.jenisInstansi}
               onValueChange={(value) => setForm((f) => ({ ...f, jenisInstansi: value }))}
@@ -242,9 +242,9 @@ export default function ProfileForm() {
 
           {/* Instansi */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Instansi</label>
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Instansi</label>
           </div>
-          <div>
+          <div className="w-full">
             <Select
               value={form.instansi}
               onValueChange={(value) => setForm((f) => ({ ...f, instansi: value }))}
@@ -264,9 +264,9 @@ export default function ProfileForm() {
 
           {/* Jabatan */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Jabatan</label>
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Jabatan</label>
           </div>
-          <div>
+          <div className="w-full">
             <Select
               value={form.jabatan}
               onValueChange={(value) => setForm((f) => ({ ...f, jabatan: value }))}
@@ -285,9 +285,9 @@ export default function ProfileForm() {
 
           {/* Nama Pelatihan */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Nama Pelatihan</label>
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Nama Pelatihan</label>
           </div>
-          <div>
+          <div className="w-full">
             <Select
               value={form.pelatihan}
               onValueChange={(value) => setForm((f) => ({ ...f, pelatihan: value }))}
@@ -306,9 +306,9 @@ export default function ProfileForm() {
 
           {/* Tahun Pelatihan */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Tahun Pelatihan</label>
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Tahun Pelatihan</label>
           </div>
-          <div>
+          <div className="w-full">
             <Select
               value={form.tahunPelatihan}
               onValueChange={(value) => setForm((f) => ({ ...f, tahunPelatihan: value }))}
@@ -327,9 +327,9 @@ export default function ProfileForm() {
 
           {/* Instansi Lembaga Penyelenggara */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Instansi Lembaga Penyelenggara</label>
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Instansi Lembaga Penyelenggara</label>
           </div>
-          <div>
+          <div className="w-full">
             <Select
               value={form.lembagaPenyelenggara}
               onValueChange={(value) => setForm((f) => ({ ...f, lembagaPenyelenggara: value }))}
@@ -350,11 +350,11 @@ export default function ProfileForm() {
 
           {/* Domisili Instansi Lembaga Penyelenggara */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">
               Domisili Instansi Lembaga Penyelenggara
             </label>
           </div>
-          <div>
+          <div className="w-full">
             <Select
               value={form.domisiliLembagaPenyelenggara}
               onValueChange={(value) => setForm((f) => ({ ...f, domisiliLembagaPenyelenggara: value }))}
@@ -375,9 +375,9 @@ export default function ProfileForm() {
 
           {/* Nomor HP */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold md:text-right w-full md:w-44 text-[#1976D2]">Nomor HP</label>
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Nomor HP</label>
           </div>
-          <div>
+          <div className="w-full">
             <Input
               type="tel"
               name="handphone"
