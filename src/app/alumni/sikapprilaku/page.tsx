@@ -183,29 +183,29 @@ export default function SikapPrilakuPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-20 bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-10 space-y-10 border border-[#B3E5FC]">
+    <div className="max-w-4xl mx-auto mt-8 bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 md:space-y-10 border border-[#B3E5FC]">
       {/* Tampilkan data profile dari zustand */}
-      <div className="mb-6 p-4 bg-white rounded-xl shadow border border-[#B3E5FC]">
+      <div className="mb-4 md:mb-6 p-3 md:p-4 bg-white rounded-xl shadow border border-[#B3E5FC]">
         <div className="font-bold text-[#1976D2] mb-2">Profil Alumni (Zustand)</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs md:text-sm">
           <div><span className="font-semibold">ID:</span> {profile.id}</div>
           <div><span className="font-semibold">Nama:</span> {profile.nama}</div>
           <div><span className="font-semibold">Pelatihan:</span> {profile.pelatihan_id}</div>
         </div>
       </div>
-      <h2 className="text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
+      <h2 className="text-xl md:text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
         Sikap & Perilaku Pasca Pelatihan
       </h2>
-      <div className="mb-8 p-5 bg-blue-100/70 border-l-8 border-[#2196F3] rounded-lg text-[#1976D2] text-base shadow">
+      <div className="mb-6 md:mb-8 p-3 md:p-5 bg-blue-100/70 border-l-8 border-[#2196F3] rounded-lg text-[#1976D2] text-sm md:text-base shadow">
         <span className="font-bold">Petunjuk:</span> Silahkan centang pada poin yang sesuai dengan pernyataan berikut.
       </div>
 
       {/* 1. Pilihan perubahan sikap perilaku (radio) */}
-      <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
-        <label className="block font-semibold text-[#1976D2] mb-4">
+      <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
+        <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
           1. {pertanyaanSikap?.text || "Memuat pertanyaan..."}
         </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
           {pertanyaanSikap?.options
             ?.filter((opt) => {
               if (isPelatihanKhusus) {
@@ -217,31 +217,31 @@ export default function SikapPrilakuPage() {
             .map((opt) => (
               <label
                 key={opt.id}
-                className="flex items-center gap-3 bg-blue-50 rounded-lg px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
+                className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
               >
                 <input
                   type="radio"
                   value={opt.option_text}
                   checked={sikap === opt.option_text}
                   onChange={() => setSikap(opt.option_text)}
-                  className="accent-[#2196F3] scale-125"
+                  className="accent-[#2196F3] scale-110 md:scale-125"
                 />
-                <span className="text-[#1976D2] font-medium">{opt.option_text}</span>
+                <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
               </label>
             ))}
         </div>
       </div>
 
       {/* 2. Pilih 3 dari 7+ opsi */}
-      <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
-        <label className="block font-semibold text-[#1976D2] mb-4">
+      <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
+        <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
           2. {pertanyaanKinerja?.text || "Memuat pertanyaan..."}
         </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
           {pertanyaanKinerja?.options?.map((opt) => (
             <label
               key={opt.id}
-              className="flex items-center gap-3 bg-blue-50 rounded-lg px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
+              className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
             >
               <input
                 type="checkbox"
@@ -253,9 +253,9 @@ export default function SikapPrilakuPage() {
                 disabled={
                   kinerja.length >= 3 && !kinerja.includes(opt.option_text)
                 }
-                className="accent-[#2196F3] scale-125"
+                className="accent-[#2196F3] scale-110 md:scale-125"
               />
-              <span className="text-[#1976D2] font-medium">{opt.option_text}</span>
+              <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
             </label>
           ))}
         </div>
@@ -266,24 +266,24 @@ export default function SikapPrilakuPage() {
 
       {/* 3. Pilih salah satu nilai ekonomi - Hanya ditampilkan jika bukan pelatihan khusus */}
       {!isPelatihanKhusus && (
-        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
-          <label className="block font-semibold text-[#1976D2] mb-4">
+        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
+          <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
             3. {pertanyaanEkonomi?.text || "Memuat pertanyaan..."}
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
             {pertanyaanEkonomi?.options?.map((opt) => (
               <label
                 key={opt.id}
-                className="flex items-center gap-3 bg-blue-50 rounded-lg px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
+                className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
               >
                 <input
                   type="radio"
                   value={opt.option_text}
                   checked={ekonomi === opt.option_text}
                   onChange={() => setEkonomi(opt.option_text)}
-                  className="accent-[#2196F3] scale-125"
+                  className="accent-[#2196F3] scale-110 md:scale-125"
                 />
-                <span className="text-[#1976D2] font-medium">{opt.option_text}</span>
+                <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
               </label>
             ))}
           </div>
@@ -292,15 +292,15 @@ export default function SikapPrilakuPage() {
 
       {/* 4. Dampak (checkbox, bisa lebih dari satu) - Hanya ditampilkan jika bukan pelatihan khusus */}
       {!isPelatihanKhusus && (
-        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
-          <label className="block font-semibold text-[#1976D2] mb-4">
+        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
+          <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
             4. {pertanyaanDampak?.text || "Memuat pertanyaan..."}
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
             {pertanyaanDampak?.options?.map((opt) => (
               <label
                 key={opt.id}
-                className="flex items-center gap-3 bg-blue-50 rounded-lg px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
+                className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
               >
                 <input
                   type="checkbox"
@@ -309,9 +309,9 @@ export default function SikapPrilakuPage() {
                   onChange={() =>
                     handleCheckbox(dampak, setDampak, opt.option_text, 5) // Maksimal 5 pilihan untuk dampak
                   }
-                  className="accent-[#2196F3] scale-125"
+                  className="accent-[#2196F3] scale-110 md:scale-125"
                 />
-                <span className="text-[#1976D2] font-medium">{opt.option_text}</span>
+                <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
               </label>
             ))}
           </div>
@@ -321,7 +321,7 @@ export default function SikapPrilakuPage() {
               value={dampakLain}
               onChange={(e) => setDampakLain(e.target.value)}
               placeholder="Sebutkan dampak lain..."
-              className="mt-2 p-2 border rounded w-full"
+              className="mt-2 p-2 border rounded w-full text-xs md:text-base"
             />
           )}
         </div>
@@ -329,15 +329,15 @@ export default function SikapPrilakuPage() {
 
       {/* 5. Penerapan hasil pelatihan mendukung transformasi - Hanya ditampilkan jika bukan pelatihan khusus */}
       {!isPelatihanKhusus && (
-        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
-          <label className="block font-semibold text-[#1976D2] mb-4">
+        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
+          <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
             5. {pertanyaanTransformasi?.text || "Memuat pertanyaan..."}
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
             {pertanyaanTransformasi?.options?.map((opt: Option & { sub_pertanyaan?: { id: number; text: string }[] }) => (
               <label
                 key={opt.id}
-                className="flex items-center gap-3 bg-blue-50 rounded-lg px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
+                className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
               >
                 <input
                   type="radio"
@@ -347,31 +347,31 @@ export default function SikapPrilakuPage() {
                     setSelectedTransformasi(opt.id);
                     setSelectedSubTransformasi(null); // Reset sub jika option utama berubah
                   }}
-                  className="accent-[#2196F3] scale-125"
+                  className="accent-[#2196F3] scale-110 md:scale-125"
                 />
-                <span className="text-[#1976D2] font-medium">{opt.option_text}</span>
+                <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
               </label>
             ))}
           </div>
           {/* Sub pertanyaan muncul jika ada dan option dipilih */}
           {selectedTransformasi && (
             <div className="mt-4">
-              <div className="font-semibold text-[#1976D2] mb-2">Sub Bidang:</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="font-semibold text-[#1976D2] mb-2 text-sm md:text-base">Sub Bidang:</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
                 {pertanyaanTransformasi?.options
                   ?.find((opt: Option) => opt.id === selectedTransformasi)?.sub_pertanyaan?.map((sub: { id: number; text: string }) => (
                     <label
                       key={sub.id}
-                      className="flex items-center gap-3 bg-blue-100 rounded-lg px-3 py-2 shadow-sm hover:bg-blue-200 transition cursor-pointer"
+                      className="flex items-center gap-2 md:gap-3 bg-blue-100 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-200 transition cursor-pointer"
                     >
                       <input
                         type="radio"
                         value={sub.id} // Gunakan ID sub untuk identifikasi unik
                         checked={selectedSubTransformasi === sub.id}
                         onChange={() => setSelectedSubTransformasi(sub.id)}
-                        className="accent-[#1976D2] scale-125"
+                        className="accent-[#1976D2] scale-110 md:scale-125"
                       />
-                      <span className="text-[#1976D2] font-medium">{sub.text}</span>
+                      <span className="text-[#1976D2] font-medium text-xs md:text-base">{sub.text}</span>
                     </label>
                   ))}
               </div>
@@ -380,11 +380,11 @@ export default function SikapPrilakuPage() {
         </div>
       )}
 
-      <div className="pt-8 flex justify-between">
+      <div className="pt-6 md:pt-8 flex flex-col md:flex-row justify-between gap-3 md:gap-6">
         <button
           type="button"
           onClick={() => router.push("/alumni/dukunganlingkungan")}
-          className="flex items-center gap-2 bg-white border border-[#B3E5FC] text-[#1976D2] px-8 py-3 rounded-xl shadow font-bold text-lg tracking-wide hover:bg-[#E3F2FD] transition"
+          className="flex items-center gap-2 bg-white border border-[#B3E5FC] text-[#1976D2] px-6 md:px-8 py-2 md:py-3 rounded-xl shadow font-bold text-base md:text-lg tracking-wide hover:bg-[#E3F2FD] transition w-full md:w-auto justify-center"
         >
           <ArrowLeft size={20} />
           Sebelumnya
@@ -394,7 +394,7 @@ export default function SikapPrilakuPage() {
             <button
               type="button"
               onClick={handleLanjut}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg font-bold text-lg tracking-wide transition"
+              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
             >
               Lanjut <ArrowRight size={20} />
             </button>
@@ -402,7 +402,7 @@ export default function SikapPrilakuPage() {
             <button
               type="button"
               onClick={handleSubmit}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg font-bold text-lg tracking-wide transition"
+              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
             >
               <Send size={20} /> Submit
             </button>

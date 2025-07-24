@@ -82,33 +82,33 @@ export default function KonfirmasiPage() {
           </div>
         </div>
       )}
-      <div className="max-w-xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-8 space-y-8 border border-[#B3E5FC] mt-10">
-        <h2 className="text-2xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
+      <div className="max-w-xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-8 space-y-6 md:space-y-8 border border-[#B3E5FC] mt-6 md:mt-10">
+        <h2 className="text-xl md:text-2xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
           Pernyataan Konfirmasi
         </h2>
-        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-6 mb-6">
-          <p className="text-[#1976D2] font-medium text-base mb-4">
+        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
+          <p className="text-[#1976D2] font-medium text-sm md:text-base mb-2 md:mb-4">
             Dengan ini, saya menyatakan bahwa seluruh jawaban yang saya berikan dalam
             formulir ini benar berdasarkan pengalaman dan penilaian saya secara
             jujur.
           </p>
-          <label className="flex items-center gap-3 mt-2">
+          <label className="flex items-center gap-2 md:gap-3 mt-2">
             <input
               type="checkbox"
               checked={setuju}
               onChange={(e) => handleSetujuChange(e.target.checked)}
-              className="accent-[#2196F3] scale-125"
+              className="accent-[#2196F3] scale-110 md:scale-125"
             />
-            <span className="text-[#1976D2] font-semibold">
+            <span className="text-[#1976D2] font-semibold text-xs md:text-base">
               Saya setuju dan menyatakan kebenaran jawaban di atas.
             </span>
           </label>
         </div>
-        <div className="flex justify-between">
+        <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-6">
           <button
             type="button"
             onClick={() => window.history.back()}
-            className="flex items-center gap-2 bg-white border border-[#B3E5FC] text-[#1976D2] px-6 py-3 rounded-xl shadow font-bold text-lg tracking-wide hover:bg-[#E3F2FD] transition"
+            className="flex items-center gap-2 bg-white border border-[#B3E5FC] text-[#1976D2] px-6 md:px-8 py-2 md:py-3 rounded-xl shadow font-bold text-base md:text-lg tracking-wide hover:bg-[#E3F2FD] transition w-full md:w-auto justify-center"
           >
             <ArrowLeft size={20} />
             Kembali
@@ -117,7 +117,7 @@ export default function KonfirmasiPage() {
             type="button"
             disabled={!setuju || loading}
             onClick={handleSubmit}
-            className={`bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-8 py-3 rounded-xl shadow-lg font-bold text-lg tracking-wide transition ${
+            className={`bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-8 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center ${
               (!setuju || loading) ? "opacity-60 cursor-not-allowed" : ""
             } flex items-center gap-2`}
           >

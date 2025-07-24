@@ -111,64 +111,64 @@ export default function SaranMasukanPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-10 space-y-10 border border-[#B3E5FC]">
-      <h2 className="text-2xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
+    <div className="max-w-3xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 md:space-y-10 border border-[#B3E5FC]">
+      <h2 className="text-xl md:text-2xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
         Saran & Masukan
       </h2>
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8">
         <div>
-          <label className="block font-semibold text-[#1976D2] mb-2">
+          <label className="block font-semibold text-[#1976D2] mb-2 text-sm md:text-base">
             1. {pertanyaanLabels.materi}
           </label>
           <Textarea
             value={materi}
             onChange={(e) => setMateri(e.target.value)}
             placeholder="Tuliskan saran atau masukan terkait materi pelatihan..."
-            className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] shadow-sm transition"
+            className="w-full border border-[#90CAF9] rounded px-2 md:px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] shadow-sm transition text-sm md:text-base"
             rows={4}
           />
         </div>
         <div>
-          <label className="block font-semibold text-[#1976D2] mb-2">
+          <label className="block font-semibold text-[#1976D2] mb-2 text-sm md:text-base">
             2. {pertanyaanLabels.metode}
           </label>
           <Textarea
             value={metode}
             onChange={(e) => setMetode(e.target.value)}
             placeholder="Tuliskan saran atau masukan terkait metode pelatihan..."
-            className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] shadow-sm transition"
+            className="w-full border border-[#90CAF9] rounded px-2 md:px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] shadow-sm transition text-sm md:text-base"
             rows={4}
           />
         </div>
         <div>
-          <label className="block font-semibold text-[#1976D2] mb-2">
+          <label className="block font-semibold text-[#1976D2] mb-2 text-sm md:text-base">
             3. {pertanyaanLabels.waktu}
           </label>
           <Textarea
             value={waktu}
             onChange={(e) => setWaktu(e.target.value)}
             placeholder="Tuliskan saran atau masukan terkait waktu pelatihan..."
-            className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] shadow-sm transition"
+            className="w-full border border-[#90CAF9] rounded px-2 md:px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] shadow-sm transition text-sm md:text-base"
             rows={4}
           />
         </div>
         <div>
-          <label className="block font-semibold text-[#1976D2] mb-2">
+          <label className="block font-semibold text-[#1976D2] mb-2 text-sm md:text-base">
             4. {pertanyaanLabels.pengajar}
           </label>
           <Textarea
             value={pengajar}
             onChange={(e) => setPengajar(e.target.value)}
             placeholder="Tuliskan saran atau masukan terkait pengajar pelatihan..."
-            className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] shadow-sm transition"
+            className="w-full border border-[#90CAF9] rounded px-2 md:px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] shadow-sm transition text-sm md:text-base"
             rows={4}
           />
         </div>
-        <div className="pt-4 flex justify-between">
+        <div className="pt-4 flex flex-col md:flex-row justify-between gap-3 md:gap-6">
           <button
             type="button"
             onClick={() => router.push("/alumni/sesuaiwaktu")}
-            className="flex items-center gap-2 bg-white border border-[#B3E5FC] text-[#1976D2] px-8 py-3 rounded-xl shadow font-bold text-lg tracking-wide hover:bg-[#E3F2FD] transition"
+            className="flex items-center gap-2 bg-white border border-[#B3E5FC] text-[#1976D2] px-6 md:px-8 py-2 md:py-3 rounded-xl shadow font-bold text-base md:text-lg tracking-wide hover:bg-[#E3F2FD] transition w-full md:w-auto justify-center"
           >
             <ArrowLeft size={20} />
             Sebelumnya
@@ -177,7 +177,7 @@ export default function SaranMasukanPage() {
             <button
               type="button"
               onClick={handleSubmit}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition"
+              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
             >
               <Send size={20} /> Submit
             </button>
@@ -185,7 +185,7 @@ export default function SaranMasukanPage() {
             <button
               type="button"
               onClick={handleLanjut}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition"
+              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
             >
               Lanjut <ArrowRight size={20} />
             </button>
