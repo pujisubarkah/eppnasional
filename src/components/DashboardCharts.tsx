@@ -16,17 +16,11 @@ import {
 
 import { useEffect, useState } from "react";
 
-const instansiData = [
-  { name: "Kementerian", jumlah: 120 },
-  { name: "Lembaga", jumlah: 80 },
-  { name: "Pemda", jumlah: 60 },
-  { name: "BUMN", jumlah: 30 },
-];
-
-
 const pieColors = ["#1976D2", "#2196F3", "#90CAF9"];
 export default function DashboardCharts() {
   const [pelatihanData, setPelatihanData] = useState<{ name: string; jumlah: number }[]>([]);
+  const [instansiData, setInstansiData] = useState<{ name: string; jumlah: number }[]>([]);
+  const [jenisInstansiData, setJenisInstansiData] = useState<{ name: string; value: number }[]>([]);
 
   useEffect(() => {
     fetch("/api/alumni/summary")
@@ -39,66 +33,77 @@ export default function DashboardCharts() {
           }))
         );
       });
+
+    fetch("/api/instansi/summary")
+      .then((res) => res.json())
+      .then((data: Array<{ kategoriNama: string; instansiNama: string; jumlahAlumni: number }>) => {
+        // Bar chart: instansiNama
+        const instansiAgg: { [name: string]: number } = {};
+        data.forEach((item) => {
+          instansiAgg[item.instansiNama] = (instansiAgg[item.instansiNama] || 0) + item.jumlahAlumni;
+        });
+        setInstansiData(
+          Object.entries(instansiAgg)
+            .map(([name, jumlah]) => ({ name, jumlah }))
+            .sort((a, b) => b.jumlah - a.jumlah)
+        );
+
+        // Pie chart: kategoriNama
+        const kategoriAgg: { [name: string]: number } = {};
+        data.forEach((item) => {
+          kategoriAgg[item.kategoriNama] = (kategoriAgg[item.kategoriNama] || 0) + item.jumlahAlumni;
+        });
+        setJenisInstansiData(
+          Object.entries(kategoriAgg).map(([name, value]) => ({ name, value }))
+        );
+      });
   }, []);
 
-  // Dummy data for jenisInstansiData (replace with real data if available)
-  const jenisInstansiData = [
-    { name: "Kementerian", value: 120 },
-    { name: "Lembaga", value: 80 },
-    { name: "Pemda", value: 60 },
-    { name: "BUMN", value: 30 },
-  ];
+  // jenisInstansiData now comes from API
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
       {/* Bar Chart Instansi */}
       <div className="bg-white/90 rounded-xl shadow flex flex-col items-center justify-center p-6">
         <span className="text-gray-600 font-semibold mb-2">Distribusi Instansi</span>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={instansiData}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="jumlah" fill="#1976D2">
-              {
-                pelatihanData.map((entry, idx) => (
-                  <text
-                    key={`label-${idx}`}
-                    x={idx * 80 + 40}
-                    y={250 - entry.jumlah * 2 - 10}
-                    textAnchor="middle"
-                    fill="#1976D2"
-                    fontSize={12}
-                  >{entry.jumlah}</text>
-                ))
-              }
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="w-full overflow-x-auto" style={{ maxHeight: 350 }}>
+          <ResponsiveContainer width={500} height={Math.max(250, instansiData.length * 32)}>
+            <BarChart
+              data={instansiData}
+              layout="vertical"
+              margin={{ left: 80, right: 20, top: 20, bottom: 20 }}
+            >
+              <XAxis type="number" />
+              <YAxis dataKey="name" type="category" width={150} />
+              <Tooltip />
+              <Bar dataKey="jumlah" fill="#1976D2">
+                <LabelList dataKey="jumlah" position="right" />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
       {/* Pie Chart Jenis Instansi */}
       <div className="bg-white/90 rounded-xl shadow flex flex-col items-center justify-center p-6">
         <span className="text-gray-600 font-semibold mb-2">Distribusi Jenis Instansi</span>
         <ResponsiveContainer width="100%" height={250}>
-          <>
-            <PieChart>
-              <Pie
-                data={jenisInstansiData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#1976D2"
-              >
-                {jenisInstansiData.map((entry, idx) => (
-                  <Cell key={`cell-${idx}`} fill={pieColors[idx % pieColors.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </>
+          <PieChart>
+            <Pie
+              data={jenisInstansiData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              fill="#1976D2"
+            >
+              {jenisInstansiData.map((entry, idx) => (
+                <Cell key={`cell-${idx}`} fill={pieColors[idx % pieColors.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
         </ResponsiveContainer>
       </div>
       {/* Bar Chart Nama Pelatihan */}

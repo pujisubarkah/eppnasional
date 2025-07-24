@@ -12,6 +12,9 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300 px-4">
+      {/* Navbar removed, handled in layout */}
+
+    
       {/* Hero Section */}
       <section className="w-full max-w-5xl mx-auto mt-12 mb-10 grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Card Alumni */}
@@ -60,7 +63,7 @@ export default function Home() {
         <DashboardCharts />
       </section>
 
-      {/* Footer dihapus, sudah disiapkan oleh user */}
+      {/* Footer removed, handled in layout */}
     </div>
   );
 }
