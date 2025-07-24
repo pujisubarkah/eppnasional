@@ -27,6 +27,7 @@ export default function ProfileForm() {
   const [jenisInstansiList, setJenisInstansiList] = useState<JenisInstansi[]>([]);
   const [instansiList, setInstansiList] = useState<Instansi[]>([]);
   const [domisiliList, setDomisiliList] = useState<Domisili[]>([]);
+  const [filteredDomisiliList, setFilteredDomisiliList] = useState<Domisili[]>([]);
   const [pelatihanList, setPelatihanList] = useState<Pelatihan[]>([]);
   const [jabatanList, setJabatanList] = useState<Jabatan[]>([]);
   const [tahunPelatihanList, setTahunPelatihanList] = useState<TahunPelatihan[]>([]);
@@ -61,7 +62,9 @@ export default function ProfileForm() {
       const pelatihanRes = await fetch("/api/pelatihan");
       setPelatihanList(await pelatihanRes.json());
       const provRes = await fetch("/api/provinsi");
-      setDomisiliList(await provRes.json());
+      const domisiliData = await provRes.json();
+      setDomisiliList(domisiliData);
+      setFilteredDomisiliList(domisiliData);
       const jabatanRes = await fetch("/api/jabatan");
       setJabatanList(await jabatanRes.json());
       const tahunRes = await fetch("/api/tahun_pelatihan");
@@ -381,8 +384,17 @@ export default function ProfileForm() {
               <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
                 <SelectValue placeholder="Pilih Domisili Instansi Lembaga Penyelenggara" />
               </SelectTrigger>
-              <SelectContent className="z-50 bg-white">
-                {domisiliList.map((item) => (
+              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">
+                <input
+                  type="text"
+                  placeholder="Cari domisili..."
+                  className="w-full px-2 py-1 mb-2 border rounded"
+                  onChange={e => {
+                    const val = e.target.value.toLowerCase();
+                    setFilteredDomisiliList(domisiliList.filter(i => i.nama.toLowerCase().includes(val)));
+                  }}
+                />
+                {filteredDomisiliList.map((item) => (
                   <SelectItem key={item.id} value={item.id.toString()}>
                     {item.nama}
                   </SelectItem>
