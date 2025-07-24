@@ -71,11 +71,11 @@ export default function PenilaianInvestasiWaktuPage() {
         <label className="block font-semibold text-[#1976D2] text-sm md:text-base mb-2 md:mb-4">
           {pertanyaan?.text || "Memuat pertanyaan..."}
         </label>
-        <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-4 mt-2">
-          {pertanyaan?.options?.map((opt) => (
+        <div className="flex flex-row justify-between gap-4 mt-2">
+          {pertanyaan?.options?.map((opt, idx) => (
             <label
               key={opt.id}
-              className="flex flex-row sm:flex-col items-center text-xs font-medium cursor-pointer gap-1 sm:gap-0"
+              className="flex flex-col items-center text-xs font-medium cursor-pointer gap-2 px-2"
             >
               <input
                 type="radio"
@@ -87,14 +87,22 @@ export default function PenilaianInvestasiWaktuPage() {
               <span className="text-[#1976D2] font-bold text-xs md:text-sm">
                 {opt.option_text.split(" ")[0]}
               </span>
+              <span className="text-gray-500 text-[10px] md:text-xs mt-1 text-center font-normal">
+                {(() => {
+                  if (idx === 0) return "Sangat Tidak Setuju";
+                  if (idx === 1) return "Tidak Setuju";
+                  if (idx === 2) return "Setuju";
+                  if (idx === 3) return "Sangat Setuju";
+                  return opt.option_text;
+                })()}
+              </span>
             </label>
           ))}
         </div>
-        <div className="flex flex-wrap justify-between gap-1 md:gap-2 mt-1 text-xs text-gray-500">
-          {pertanyaan?.options?.map((opt) => (
-            <span key={opt.id} className="w-1/4 sm:w-auto text-center">{opt.option_text}</span>
-          ))}
-        </div>
+       
+            
+        
+      
       </div>
       <div className="pt-6 md:pt-8 flex flex-col md:flex-row justify-between gap-3 md:gap-6">
         <button

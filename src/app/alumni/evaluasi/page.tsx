@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useProfileStore } from '@/lib/store/profileStore'
 import { useEvaluasiStore } from '@/lib/store/evaluasiStore'
 import { toast } from 'sonner'
-import { ArrowRight, Send } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Send } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface SubAgenda {
@@ -251,18 +251,26 @@ export default function EvaluasiPage() {
         </div>
       </div>
 
-      <div className="pt-4 flex justify-end">
+      <div className="pt-6 md:pt-8 flex flex-col md:flex-row justify-between gap-4">
+        <button
+          type="button"
+          onClick={() => router.push("/alumni/profile")}
+          className="flex items-center gap-2 bg-white border border-[#B3E5FC] text-[#1976D2] px-6 md:px-8 py-2 md:py-3 rounded-xl shadow font-bold text-base md:text-lg tracking-wide hover:bg-[#E3F2FD] transition w-full md:w-auto justify-center"
+        >
+          <ArrowLeft size={20} />
+          Kembali
+        </button>
         {!isSubmitted ? (
           <button
             onClick={handleSubmit}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition"
+            className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition w-full md:w-auto justify-center"
           >
             <Send size={20} /> Submit
           </button>
         ) : (
           <button
             onClick={() => router.push("/alumni/dukunganlingkungan")}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition"
+            className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition w-full md:w-auto justify-center"
           >
             Lanjut <ArrowRight size={20} />
           </button>

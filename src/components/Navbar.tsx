@@ -65,12 +65,12 @@ export default function Navbar() {
         <Image
           src="/lanri.png"
           alt="Logo LAN RI"
-          width={40}
-          height={40}
-          className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 drop-shadow-md flex-shrink-0"
+          width={72}
+          height={72}
+          className="h-auto w-auto drop-shadow-md flex-shrink-0"
           priority
         />
-        <span className="navbar-logo-text font-black text-white tracking-wide drop-shadow-md truncate">
+        <span className="navbar-logo-text font-black text-white tracking-wide drop-shadow-md truncate text-base sm:text-lg md:text-xl lg:text-lg xl:text-xl">
           <span className="hidden sm:inline">Evaluasi Pasca Pelatihan Nasional</span>
           <span className="sm:hidden">EPP Nasional</span>
         </span>
@@ -148,7 +148,7 @@ export default function Navbar() {
                       alt="Logo LAN RI"
                       width={24}
                       height={24}
-                      className="h-6 w-6 drop-shadow-md"
+                      className="h-auto w-auto drop-shadow-md"
                     />
                     <span className="text-white font-bold text-base">Menu</span>
                   </div>

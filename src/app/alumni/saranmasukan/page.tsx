@@ -58,10 +58,6 @@ export default function SaranMasukanPage() {
   // Tapi karena id sudah fix dan text sudah sesuai, cukup gunakan id saja
 
   const handleSubmit = async () => {
-    if (!materi || !metode || !waktu || !pengajar) {
-      toast.error("Mohon isi semua saran dan masukan terlebih dahulu!");
-      return;
-    }
     try {
       await fetch("/api/answers", {
         method: "POST",
@@ -69,7 +65,7 @@ export default function SaranMasukanPage() {
         body: JSON.stringify({
           question_id: pertanyaanIds.materi,
           user_id,
-          answer: materi,
+          answer: materi ? materi : null,
         }),
       });
       await fetch("/api/answers", {
@@ -78,7 +74,7 @@ export default function SaranMasukanPage() {
         body: JSON.stringify({
           question_id: pertanyaanIds.metode,
           user_id,
-          answer: metode,
+          answer: metode ? metode : null,
         }),
       });
       await fetch("/api/answers", {
@@ -87,7 +83,7 @@ export default function SaranMasukanPage() {
         body: JSON.stringify({
           question_id: pertanyaanIds.waktu,
           user_id,
-          answer: waktu,
+          answer: waktu ? waktu : null,
         }),
       });
       await fetch("/api/answers", {
@@ -96,7 +92,7 @@ export default function SaranMasukanPage() {
         body: JSON.stringify({
           question_id: pertanyaanIds.pengajar,
           user_id,
-          answer: pengajar,
+          answer: pengajar ? pengajar : null,
         }),
       });
       toast.success("Saran & masukan berhasil disimpan! Silakan klik tombol lanjut.");

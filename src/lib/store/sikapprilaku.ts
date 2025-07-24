@@ -2,8 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface SikapPrilakuState {
-  sikap: string;
-  setSikap: (v: string) => void;
+  sikap: string[];
+  setSikap: (v: string[]) => void;
 
   kinerja: string[];
   setKinerja: (v: string[]) => void;
@@ -26,7 +26,7 @@ interface SikapPrilakuState {
 export const useSikapPrilakuStore = create<SikapPrilakuState>()(
   persist(
     (set) => ({
-      sikap: "",
+      sikap: [],
       setSikap: (v) => set({ sikap: v }),
 
       kinerja: [],
@@ -46,7 +46,7 @@ export const useSikapPrilakuStore = create<SikapPrilakuState>()(
 
       clear: () =>
         set({
-          sikap: "",
+          sikap: [],
           kinerja: [],
           ekonomi: "",
           dampak: [],

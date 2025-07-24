@@ -22,13 +22,26 @@ export default function SikapPrilakuPage() {
   const [selectedSubTransformasi, setSelectedSubTransformasi] = useState<number | null>(null);
 
   const {
-    sikap, setSikap,
-    kinerja, setKinerja,
-    ekonomi, setEkonomi,
-    dampak, setDampak,
-    dampakLain, setDampakLain,
-    tema, setTema // Tidak digunakan dalam handleSubmit, bisa dihapus jika tidak dipakai di tempat lain
-  } = useSikapPrilakuStore();
+        sikap, setSikap,
+        kinerja, setKinerja,
+        ekonomi, setEkonomi,
+        dampak, setDampak,
+        dampakLain, setDampakLain,
+        tema, setTema // Tidak digunakan dalam handleSubmit, bisa dihapus jika tidak dipakai di tempat lain
+      } = useSikapPrilakuStore() as {
+        sikap: string[];
+        setSikap: (v: string[]) => void;
+        kinerja: string[];
+        setKinerja: (v: string[]) => void;
+        ekonomi: string;
+        setEkonomi: (v: string) => void;
+        dampak: string[];
+        setDampak: (v: string[]) => void;
+        dampakLain: string;
+        setDampakLain: (v: string) => void;
+        tema: string;
+        setTema: (v: string) => void;
+      };
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
@@ -77,35 +90,37 @@ export default function SikapPrilakuPage() {
   const handleSubmit = async () => {
     // Validasi berdasarkan jenis pelatihan
     if (isPelatihanKhusus) {
-      // Hanya validasi pertanyaan 1 dan 2 untuk pelatihan khusus
-      if (!sikap || kinerja.length !== 3) {
+      if (!sikap || !Array.isArray(sikap) || sikap.length === 0 || kinerja.length !== 3) {
         toast.error("Mohon isi pertanyaan 1 dan 2 dengan lengkap!");
         return;
       }
     } else {
-      // Validasi semua pertanyaan untuk pelatihan umum
-      if (
-        !sikap ||
-        kinerja.length !== 3 ||
-        !ekonomi ||
-        dampak.length === 0
-      ) {
+      if (!sikap || !Array.isArray(sikap) || sikap.length === 0 || kinerja.length !== 3 || !ekonomi || dampak.length === 0) {
         toast.error("Mohon isi semua pertanyaan dengan lengkap!");
+        return;
+      }
+      // Validasi bidang dan sub bidang untuk pertanyaan 5
+      if (selectedTransformasi === null || selectedSubTransformasi === null) {
+        toast.error("Mohon pilih bidang dan sub bidang pada pertanyaan 5!");
         return;
       }
     }
 
     try {
-      // Kirim jawaban pertanyaan 1
-      await fetch("/api/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question_id: pertanyaanSikap?.id,
-          user_id,
-          answer: sikap,
-        }),
-      });
+      // Kirim jawaban pertanyaan 1 (bisa lebih dari satu)
+      if (Array.isArray(sikap)) {
+        for (const ans of sikap) {
+          await fetch("/api/answers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              question_id: pertanyaanSikap?.id,
+              user_id,
+              answer: ans,
+            }),
+          });
+        }
+      }
 
       // Kirim jawaban pertanyaan 2
       for (const ans of kinerja) {
@@ -184,15 +199,8 @@ export default function SikapPrilakuPage() {
 
   return (
     <div className="max-w-4xl mx-auto mt-8 bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 md:space-y-10 border border-[#B3E5FC]">
-      {/* Tampilkan data profile dari zustand */}
-      <div className="mb-4 md:mb-6 p-3 md:p-4 bg-white rounded-xl shadow border border-[#B3E5FC]">
-        <div className="font-bold text-[#1976D2] mb-2">Profil Alumni (Zustand)</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs md:text-sm">
-          <div><span className="font-semibold">ID:</span> {profile.id}</div>
-          <div><span className="font-semibold">Nama:</span> {profile.nama}</div>
-          <div><span className="font-semibold">Pelatihan:</span> {profile.pelatihan_id}</div>
-        </div>
-      </div>
+      
+    
       <h2 className="text-xl md:text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
         Sikap & Perilaku Pasca Pelatihan
       </h2>
@@ -200,30 +208,36 @@ export default function SikapPrilakuPage() {
         <span className="font-bold">Petunjuk:</span> Silahkan centang pada poin yang sesuai dengan pernyataan berikut.
       </div>
 
-      {/* 1. Pilihan perubahan sikap perilaku (radio) */}
+      {/* 1. Pilihan perubahan sikap perilaku (checkbox, bisa lebih dari satu) */}
       <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
         <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
           1. {pertanyaanSikap?.text || "Memuat pertanyaan..."}
+          <span className="block text-xs md:text-sm text-[#1976D2] font-normal mt-1">(Boleh pilih lebih dari 1)</span>
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
           {pertanyaanSikap?.options
-            ?.filter((opt) => {
-              if (isPelatihanKhusus) {
-                return opt.ordering === 5;
-              } else {
-                return opt.ordering !== 5;
-              }
-            })
+            // Filter sesuai pelatihan_id dari zustand
+            ?.filter((opt) => opt.ordering === profile.pelatihan_id)
             .map((opt) => (
               <label
                 key={opt.id}
                 className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
               >
                 <input
-                  type="radio"
+                  type="checkbox"
                   value={opt.option_text}
-                  checked={sikap === opt.option_text}
-                  onChange={() => setSikap(opt.option_text)}
+                  checked={Array.isArray(sikap) ? sikap.includes(opt.option_text) : false}
+                  onChange={() => {
+                    if (Array.isArray(sikap)) {
+                      if (sikap.includes(opt.option_text)) {
+                        setSikap(sikap.filter((v) => v !== opt.option_text));
+                      } else {
+                        setSikap([...sikap, opt.option_text]);
+                      }
+                    } else {
+                      setSikap([opt.option_text]);
+                    }
+                  }}
                   className="accent-[#2196F3] scale-110 md:scale-125"
                 />
                 <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
@@ -271,26 +285,36 @@ export default function SikapPrilakuPage() {
             3. {pertanyaanEkonomi?.text || "Memuat pertanyaan..."}
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
-            {pertanyaanEkonomi?.options?.map((opt) => (
-              <label
-                key={opt.id}
-                className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  value={opt.option_text}
-                  checked={ekonomi === opt.option_text}
-                  onChange={() => setEkonomi(opt.option_text)}
-                  className="accent-[#2196F3] scale-110 md:scale-125"
-                />
-                <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
-              </label>
-            ))}
+            {pertanyaanEkonomi?.options
+              // Filter sesuai pelatihan_id dan ordering
+              ?.filter((opt) => {
+                if (profile.pelatihan_id === 1 || profile.pelatihan_id === 2) {
+                  return opt.ordering === 1;
+                } else if (profile.pelatihan_id === 3 || profile.pelatihan_id === 4) {
+                  return opt.ordering === 2;
+                }
+                return false;
+              })
+              .map((opt) => (
+                <label
+                  key={opt.id}
+                  className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    value={opt.option_text}
+                    checked={ekonomi === opt.option_text}
+                    onChange={() => setEkonomi(opt.option_text)}
+                    className="accent-[#2196F3] scale-110 md:scale-125"
+                  />
+                  <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
+                </label>
+              ))}
           </div>
         </div>
       )}
 
-      {/* 4. Dampak (checkbox, bisa lebih dari satu) - Hanya ditampilkan jika bukan pelatihan khusus */}
+      {/* 4. Dampak (radio, hanya satu pilihan) - Hanya ditampilkan jika bukan pelatihan khusus */}
       {!isPelatihanKhusus && (
         <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
           <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
@@ -303,19 +327,17 @@ export default function SikapPrilakuPage() {
                 className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
               >
                 <input
-                  type="checkbox"
+                  type="radio"
                   value={opt.option_text}
-                  checked={dampak.includes(opt.option_text)}
-                  onChange={() =>
-                    handleCheckbox(dampak, setDampak, opt.option_text, 5) // Maksimal 5 pilihan untuk dampak
-                  }
+                  checked={dampak[0] === opt.option_text}
+                  onChange={() => setDampak([opt.option_text])}
                   className="accent-[#2196F3] scale-110 md:scale-125"
                 />
                 <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
               </label>
             ))}
           </div>
-          {dampak.includes("Yang lain:") && (
+          {dampak[0] === "Yang lain:" && (
             <input
               type="text"
               value={dampakLain}
