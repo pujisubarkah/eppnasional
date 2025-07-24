@@ -4,7 +4,7 @@ import { Users, Phone, Mail, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="footer-bg text-gray-800 mt-16 px-0 pt-12 pb-6">
+    <footer className="bg-gradient-to-r from-blue-800 via-blue-600 to-blue-700 shadow-md backdrop-blur-sm filter brightness-105 contrast-125 border-t border-blue-500 text-gray-100 mt-16 px-0 pt-12 pb-6">
       <div className="max-w-5xl mx-auto px-6 md:px-12">
         <div className="grid md:grid-cols-2 gap-10 bg-white/70 rounded-xl shadow-lg p-8">
           {/* Kiri: Tentang */}
@@ -46,7 +46,7 @@ export default function Footer() {
       </div>
       <style jsx>{`
         .footer-bg {
-          background: linear-gradient(90deg, #1976D2 0%, #2196F3 100%);
+          /* background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #1e40af 100%); */
         }
       `}</style>
     </footer>
