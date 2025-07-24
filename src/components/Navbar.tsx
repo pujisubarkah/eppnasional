@@ -5,12 +5,13 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { LogIn, LogOut, ChevronDown } from "lucide-react";
 import Image from "next/image";
-import { useProfileStore } from "@/lib/store/profileStore";
+import { useNamaProfileStore } from "@/lib/store/namaprofile";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { nama, clear } = useProfileStore(); // asumsi ada clear() untuk logout
+  // Gunakan zustand namaprofile
+  const { nama, setNama, clearNama } = useNamaProfileStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -54,12 +55,12 @@ export default function Navbar() {
   }, [dropdownOpen]);
 
   const handleLogout = () => {
-    clear(); // hapus data user dari zustand
+    clearNama(); // hapus nama user dari zustand
     router.push("/login"); // redirect ke halaman login
   };
 
   return (
-    <nav className="navbar flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 shadow-lg border-b border-[#1565C0] bg-gradient-to-r from-[#1565C0] via-[#1976D2] to-[#1565C0] backdrop-blur-sm z-50 relative">
+    <nav className="navbar flex items-center justify-between px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-800 via-blue-600 to-blue-700 shadow-md backdrop-blur-sm filter brightness-105 contrast-125 border-b border-blue-500 z-50 fixed top-0 left-0 right-0">
       {/* Logo / Judul */}
       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
         <Image
