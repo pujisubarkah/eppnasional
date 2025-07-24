@@ -254,7 +254,16 @@ export default function ProfileForm() {
               <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
                 <SelectValue placeholder="Pilih Instansi" />
               </SelectTrigger>
-              <SelectContent className="z-50 bg-white">
+              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">
+                <input
+                  type="text"
+                  placeholder="Cari instansi..."
+                  className="w-full px-2 py-1 mb-2 border rounded"
+                  onChange={e => {
+                    const val = e.target.value.toLowerCase();
+                    setInstansiList(instansiList.filter(i => i.agency_name.toLowerCase().includes(val)));
+                  }}
+                />
                 {instansiList.map((item) => (
                   <SelectItem key={item.id} value={item.id.toString()}>{item.agency_name}</SelectItem>
                 ))}
@@ -339,6 +348,15 @@ export default function ProfileForm() {
                 <SelectValue placeholder="Pilih Instansi Lembaga Penyelenggara" />
               </SelectTrigger>
               <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">
+                <input
+                  type="text"
+                  placeholder="Cari lembaga..."
+                  className="w-full px-2 py-1 mb-2 border rounded"
+                  onChange={e => {
+                    const val = e.target.value.toLowerCase();
+                    setLemdikList(lemdikList.filter(i => i.namaLemdik.toLowerCase().includes(val)));
+                  }}
+                />
                 {lemdikList.map((item) => (
                   <SelectItem key={item.id} value={item.namaLemdik}>
                     {item.namaLemdik}
