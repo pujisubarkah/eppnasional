@@ -1,16 +1,15 @@
 import { db } from '@/db/index';
-import { alumni } from '@/db/profile_alumni';
-import { pelatihan } from '@/db/pelatihan';
 import { sql } from 'drizzle-orm';
 
 export async function GET() {
   try {
     const result = await db.execute(
       sql`
-        SELECT p.id, p.nama AS pelatihan, COUNT(a.id) AS total_alumni
-        FROM ${pelatihan} p
-        LEFT JOIN ${alumni} a ON a.pelatihan_id = p.id
-        GROUP BY p.id, p.nama
+        SELECT k.id, k.nama_kategori, COUNT(a.id) AS total_alumni
+        FROM instansi_kategori k
+        LEFT JOIN instansi i ON i.agency_category_id = k.id
+        LEFT JOIN informasi_profile a ON a.instansiId = i.id
+        GROUP BY k.id, k.nama_kategori
         ORDER BY total_alumni DESC
       `
     );
