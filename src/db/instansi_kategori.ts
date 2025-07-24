@@ -1,4 +1,4 @@
-// db/schema/agency_category.ts
+// db/agency_category.ts
 import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
 
 export const instansi_kategori = pgTable('instansi_kategori', {
