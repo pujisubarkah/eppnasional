@@ -134,23 +134,36 @@ export default function DukunganLingkunganPage() {
           <ArrowLeft size={20} />
           Sebelumnya
         </button>
-        {!isSubmitted ? (
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
-          >
-            <Send size={20} /> Submit
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleLanjut}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
-          >
-            Lanjut <ArrowRight size={20} />
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={async () => {
+            if (answers.some((ans) => !ans)) {
+              toast.error("Mohon isi semua pertanyaan terlebih dahulu!");
+              return;
+            }
+            try {
+              for (let i = 0; i < pertanyaanList.length; i++) {
+                await fetch("/api/answers", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    question_id: pertanyaanList[i].id,
+                    user_id,
+                    answer: answers[i],
+                  }),
+                });
+              }
+              toast.success("Jawaban berhasil disimpan!");
+              clear();
+              router.push("/alumni/sikapprilaku");
+            } catch {
+              toast.error("Gagal menyimpan jawaban!");
+            }
+          }}
+          className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
+        >
+          Lanjut <ArrowRight size={20} />
+        </button>
       </div>
     </div>
   );

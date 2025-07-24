@@ -2,8 +2,8 @@ import { Award, BarChart3, Users2 } from "lucide-react";
 
 export default function TentangPage() {
   return (
-    <section className="max-w-3xl mx-auto py-16 px-4">
-      <div className="bg-white/80 rounded-xl shadow-lg p-8">
+    <section className="max-w-3xl mx-auto py-16 px-4 mt-24">
+      <div className="bg-white/80 rounded-xl shadow-lg p-8 border-2 border-[#2196F3] outline-2 outline-[#2196F3]">
         <div className="flex items-center gap-3 mb-4">
           <Award className="w-9 h-9 text-[#2196F3] drop-shadow" />
           <h1 className="text-3xl md:text-4xl font-extrabold text-[#2196F3] drop-shadow">

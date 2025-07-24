@@ -43,7 +43,7 @@ export default function DashboardMap() {
 
   return (
     <section className="w-full max-w-7xl mx-auto px-2 md:px-6 py-6 md:py-12">
-      <div className="bg-gradient-to-br from-[#E3F2FD] via-white to-[#BBDEFB] rounded-2xl md:rounded-3xl shadow-xl border border-[#90CAF9] p-3 md:p-10 flex flex-col lg:flex-row gap-4 md:gap-8 items-stretch backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-[#E3F2FD] via-white to-[#BBDEFB] rounded-2xl md:rounded-3xl shadow-xl border-2 border-[#2196F3] outline-2 outline-[#2196F3] p-3 md:p-10 flex flex-col lg:flex-row gap-4 md:gap-8 items-stretch backdrop-blur-sm">
         {/* Bagian Utama Peta */}
         <div className="flex-1 flex flex-col items-center justify-center">
           {/* Judul */}
@@ -92,7 +92,7 @@ export default function DashboardMap() {
           </div>
         </div>
         {/* Legend Card */}
-        <div className="w-full lg:w-64 flex flex-col items-start justify-start bg-white/90 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg border border-[#90CAF9] p-3 md:p-5 gap-2 md:gap-4 h-fit self-start mt-4 md:mt-0 transition-all duration-300 hover:shadow-xl">
+        <div className="w-full lg:w-64 flex flex-col items-start justify-start bg-white/90 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg border-2 border-[#2196F3] outline-2 outline-[#2196F3] p-3 md:p-5 gap-2 md:gap-4 h-fit self-start mt-4 md:mt-0 transition-all duration-300 hover:shadow-xl">
           <h2 className="font-bold text-[#1976D2] text-lg md:text-xl tracking-wide">Legenda</h2>
           {colorScale.map((c) => (
             <div key={c.label} className="flex items-center gap-2 md:gap-3 w-full">

@@ -64,7 +64,7 @@ export default function DashboardCharts() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
       {/* Bar Chart Instansi */}
-      <div className="bg-white/90 rounded-xl shadow flex flex-col items-center justify-center p-6">
+      <div className="bg-white/90 rounded-xl shadow flex flex-col items-center justify-center p-6 border-2 border-[#2196F3] outline-2 outline-[#2196F3]">
         <span className="text-gray-600 font-semibold mb-2">Distribusi Instansi</span>
         <div className="w-full overflow-x-auto" style={{ maxHeight: 350 }}>
           <ResponsiveContainer width={500} height={Math.max(250, instansiData.length * 32)}>
@@ -84,7 +84,7 @@ export default function DashboardCharts() {
         </div>
       </div>
       {/* Pie Chart Jenis Instansi */}
-      <div className="bg-white/90 rounded-xl shadow flex flex-col items-center justify-center p-6">
+      <div className="bg-white/90 rounded-xl shadow flex flex-col items-center justify-center p-6 border-2 border-[#2196F3] outline-2 outline-[#2196F3]">
         <span className="text-gray-600 font-semibold mb-2">Distribusi Jenis Instansi</span>
         <ResponsiveContainer width="100%" height={250}>
           <PieChart>
@@ -107,7 +107,7 @@ export default function DashboardCharts() {
         </ResponsiveContainer>
       </div>
       {/* Bar Chart Nama Pelatihan */}
-      <div className="bg-white/90 rounded-xl shadow flex flex-col items-center justify-center p-6 md:col-span-2">
+      <div className="bg-white/90 rounded-xl shadow flex flex-col items-center justify-center p-6 md:col-span-2 border-2 border-[#2196F3] outline-2 outline-[#2196F3]">
         <span className="text-gray-600 font-semibold mb-2">Distribusi Nama Pelatihan</span>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={pelatihanData}>

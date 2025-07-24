@@ -1,6 +1,6 @@
 export default function KontakPage() {
   return (
-    <section className="max-w-xl mx-auto py-16 px-4 flex flex-col items-center">
+    <section className="max-w-xl mx-auto py-16 px-4 flex flex-col items-center mt-24">
       <h1 className="text-3xl md:text-4xl font-extrabold mb-6 text-[#2196F3] drop-shadow text-center">
         Butuh konsultasi lebih lanjut?
       </h1>

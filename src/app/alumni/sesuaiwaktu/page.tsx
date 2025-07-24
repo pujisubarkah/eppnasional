@@ -60,7 +60,7 @@ export default function PenilaianInvestasiWaktuPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-8 bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 md:space-y-10 border border-[#B3E5FC]">
+    <div className="max-w-3xl mx-auto mt-24 bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 md:space-y-10 border border-[#B3E5FC]">
       <h2 className="text-xl md:text-2xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
         Penilaian Investasi Waktu
       </h2>
@@ -99,10 +99,6 @@ export default function PenilaianInvestasiWaktuPage() {
             </label>
           ))}
         </div>
-       
-            
-        
-      
       </div>
       <div className="pt-6 md:pt-8 flex flex-col md:flex-row justify-between gap-3 md:gap-6">
         <button
@@ -113,23 +109,33 @@ export default function PenilaianInvestasiWaktuPage() {
           <ArrowLeft size={20} />
           Sebelumnya
         </button>
-        {!isSubmitted ? (
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
-          >
-            <Send size={20} /> Submit
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleLanjut}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
-          >
-            Lanjut <ArrowRight size={20} />
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={async () => {
+            if (!jawaban) {
+              toast.error("Mohon pilih salah satu jawaban terlebih dahulu!");
+              return;
+            }
+            try {
+              await fetch("/api/answers", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  question_id: pertanyaan?.id,
+                  user_id,
+                  answer: jawaban,
+                }),
+              });
+              toast.success(`Jawaban berhasil disimpan! Terima kasih ${nama ? nama : ""}, tinggal satu tahap lagi terkait saran dan masukan pelatihan!`);
+              router.push("/alumni/saranmasukan");
+            } catch {
+              toast.error("Gagal menyimpan jawaban!");
+            }
+          }}
+          className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
+        >
+          Lanjut <ArrowRight size={20} />
+        </button>
       </div>
     </div>
   );

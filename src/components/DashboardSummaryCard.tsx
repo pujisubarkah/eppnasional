@@ -22,7 +22,7 @@ export default function DashboardSummaryCard() {
       {["2021", "2022", "2023", "2024"].map((tahun) => (
         <div
           key={tahun}
-          className="bg-white rounded-xl shadow flex flex-col items-center justify-center p-6 border-2 border-[#2196F3]/40 hover:border-[#1976D2] transition"
+          className="bg-white rounded-xl shadow flex flex-col items-center justify-center p-6 border-2 border-[#2196F3]/40 outline-2 outline-[#2196F3] hover:border-[#1976D2] transition"
         >
           <CalendarDays className="w-8 h-8 text-[#1976D2] mb-2" />
           <div className="text-2xl font-bold text-[#1976D2]">
@@ -35,7 +35,7 @@ export default function DashboardSummaryCard() {
         </div>
       ))}
       {/* Total Responden Keseluruhan */}
-      <div className="bg-white rounded-xl shadow flex flex-col items-center justify-center p-6 border-2 border-[#2196F3]/40 hover:border-[#1976D2] transition">
+      <div className="bg-white rounded-xl shadow flex flex-col items-center justify-center p-6 border-2 border-[#2196F3]/40 outline-2 outline-[#2196F3] hover:border-[#1976D2] transition">
         <Users className="w-8 h-8 text-[#1976D2] mb-2" />
         <div className="text-2xl font-bold text-[#1976D2]">
           {summary?.totalResponden ?? 0}
@@ -46,7 +46,7 @@ export default function DashboardSummaryCard() {
         </div>
       </div>
       {/* Total Instansi */}
-      <div className="bg-white rounded-xl shadow flex flex-col items-center justify-center p-6 border-2 border-[#2196F3]/40 hover:border-[#1976D2] transition">
+      <div className="bg-white rounded-xl shadow flex flex-col items-center justify-center p-6 border-2 border-[#2196F3]/40 outline-2 outline-[#2196F3] hover:border-[#1976D2] transition">
         <Building2 className="w-8 h-8 text-[#1976D2] mb-2" />
         <div className="text-2xl font-bold text-[#1976D2]">
           {summary?.totalInstansi ?? 0}

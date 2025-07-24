@@ -82,7 +82,7 @@ export default function KonfirmasiPage() {
           </div>
         </div>
       )}
-      <div className="max-w-xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-8 space-y-6 md:space-y-8 border border-[#B3E5FC] mt-6 md:mt-10">
+      <div className="max-w-xl mx-auto mt-24 bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-8 space-y-6 md:space-y-8 border border-[#B3E5FC]">
         <h2 className="text-xl md:text-2xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">
           Pernyataan Konfirmasi
         </h2>

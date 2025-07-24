@@ -169,23 +169,56 @@ export default function SaranMasukanPage() {
             <ArrowLeft size={20} />
             Sebelumnya
           </button>
-          {!isSubmitted ? (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
-            >
-              <Send size={20} /> Submit
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleLanjut}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
-            >
-              Lanjut <ArrowRight size={20} />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await fetch("/api/answers", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    question_id: pertanyaanIds.materi,
+                    user_id,
+                    answer: materi ? materi : null,
+                  }),
+                });
+                await fetch("/api/answers", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    question_id: pertanyaanIds.metode,
+                    user_id,
+                    answer: metode ? metode : null,
+                  }),
+                });
+                await fetch("/api/answers", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    question_id: pertanyaanIds.waktu,
+                    user_id,
+                    answer: waktu ? waktu : null,
+                  }),
+                });
+                await fetch("/api/answers", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    question_id: pertanyaanIds.pengajar,
+                    user_id,
+                    answer: pengajar ? pengajar : null,
+                  }),
+                });
+                toast.success("Saran & masukan berhasil disimpan!");
+                router.push("/alumni/konfirmasi");
+              } catch {
+                toast.error("Gagal menyimpan saran & masukan!");
+              }
+            }}
+            className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-6 md:px-10 py-2 md:py-3 rounded-xl shadow-lg font-bold text-base md:text-lg tracking-wide transition w-full md:w-auto justify-center"
+          >
+            Lanjut <ArrowRight size={20} />
+          </button>
         </div>
       </div>
     </div>
