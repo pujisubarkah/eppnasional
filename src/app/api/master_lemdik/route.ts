@@ -7,6 +7,7 @@ export async function GET() {
     const result = await db.select().from(lemdik);
     return NextResponse.json({ status: 'success', data: result });
   } catch (error) {
-    return NextResponse.json({ status: 'error', message: (error as any)?.message || 'Unknown error' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ status: 'error', message }, { status: 500 });
   }
 }

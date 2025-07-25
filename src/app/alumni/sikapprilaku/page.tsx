@@ -113,9 +113,13 @@ export default function SikapPrilakuPage() {
         setSelectedTransformasi(null);
         setSelectedSubTransformasi(null);
 
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching questions:", err);
-        toast.error(err.message || "Gagal memuat pertanyaan!");
+        if (err instanceof Error) {
+          toast.error(err.message || "Gagal memuat pertanyaan!");
+        } else {
+          toast.error("Gagal memuat pertanyaan!");
+        }
       }
     }
 
@@ -240,7 +244,7 @@ export default function SikapPrilakuPage() {
 
       toast.success("Jawaban berhasil disimpan!");
       return true; // Indikasi sukses
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error submitting answers:", error);
       toast.error("Gagal menyimpan jawaban!");
       return false; // Indikasi gagal
