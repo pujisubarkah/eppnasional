@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { useProfileStore } from "@/lib/store/profileStore";
 import { useSaranMasukanStore } from "@/lib/store/saranmasukan";
@@ -22,7 +22,6 @@ export default function SaranMasukanPage() {
     pengajar: "Terkait Pengajar Pelatihan",
   });
 
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     async function fetchLabels() {
@@ -57,54 +56,7 @@ export default function SaranMasukanPage() {
   // Jika ingin fetch text pertanyaan dari API, bisa gunakan useEffect di sini
   // Tapi karena id sudah fix dan text sudah sesuai, cukup gunakan id saja
 
-  const handleSubmit = async () => {
-    try {
-      await fetch("/api/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question_id: pertanyaanIds.materi,
-          user_id,
-          answer: materi ? materi : null,
-        }),
-      });
-      await fetch("/api/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question_id: pertanyaanIds.metode,
-          user_id,
-          answer: metode ? metode : null,
-        }),
-      });
-      await fetch("/api/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question_id: pertanyaanIds.waktu,
-          user_id,
-          answer: waktu ? waktu : null,
-        }),
-      });
-      await fetch("/api/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question_id: pertanyaanIds.pengajar,
-          user_id,
-          answer: pengajar ? pengajar : null,
-        }),
-      });
-      toast.success("Saran & masukan berhasil disimpan! Silakan klik tombol lanjut.");
-      setIsSubmitted(true);
-    } catch {
-      toast.error("Gagal menyimpan saran & masukan!");
-    }
-  };
 
-  const handleLanjut = () => {
-    router.push("/alumni/konfirmasi");
-  };
 
   return (
     <div className="max-w-3xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 md:space-y-10 border border-[#B3E5FC]">

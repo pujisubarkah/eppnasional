@@ -33,8 +33,7 @@ function useHasHydrated() {
 }
 
 export default function EvaluasiPage() {
-  const hasHydrated = useHasHydrated();
-  const { id, nama, pelatihan_id } = useProfileStore();
+  const { nama, pelatihan_id } = useProfileStore();
   
   // Gunakan state dan action dari store
   const { relevan, setRelevan, tidakRelevan, setTidakRelevan } = useEvaluasiStore();

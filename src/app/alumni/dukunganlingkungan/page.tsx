@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowRight, ArrowLeft, Send } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useProfileStore } from "@/lib/store/profileStore";
 import { useDukunganLingkunganStore } from "@/lib/store/dukunganlingkungan"; // <-- import store
 
@@ -12,7 +12,6 @@ type Question = { id: number; text: string; options: Option[] };
 
 export default function DukunganLingkunganPage() {
   const [pertanyaanList, setPertanyaanList] = useState<Question[]>([]);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
   const { id: user_id } = useProfileStore();
 
@@ -43,36 +42,7 @@ export default function DukunganLingkunganPage() {
     setAnswer(idx, value);
   };
 
-  const handleSubmit = async () => {
-    if (answers.some((ans) => !ans)) {
-      toast.error("Mohon isi semua pertanyaan terlebih dahulu!");
-      return;
-    }
-    try {
-      for (let i = 0; i < pertanyaanList.length; i++) {
-        await fetch("/api/answers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            question_id: pertanyaanList[i].id,
-            user_id,
-            answer: answers[i],
-          }),
-        });
-      }
-      toast.success(
-        "Jawaban berhasil disimpan! Silakan klik tombol lanjut untuk melanjutkan."
-      );
-      setIsSubmitted(true);
-    } catch {
-      toast.error("Gagal menyimpan jawaban!");
-    }
-  };
 
-  const handleLanjut = () => {
-    clear(); // reset jawaban jika ingin
-    router.push("/alumni/sikapprilaku");
-  };
 
   return (
     <div className="max-w-4xl mx-auto mt-8 bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 md:space-y-10 border border-[#B3E5FC]">

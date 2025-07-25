@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowRight, ArrowLeft, Send } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useProfileStore } from "@/lib/store/profileStore";
 import { useSesuaiWaktuStore } from "@/lib/store/sesuaiwaktu";
 
@@ -13,7 +13,6 @@ type Question = { id: number; text: string; options: Option[] };
 export default function PenilaianInvestasiWaktuPage() {
   const [pertanyaan, setPertanyaan] = useState<Question | null>(null);
   const { jawaban, setJawaban } = useSesuaiWaktuStore();
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const router = useRouter();
   const { nama, id: user_id } = useProfileStore();
@@ -31,33 +30,7 @@ export default function PenilaianInvestasiWaktuPage() {
     fetchPertanyaan();
   }, []);
 
-  const handleSubmit = async () => {
-    if (!jawaban) {
-      toast.error("Mohon pilih salah satu jawaban terlebih dahulu!");
-      return;
-    }
-    try {
-      await fetch("/api/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question_id: pertanyaan?.id,
-          user_id,
-          answer: jawaban,
-        }),
-      });
-      toast.success(
-        `Jawaban berhasil disimpan! Terima kasih ${nama ? nama : ""}, tinggal satu tahap lagi terkait saran dan masukan pelatihan!`
-      );
-      setIsSubmitted(true);
-    } catch {
-      toast.error("Gagal menyimpan jawaban!");
-    }
-  };
 
-  const handleLanjut = () => {
-    router.push("/alumni/saranmasukan");
-  };
 
   return (
     <div className="max-w-3xl mx-auto mt-24 bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 md:space-y-10 border border-[#B3E5FC]">
