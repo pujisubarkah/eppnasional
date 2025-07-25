@@ -35,8 +35,19 @@ export default function DashboardMap() {
   useEffect(() => {
     async function fetchProvinsi() {
       const res = await fetch("/api/provinsi/summary");
-      const data = await res.json();
-      setProvinsi(data);
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = [];
+      }
+      if (Array.isArray(data)) {
+        setProvinsi(data);
+      } else if (Array.isArray(data?.result)) {
+        setProvinsi(data.result);
+      } else {
+        setProvinsi([]);
+      }
     }
     fetchProvinsi();
   }, []);

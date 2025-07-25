@@ -38,10 +38,12 @@ export const useEvaluasiStore = create<EvaluasiState>()(
           tidakRelevanOptions: [],
         }),
       reset: () =>
-        set({
+        set((state) => ({
           relevan: [],
           tidakRelevan: [],
-        }),
+          relevanOptions: state.relevanOptions,
+          tidakRelevanOptions: state.tidakRelevanOptions,
+        })),
     }),
     {
       name: "evaluasi-jawaban", // Key di localStorage
