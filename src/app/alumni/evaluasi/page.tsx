@@ -23,14 +23,6 @@ interface Option {
   option_value?: number
 }
 
-// Custom hook untuk cek hydration Zustand
-function useHasHydrated() {
-  const [hasHydrated, setHasHydrated] = useState(false)
-  useEffect(() => {
-    setHasHydrated(true)
-  }, [])
-  return hasHydrated
-}
 
 export default function EvaluasiPage() {
   const { nama, pelatihan_id } = useProfileStore();

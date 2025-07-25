@@ -11,7 +11,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   // Gunakan zustand namaprofile
-  const { nama, setNama, clearNama } = useNamaProfileStore();
+  const { nama, clearNama } = useNamaProfileStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
