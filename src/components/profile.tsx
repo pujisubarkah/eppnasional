@@ -22,16 +22,17 @@ type Pelatihan = { id: number; nama: string };
 type Jabatan = { id: number; nama: string };
 type TahunPelatihan = { id: number; tahun: string };
 
-export default function ProfileForm() {
-  // State untuk list dropdown
+export default function ProfileForm() {  // State untuk list dropdown
   const [jenisInstansiList, setJenisInstansiList] = useState<JenisInstansi[]>([]);
   const [instansiList, setInstansiList] = useState<Instansi[]>([]);
+  const [filteredInstansiList, setFilteredInstansiList] = useState<Instansi[]>([]);
   const [domisiliList, setDomisiliList] = useState<Domisili[]>([]);
   const [filteredDomisiliList, setFilteredDomisiliList] = useState<Domisili[]>([]);
   const [pelatihanList, setPelatihanList] = useState<Pelatihan[]>([]);
   const [jabatanList, setJabatanList] = useState<Jabatan[]>([]);
   const [tahunPelatihanList, setTahunPelatihanList] = useState<TahunPelatihan[]>([]);
   const [lemdikList, setLemdikList] = useState<{ id: number; namaLemdik: string }[]>([]);
+  const [filteredLemdikList, setFilteredLemdikList] = useState<{ id: number; namaLemdik: string }[]>([]);
 
   // State untuk form
   const [form, setForm] = useState({
@@ -50,9 +51,46 @@ export default function ProfileForm() {
   });
   const [saved, setSaved] = useState(false);
   const [showNamaModal, setShowNamaModal] = useState(false);
+  const router = useRouter();  const { nama, formData, setFormData, hasHydrated } = useProfileStore(); // ambil data dari zustand  // Debugging effect untuk melihat status hydration dan data
+  useEffect(() => {
+    console.log("Current hydration status:", hasHydrated);
+    console.log("Current formData in store:", formData);
+    
+    // Cek localStorage secara manual
+    const storedData = localStorage.getItem('profile-storage');
+    console.log("Raw localStorage content:", storedData);
+    
+    // Coba parse localStorage untuk debugging
+    try {
+      const parsedData = storedData ? JSON.parse(storedData) : null;
+      console.log("Parsed localStorage content:", parsedData);
+    } catch (e) {
+      console.error("Failed to parse localStorage:", e);
+    }
+  }, [hasHydrated]);
 
-  const router = useRouter();
-  const nama = useProfileStore((state) => state.nama); // ambil nama dari zustand
+  // Load data dari store setelah hydration dan ketika formData berubah
+  useEffect(() => {
+    // Cek status hydration terlebih dahulu
+    if (!hasHydrated) {
+      console.log("Not yet hydrated, skipping form load");
+      return;
+    }
+    
+    // Cek formData apakah ada dan memiliki data
+    if (formData) {
+      // Cek apakah formData memiliki data yang valid (setidaknya ada nama atau nip)
+      if (formData.nama || formData.nip || formData.instansi) {
+        console.log("Loading form data from store:", formData);
+        setForm(formData);
+        setSaved(true); // Juga set status saved jika data sudah ada
+      } else {
+        console.log("FormData exists but has no valid data");
+      }
+    } else {
+      console.log("FormData is null or undefined");
+    }
+  }, [hasHydrated, formData]); // Dependensi pada hasHydrated dan formData
 
   // Fetch data dropdown saat mount
   useEffect(() => {
@@ -60,11 +98,14 @@ export default function ProfileForm() {
       const jenisRes = await fetch("/api/jenis_instansi");
       setJenisInstansiList(await jenisRes.json());
       const pelatihanRes = await fetch("/api/pelatihan");
-      setPelatihanList(await pelatihanRes.json());
-      const provRes = await fetch("/api/provinsi");
+      setPelatihanList(await pelatihanRes.json());      const provRes = await fetch("/api/provinsi");
       const domisiliData = await provRes.json();
-      setDomisiliList(domisiliData);
-      setFilteredDomisiliList(domisiliData);
+      // Urutkan domisili secara ascending (A ke Z)
+      const sortedDomisiliData = domisiliData.sort((a: Domisili, b: Domisili) => 
+        a.nama.localeCompare(b.nama)
+      );
+      setDomisiliList(sortedDomisiliData);
+      setFilteredDomisiliList(sortedDomisiliData);
       const jabatanRes = await fetch("/api/jabatan");
       setJabatanList(await jabatanRes.json());
       const tahunRes = await fetch("/api/tahun_pelatihan");
@@ -73,46 +114,113 @@ export default function ProfileForm() {
       setLemdikList(await lemdikRes.json());
     }
     fetchData();
-  }, []);
-
-  // Fetch instansi saat jenisInstansi berubah
+  }, []);  // Fetch instansi saat jenisInstansi berubah
   useEffect(() => {
     async function fetchInstansi() {
       if (form.jenisInstansi) {
         try {
           const res = await fetch(`/api/instansi/${form.jenisInstansi}`);
-          setInstansiList(await res.json());
-        } catch {
+          const data = await res.json();
+          // Urutkan instansi secara ascending (A ke Z)
+          const sortedData = data.sort((a: Instansi, b: Instansi) => 
+            a.agency_name.localeCompare(b.agency_name)
+          );
+          setInstansiList(sortedData);
+          setFilteredInstansiList(sortedData);        } catch {
           setInstansiList([]);
+          setFilteredInstansiList([]);
         }
-        setForm((f) => ({ ...f, instansi: "" }));
-      } else {
+        const newForm = { ...form, instansi: "" };
+        setForm(newForm);
+        setFormData(newForm);      } else {
         setInstansiList([]);
-        setForm((f) => ({ ...f, instansi: "" }));
+        setFilteredInstansiList([]);
+        const newForm = { ...form, instansi: "" };
+        setForm(newForm);
+        setFormData(newForm);
       }
     }
     fetchInstansi();
  
   }, [form.jenisInstansi]);
-
   // Fetch lemdik dari API eksternal
   useEffect(() => {
     async function fetchLemdik() {
       try {
         const res = await fetch("https://api-smartbangkom.lan.go.id/master/lemdik");
         const data = await res.json();
-        setLemdikList(data);
+        // Urutkan lembaga penyelenggara secara ascending (A ke Z)
+        const sortedData = data.sort((a: { namaLemdik: string }, b: { namaLemdik: string }) => 
+          a.namaLemdik.localeCompare(b.namaLemdik)
+        );
+        setLemdikList(sortedData);
+        setFilteredLemdikList(sortedData);
       } catch {
         setLemdikList([]);
+        setFilteredLemdikList([]);
       }
     }
     fetchLemdik();
-  }, []);
-
-  // Handle input change
+  }, []); 
+    // Handle input change
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    const newForm = { ...form, [name]: value };
+    setForm(newForm);
+    // Simpan ke store saat user mengubah input
+    console.log(`Input changed ${name}:`, value);
+    
+    // Simpan langsung ke localStorage juga untuk redundansi
+    const currentStorage = localStorage.getItem('profile-storage');
+    if (currentStorage) {
+      try {
+        const parsedStorage = JSON.parse(currentStorage);
+        const updatedStorage = {
+          ...parsedStorage,
+          state: {
+            ...parsedStorage.state,
+            formData: {
+              ...parsedStorage.state.formData,
+              [name]: value
+            }
+          }
+        };
+        localStorage.setItem('profile-storage', JSON.stringify(updatedStorage));
+      } catch (e) {
+        console.error("Failed to update localStorage directly:", e);
+      }
+    }
+    
+    setFormData(newForm);
+  }  // Handle select change
+  function handleSelectChange(name: string, value: string) {
+    const newForm = { ...form, [name]: value };
+    setForm(newForm);
+    // Simpan ke store saat user mengubah select
+    console.log(`Select changed ${name}:`, value);
+    
+    // Simpan langsung ke localStorage juga untuk redundansi
+    const currentStorage = localStorage.getItem('profile-storage');
+    if (currentStorage) {
+      try {
+        const parsedStorage = JSON.parse(currentStorage);
+        const updatedStorage = {
+          ...parsedStorage,
+          state: {
+            ...parsedStorage.state,
+            formData: {
+              ...parsedStorage.state.formData,
+              [name]: value
+            }
+          }
+        };
+        localStorage.setItem('profile-storage', JSON.stringify(updatedStorage));
+      } catch (e) {
+        console.error("Failed to update localStorage directly:", e);
+      }
+    }
+    
+    setFormData(newForm);
   }
 
   // Handle submit
@@ -138,15 +246,42 @@ export default function ProfileForm() {
       const res = await fetch("/api/profile_alumni", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+        body: JSON.stringify(payload),      });
       const result = await res.json();
-      if (result.status === "success") {
-        useProfileStore.getState().setProfile({
+      if (result.status === "success") {        // Simpan profile data dan form data ke store
+        const profileData = {
           id: result.id,
           nama: result.nama,
           pelatihan_id: result.pelatihan_id,
-        });
+        };
+        
+        console.log("Saving profile to store:", profileData);
+        useProfileStore.getState().setProfile(profileData);
+        
+        console.log("Saving form data to store:", form);
+        useProfileStore.getState().setFormData(form);
+        
+        // Simpan langsung ke localStorage juga untuk redundansi
+        const currentStorage = localStorage.getItem('profile-storage');
+        if (currentStorage) {
+          try {
+            const parsedStorage = JSON.parse(currentStorage);
+            const updatedStorage = {
+              ...parsedStorage,
+              state: {
+                ...parsedStorage.state,
+                id: result.id,
+                nama: result.nama,
+                pelatihan_id: result.pelatihan_id,
+                formData: form
+              }
+            };
+            localStorage.setItem('profile-storage', JSON.stringify(updatedStorage));
+            console.log("Updated localStorage directly:", updatedStorage);
+          } catch (e) {
+            console.error("Failed to update localStorage directly:", e);
+          }
+        }
         toast.success(
           `Terima kasih ${nama ? nama : ""} sudah bersedia mengisi survey! Silakan lanjut ke tahap berikutnya.`
         );
@@ -226,10 +361,9 @@ export default function ProfileForm() {
           <div className="flex items-center md:justify-end">
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Jenis Instansi</label>
           </div>
-          <div className="w-full">
-            <Select
+          <div className="w-full">            <Select
               value={form.jenisInstansi}
-              onValueChange={(value) => setForm((f) => ({ ...f, jenisInstansi: value }))}
+              onValueChange={(value) => handleSelectChange("jenisInstansi", value)}
               required
             >
               <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
@@ -247,27 +381,28 @@ export default function ProfileForm() {
           <div className="flex items-center md:justify-end">
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Instansi</label>
           </div>
-          <div className="w-full">
-            <Select
+          <div className="w-full">            <Select
               value={form.instansi}
-              onValueChange={(value) => setForm((f) => ({ ...f, instansi: value }))}
+              onValueChange={(value) => handleSelectChange("instansi", value)}
               disabled={!form.jenisInstansi}
               required
             >
               <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
                 <SelectValue placeholder="Pilih Instansi" />
               </SelectTrigger>
-              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">
-                <input
+              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">                <input
                   type="text"
                   placeholder="Cari instansi..."
                   className="w-full px-2 py-1 mb-2 border rounded"
                   onChange={e => {
                     const val = e.target.value.toLowerCase();
-                    setInstansiList(instansiList.filter(i => i.agency_name.toLowerCase().includes(val)));
+                    const filtered = instansiList.filter(i => i.agency_name.toLowerCase().includes(val));
+                    // Tetap urutkan hasil filter secara ascending
+                    const sortedFiltered = filtered.sort((a, b) => a.agency_name.localeCompare(b.agency_name));
+                    setFilteredInstansiList(sortedFiltered);
                   }}
                 />
-                {instansiList.map((item) => (
+                {filteredInstansiList.map((item) => (
                   <SelectItem key={item.id} value={item.id.toString()}>{item.agency_name}</SelectItem>
                 ))}
               </SelectContent>
@@ -281,7 +416,7 @@ export default function ProfileForm() {
           <div className="w-full">
             <Select
               value={form.jabatan}
-              onValueChange={(value) => setForm((f) => ({ ...f, jabatan: value }))}
+              onValueChange={(value) => handleSelectChange("jabatan", value)}
               required
             >
               <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
@@ -302,7 +437,7 @@ export default function ProfileForm() {
           <div className="w-full">
             <Select
               value={form.pelatihan}
-              onValueChange={(value) => setForm((f) => ({ ...f, pelatihan: value }))}
+              onValueChange={(value) => handleSelectChange("pelatihan", value)}
               required
             >
               <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
@@ -323,7 +458,7 @@ export default function ProfileForm() {
           <div className="w-full">
             <Select
               value={form.tahunPelatihan}
-              onValueChange={(value) => setForm((f) => ({ ...f, tahunPelatihan: value }))}
+              onValueChange={(value) => handleSelectChange("tahunPelatihan", value)}
               required
             >
               <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
@@ -344,23 +479,25 @@ export default function ProfileForm() {
           <div className="w-full">
             <Select
               value={form.lembagaPenyelenggara}
-              onValueChange={(value) => setForm((f) => ({ ...f, lembagaPenyelenggara: value }))}
+              onValueChange={(value) => handleSelectChange("lembagaPenyelenggara", value)}
               required
             >
               <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
                 <SelectValue placeholder="Pilih Instansi Lembaga Penyelenggara" />
               </SelectTrigger>
-              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">
-                <input
+              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">                <input
                   type="text"
                   placeholder="Cari lembaga..."
                   className="w-full px-2 py-1 mb-2 border rounded"
                   onChange={e => {
                     const val = e.target.value.toLowerCase();
-                    setLemdikList(lemdikList.filter(i => i.namaLemdik.toLowerCase().includes(val)));
+                    const filtered = lemdikList.filter(i => i.namaLemdik.toLowerCase().includes(val));
+                    // Tetap urutkan hasil filter secara ascending
+                    const sortedFiltered = filtered.sort((a, b) => a.namaLemdik.localeCompare(b.namaLemdik));
+                    setFilteredLemdikList(sortedFiltered);
                   }}
                 />
-                {lemdikList.map((item) => (
+                {filteredLemdikList.map((item) => (
                   <SelectItem key={item.id} value={item.namaLemdik}>
                     {item.namaLemdik}
                   </SelectItem>
@@ -378,20 +515,22 @@ export default function ProfileForm() {
           <div className="w-full">
             <Select
               value={form.domisiliLembagaPenyelenggara}
-              onValueChange={(value) => setForm((f) => ({ ...f, domisiliLembagaPenyelenggara: value }))}
+              onValueChange={(value) => handleSelectChange("domisiliLembagaPenyelenggara", value)}
               required
             >
               <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
                 <SelectValue placeholder="Pilih Domisili Instansi Lembaga Penyelenggara" />
               </SelectTrigger>
-              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">
-                <input
+              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">                <input
                   type="text"
                   placeholder="Cari domisili..."
                   className="w-full px-2 py-1 mb-2 border rounded"
                   onChange={e => {
                     const val = e.target.value.toLowerCase();
-                    setFilteredDomisiliList(domisiliList.filter(i => i.nama.toLowerCase().includes(val)));
+                    const filtered = domisiliList.filter(i => i.nama.toLowerCase().includes(val));
+                    // Tetap urutkan hasil filter secara ascending
+                    const sortedFiltered = filtered.sort((a, b) => a.nama.localeCompare(b.nama));
+                    setFilteredDomisiliList(sortedFiltered);
                   }}
                 />
                 {filteredDomisiliList.map((item) => (

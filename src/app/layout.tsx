@@ -21,7 +21,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
         <Navbar />
-        {children}
+        <main className="mt-20">
+          {children}
+        </main>
         <Footer />
         <Toaster richColors position="top-center" />
       </body>

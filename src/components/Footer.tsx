@@ -14,23 +14,21 @@ export default function Footer() {
               Dikelola oleh Direktorat Penjaminan Mutu Pengembangan Kapasitas, Lembaga Administrasi Negara.<br />
               EPP Nasional adalah Evaluasi Pasca Pelatihan.
             </p>
-          </div>
-
-          {/* Kanan: Kontak */}
+          </div>          {/* Kanan: Kontak */}
           <div>
             <h2 className="text-xl font-extrabold mb-2 text-[#2196F3] drop-shadow">Informasi Lebih Lanjut</h2>
-            <ul className="text-base space-y-3">
+            <ul className="text-base space-y-3 text-gray-700">
               <li className="flex items-start gap-2">
                 <Users className="w-5 h-5 mt-0.5 text-blue-600" />
                 <span>Layanan Sahabat Mutu</span>
               </li>
               <li className="flex items-start gap-2">
                 <Phone className="w-5 h-5 mt-0.5 text-blue-600" />
-                <a href="tel:+628563542025" className="hover:underline">+62 856-3542-025</a>
+                <a href="tel:+628563542025" className="hover:underline text-gray-700">+62 856-3542-025</a>
               </li>
               <li className="flex items-start gap-2">
                 <Mail className="w-5 h-5 mt-0.5 text-blue-600" />
-                <a href="mailto:dirpmpk@lan.go.id" className="hover:underline">dirpmpk@lan.go.id</a>
+                <a href="mailto:dirpmpk@lan.go.id" className="hover:underline text-gray-700">dirpmpk@lan.go.id</a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-5 h-5 mt-0.5 text-blue-600" />
