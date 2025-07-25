@@ -16,6 +16,7 @@ interface EvaluasiState {
   setRelevanOptions: (options: Option[]) => void;
   setTidakRelevanOptions: (options: Option[]) => void;
   clearAll: () => void;
+  reset: () => void;
 }
 
 export const useEvaluasiStore = create<EvaluasiState>()(
@@ -35,6 +36,11 @@ export const useEvaluasiStore = create<EvaluasiState>()(
           tidakRelevan: [],
           relevanOptions: [],
           tidakRelevanOptions: [],
+        }),
+      reset: () =>
+        set({
+          relevan: [],
+          tidakRelevan: [],
         }),
     }),
     {

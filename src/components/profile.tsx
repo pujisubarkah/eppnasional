@@ -167,60 +167,12 @@ export default function ProfileForm() {  // State untuk list dropdown
     const { name, value } = e.target;
     const newForm = { ...form, [name]: value };
     setForm(newForm);
-    // Simpan ke store saat user mengubah input
-    console.log(`Input changed ${name}:`, value);
-    
-    // Simpan langsung ke localStorage juga untuk redundansi
-    const currentStorage = localStorage.getItem('profile-storage');
-    if (currentStorage) {
-      try {
-        const parsedStorage = JSON.parse(currentStorage);
-        const updatedStorage = {
-          ...parsedStorage,
-          state: {
-            ...parsedStorage.state,
-            formData: {
-              ...parsedStorage.state.formData,
-              [name]: value
-            }
-          }
-        };
-        localStorage.setItem('profile-storage', JSON.stringify(updatedStorage));
-      } catch (e) {
-        console.error("Failed to update localStorage directly:", e);
-      }
-    }
-    
-    setFormData(newForm);
+    setFormData(newForm); // Simpan ke Zustand store
   }  // Handle select change
   function handleSelectChange(name: string, value: string) {
     const newForm = { ...form, [name]: value };
     setForm(newForm);
-    // Simpan ke store saat user mengubah select
-    console.log(`Select changed ${name}:`, value);
-    
-    // Simpan langsung ke localStorage juga untuk redundansi
-    const currentStorage = localStorage.getItem('profile-storage');
-    if (currentStorage) {
-      try {
-        const parsedStorage = JSON.parse(currentStorage);
-        const updatedStorage = {
-          ...parsedStorage,
-          state: {
-            ...parsedStorage.state,
-            formData: {
-              ...parsedStorage.state.formData,
-              [name]: value
-            }
-          }
-        };
-        localStorage.setItem('profile-storage', JSON.stringify(updatedStorage));
-      } catch (e) {
-        console.error("Failed to update localStorage directly:", e);
-      }
-    }
-    
-    setFormData(newForm);
+    setFormData(newForm); // Simpan ke Zustand store
   }
 
   // Handle submit

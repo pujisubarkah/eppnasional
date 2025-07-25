@@ -23,12 +23,19 @@ interface Option {
   option_value?: number
 }
 
+export interface EvaluasiState {
+  relevan: string[];
+  setRelevan: (v: string[]) => void;
+  tidakRelevan: string[];
+  setTidakRelevan: (v: string[]) => void;
+  reset: () => void;
+}
 
 export default function EvaluasiPage() {
   const { nama, pelatihan_id } = useProfileStore();
   
   // Gunakan state dan action dari store
-  const { relevan, setRelevan, tidakRelevan, setTidakRelevan } = useEvaluasiStore();
+  const { relevan, setRelevan, tidakRelevan, setTidakRelevan, reset } = useEvaluasiStore();
 
   const [materiList, setMateriList] = useState<Agenda[]>([])
   const [namaPelatihan, setNamaPelatihan] = useState<string>('Memuat...')
@@ -79,6 +86,10 @@ export default function EvaluasiPage() {
       fetchTidakRelevanOptions();
     }
   }, [pelatihan_id, fetchRelevanOptions, fetchTidakRelevanOptions]);
+
+  useEffect(() => {
+    reset(); // Reset pilihan saat halaman dibuka
+  }, []);
 
   // Logika checkbox diperbaiki untuk sinkronisasi antar list
   const handleCheckbox = (list: string[], setList: (v: string[]) => void, value: string) => {
