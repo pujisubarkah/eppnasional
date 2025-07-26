@@ -1,49 +1,46 @@
 "use client";
 import { useEffect, useState } from "react";
 
-// Dummy data materi per pelatihan
-const materiTable = [
-  {
-    pelatihan_id: 1,
-    relevan: [
-      "Pengembangan Kepemimpinan Kolaboratif",
-      "Etika dan Integritas",
-      "Kerangka Manajemen Kebijakan Publik",
-    ],
-    tidakRelevan: [
-      "Komunikasi dan Advokasi Kebijakan",
-      "Isu Strategis Kebijakan",
-    ],
-  },
-  {
-    pelatihan_id: 2,
-    relevan: [
-      "Etika dan Integritas",
-      "Kerangka Manajemen Kebijakan Publik",
-    ],
-    tidakRelevan: [
-      "Berpikir Holistik",
-    ],
-  },
-  // ...tambahkan data lain sesuai kebutuhan
-];
+type MateriRow = {
+  pelatihanId: number;
+  namaPelatihan: string;
+  relevan: string[];
+  tidakRelevan: string[];
+};
 
 export default function MateriPage() {
   const [pelatihan, setPelatihan] = useState<{ id: number; nama: string }[]>([]);
-  const [selected, setSelected] = useState<number | "all">("all");
+  const [selected, setSelected] = useState<string | "all">("all");
+  const [materiTable, setMateriTable] = useState<MateriRow[]>([]);
 
   useEffect(() => {
-    // Fetch daftar pelatihan dari API
     fetch("/api/pelatihan")
       .then((res) => res.json())
       .then((data) => setPelatihan(data));
   }, []);
 
-  // Filter table sesuai pelatihan yang dipilih
+  useEffect(() => {
+    fetch("/api/jawaban/1")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.result)) {
+          const mapped = data.result.map((row: any) => ({
+            pelatihanId: row.pelatihanId,
+            namaPelatihan: row.namaPelatihan,
+            relevan: [row.answers.q1, row.answers.q2, row.answers.q3].filter(Boolean),
+            tidakRelevan: [row.answers.q4, row.answers.q5, row.answers.q6].filter(Boolean),
+          }));
+          setMateriTable(mapped);
+        } else {
+          setMateriTable([]);
+        }
+      });
+  }, []);
+
   const filteredTable =
     selected === "all"
       ? materiTable
-      : materiTable.filter((row) => row.pelatihan_id === selected);
+      : materiTable.filter((row) => row.namaPelatihan === selected);
 
   return (
     <div>
@@ -58,11 +55,11 @@ export default function MateriPage() {
         <select
           className="border border-[#B3E5FC] rounded px-3 py-1 focus:outline-none"
           value={selected}
-          onChange={e => setSelected(e.target.value === "all" ? "all" : Number(e.target.value))}
+          onChange={e => setSelected(e.target.value)}
         >
           <option value="all">Semua Pelatihan</option>
-          {pelatihan.map((p) => (
-            <option key={p.id} value={p.id}>{p.nama}</option>
+          {Array.from(new Set(materiTable.map((row) => row.namaPelatihan))).map((nama) => (
+            <option key={nama} value={nama}>{nama}</option>
           ))}
         </select>
       </div>
@@ -77,20 +74,19 @@ export default function MateriPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredTable.map((row, idx) => {
-              const nama = pelatihan.find((p) => p.id === row.pelatihan_id)?.nama || "-";
-              return (
-                <tr key={row.pelatihan_id} className="text-center">
-                  <td className="px-4 py-2 border">{idx + 1}</td>
-                  <td className="px-4 py-2 border">{nama}</td>
-                  <td className="px-4 py-2 border text-green-700 font-bold">{Array.isArray(row.relevan) ? row.relevan.join(", ") : row.relevan}</td>
-                  <td className="px-4 py-2 border text-red-600 font-bold">{Array.isArray(row.tidakRelevan) ? row.tidakRelevan.join(", ") : row.tidakRelevan}</td>
-                </tr>
-              );
-            })}
+            {filteredTable.map((row, idx) => (
+              <tr key={row.pelatihanId} className="text-center">
+                <td className="px-4 py-2 border">{idx + 1}</td>
+                <td className="px-4 py-2 border">{row.namaPelatihan}</td>
+                <td className="px-4 py-2 border text-green-700 font-bold">{row.relevan.join(", ")}</td>
+                <td className="px-4 py-2 border text-red-600 font-bold">{row.tidakRelevan.join(", ")}</td>
+              </tr>
+            ))}
             {filteredTable.length === 0 && (
               <tr>
-                <td colSpan={4} className="text-center py-6 text-gray-400">Tidak ada data</td>
+                <td colSpan={4} className="px-4 py-2 border text-center text-gray-500">
+                  Tidak ada data yang tersedia.
+                </td>
               </tr>
             )}
           </tbody>
