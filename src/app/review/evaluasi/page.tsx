@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useProfileFormStore } from "@/lib/store/alumni_profile";
+import { toast } from "sonner";
+import { CheckCircle } from "lucide-react";
 
 type Option = { id: number; option_text: string };
 type Question = { id: number; text: string; options: Option[] };
@@ -16,11 +18,7 @@ export default function ReviewEvaluasiPage() {
   const [openQuestion, setOpenQuestion] = useState<Question | null>(null);
   const [saran, setSaran] = useState("");
   // Removed unused isSubmitted state
-  // Toast
-  const toast = {
-    success: (msg: string) => alert(msg),
-    error: (msg: string) => alert(msg),
-  };
+  // Toast sonner
   // Gunakan id dari zustand sebagai user_id
   const user_id = form?.id;
 
@@ -60,22 +58,40 @@ export default function ReviewEvaluasiPage() {
       return;
     }
     try {
-      for (let i = 0; i < pertanyaanList.length; i++) {
-        await fetch("/api/answers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            question_id: pertanyaanList[i].id,
-            user_id, // Menggunakan id dari zustand sebagai user_id
-            answer: answers[i],
-          }),
-        });
+      // Gabungkan jawaban ke format JSON
+      const answersJson: Record<string, string> = {};
+      pertanyaanList.forEach((q, i) => {
+        answersJson[`q${i + 1}`] = answers[i] ?? "";
+      });
+      const res = await fetch("/api/jawaban", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id,
+          answers: answersJson,
+          category_id: 6,
+        }),
+      });
+      if (res.ok) {
+        toast.success(
+          <div className="flex items-center gap-3">
+            <CheckCircle className="text-green-500" size={28} />
+            <span>
+              <span className="font-bold">Jawaban berhasil disimpan!</span><br />
+              Terima kasih atas partisipasi Anda. Pendapat Anda sangat berarti!
+            </span>
+          </div>,
+          {
+            duration: 4000,
+            position: "top-center",
+            style: { background: "#E3F2FD", color: "#1976D2", border: "2px solid #B3E5FC" }
+          }
+        );
+        setShowModal(true);
+      } else {
+        const errorData = await res.json();
+        toast.error(errorData.message || "Gagal menyimpan jawaban!");
       }
-      toast.success(
-        "Jawaban berhasil disimpan! Terima kasih atas partisipasi Anda."
-      );
-      // setIsSubmitted removed (no longer used)
-      setShowModal(true);
     } catch {
       toast.error("Gagal menyimpan jawaban!");
     }
@@ -173,9 +189,9 @@ export default function ReviewEvaluasiPage() {
       <div className="text-center pt-2">
         <button
           type="submit"
-          className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition"
+          className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition flex items-center justify-center gap-2"
         >
-          Simpan
+          <CheckCircle size={20} className="mr-1" /> Simpan
         </button>
       </div>
       {/* Data dari Store (Zustand) section removed as requested */}

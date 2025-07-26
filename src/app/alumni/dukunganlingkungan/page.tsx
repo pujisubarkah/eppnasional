@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useProfileFormStore } from '@/lib/store/globalStore';
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { useProfileStore } from "@/lib/store/profileStore";
-import { useDukunganLingkunganStore } from "@/lib/store/dukunganlingkungan"; // <-- import store
+
 
 type Option = { id: number; option_text: string };
 type Question = { id: number; text: string; options: Option[] };
@@ -13,10 +13,10 @@ type Question = { id: number; text: string; options: Option[] };
 export default function DukunganLingkunganPage() {
   const [pertanyaanList, setPertanyaanList] = useState<Question[]>([]);
   const router = useRouter();
-  const { id: user_id } = useProfileStore();
-
-  // Ambil state dan setter dari zustand
-  const { answers, setAnswers, setAnswer, clear } = useDukunganLingkunganStore();
+  // Ambil id, nama, pelatihan_id dari globalStore
+  const profileStore = useProfileFormStore();
+  const user_id = profileStore.id || "";
+  const [answers, setAnswers] = useState<(string|null)[]>([]);
 
   useEffect(() => {
     async function fetchQuestions() {
@@ -39,7 +39,11 @@ export default function DukunganLingkunganPage() {
   }, []);
 
   const handleAnswer = (idx: number, value: string) => {
-    setAnswer(idx, value);
+    setAnswers(prev => {
+      const updated = [...prev];
+      updated[idx] = value;
+      return updated;
+    });
   };
 
 
@@ -112,20 +116,28 @@ export default function DukunganLingkunganPage() {
               return;
             }
             try {
-              for (let i = 0; i < pertanyaanList.length; i++) {
-                await fetch("/api/answers", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    question_id: pertanyaanList[i].id,
-                    user_id,
-                    answer: answers[i],
-                  }),
-                });
+              // Gabungkan jawaban ke format JSON
+              const answersJson: Record<string, string> = {};
+              pertanyaanList.forEach((q, i) => {
+                answersJson[`q${i + 1}`] = answers[i] ?? "";
+              });
+              const res = await fetch("/api/jawaban", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  user_id,
+                  answers: answersJson,
+                  category_id: 2,
+                }),
+              });
+              if (res.ok) {
+                toast.success("Jawaban berhasil disimpan!");
+                setAnswers(Array(pertanyaanList.length).fill(null));
+                router.push("/alumni/sikapprilaku");
+              } else {
+                const errorData = await res.json();
+                toast.error(errorData.message || "Gagal menyimpan jawaban!");
               }
-              toast.success("Jawaban berhasil disimpan!");
-              clear();
-              router.push("/alumni/sikapprilaku");
             } catch {
               toast.error("Gagal menyimpan jawaban!");
             }

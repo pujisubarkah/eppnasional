@@ -14,10 +14,11 @@ const colorScale = [
   { max: 50, color: "#90CAF9", label: "11–50" },
   { max: 100, color: "#42A5F5", label: "51–100" },
   { max: 200, color: "#2196F3", label: "101–200" },
-  { max: 1000, color: "#1976D2", label: "201+" },
+  { max: Infinity, color: "#1976D2", label: "201+" },
 ];
 
 function getColor(count: number) {
+  if (count === 0) return "url(#no-data-gradient)";
   for (const c of colorScale) {
     if (count <= c.max) return c.color;
   }
@@ -25,27 +26,27 @@ function getColor(count: number) {
 }
 
 function cleanPath(path: string) {
-  return path.replace(/^"|"$/g, "");
+  return path ? path.replace(/^"|"$/g, "") : "";
 }
 
 export default function DashboardMap() {
   const [provinsi, setProvinsi] = useState<Provinsi[]>([]);
   const [hovered, setHovered] = useState<Provinsi | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
     async function fetchProvinsi() {
-      const res = await fetch("/api/provinsi/summary");
-      let data;
       try {
-        data = await res.json();
+        const res = await fetch("/api/provinsi/summary");
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setProvinsi(data);
+        } else if (Array.isArray(data?.result)) {
+          setProvinsi(data.result);
+        } else {
+          setProvinsi([]);
+        }
       } catch {
-        data = [];
-      }
-      if (Array.isArray(data)) {
-        setProvinsi(data);
-      } else if (Array.isArray(data?.result)) {
-        setProvinsi(data.result);
-      } else {
         setProvinsi([]);
       }
     }
@@ -54,68 +55,102 @@ export default function DashboardMap() {
 
   return (
     <section className="w-full max-w-7xl mx-auto px-2 md:px-6 py-6 md:py-12">
-      <div className="bg-gradient-to-br from-[#E3F2FD] via-white to-[#BBDEFB] rounded-2xl md:rounded-3xl shadow-xl border-2 border-[#2196F3] outline-2 outline-[#2196F3] p-3 md:p-10 flex flex-col lg:flex-row gap-4 md:gap-8 items-stretch backdrop-blur-sm">
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border-2 border-[#2196F3] p-4 md:p-10 flex flex-col lg:flex-row gap-4 md:gap-8 items-stretch">
         {/* Bagian Utama Peta */}
-        <div className="flex-1 flex flex-col items-center justify-center">
-          {/* Judul */}
-          <h1 className="text-2xl md:text-5xl font-extrabold mb-2 md:mb-4 tracking-wide text-center drop-shadow-lg bg-clip-text text-transparent bg-gradient-to-r from-[#1976D2] via-[#2196F3] to-[#29B6F6]">
-            PETA SEBARAN RESPONDEN
-          </h1>
-          {/* Subjudul */}
-          <p className="text-center mb-4 md:mb-6 text-base md:text-xl font-medium text-[#1976D2] bg-white/80 backdrop-blur-sm rounded-lg md:rounded-xl shadow px-3 md:px-6 py-2 md:py-3 mx-auto max-w-full md:max-w-3xl transition-all duration-300 hover:shadow-md">
-            Temukan sebaran responden alumni ASN dari seluruh Indonesia!
-            <br className="hidden md:block" />
-            <span className="text-[#2196F3] font-bold">Semakin banyak responden, semakin biru provinsinya.</span>
-            <br />
-            <span className="text-[#29B6F6]">Peta interaktif ini menunjukkan partisipasi alumni secara nasional.</span>
-          </p>
-          {/* SVG Map & Tooltip Hover */}
-          <div className="w-full flex flex-col justify-center items-center relative">
-            {hovered && (
-              <div className="absolute z-10 left-1/2 -translate-x-1/2 -top-2 text-sm md:text-base font-semibold text-[#1976D2] bg-white/95 backdrop-blur-sm rounded-lg shadow-lg px-2 md:px-4 py-1 border border-[#B3E5FC] animate-fadeIn transition-all duration-300 pointer-events-none whitespace-nowrap">
-                <span className="font-bold drop-shadow">{hovered.provinsiNama}</span>
-                {" "}
-                <span className="text-gray-700 font-normal">({hovered.jumlahAlumni} alumni)</span>
-              </div>
-            )}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="mb-4 md:mb-6 text-center">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center text-[#1976D2] mb-2 md:mb-3">
+              PETA SEBARAN RESPONDEN
+            </h1>
+            <p className="text-center text-gray-700 max-w-4xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed px-2 mb-2">
+              Temukan sebaran responden alumni ASN dari seluruh Indonesia!
+            </p>
+            <p className="text-center text-gray-700 max-w-4xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed px-2">
+              <span className="text-[#1976D2] font-semibold">Semakin banyak responden, semakin biru provinsinya.</span>
+              Peta interaktif ini menunjukkan partisipasi alumni secara nasional.
+            </p>
+            <hr className="w-1/4 h-1 bg-gradient-to-r from-blue-700 via-blue-400 to-cyan-400 mx-auto my-3 sm:my-4" />
+          </div>
+
+          {/* Kontainer Peta */}
+          <div className="relative overflow-hidden rounded-lg shadow-md border border-[#2196F3]/30 flex-1">
             <svg
               viewBox="0 0 1000 600"
-              className="w-full h-[18rem] sm:h-[28rem] md:h-[48rem] lg:h-[60rem] object-contain transition-all duration-300"
+              className="w-full h-auto max-h-[70vh]"
+              preserveAspectRatio="xMidYMid meet"
             >
+              <defs>
+                <radialGradient id="prov-hover-gradient" cx="50%" cy="50%" r="70%">
+                  <stop offset="0%" stopColor="#BBDEFB" />
+                  <stop offset="100%" stopColor="#1976D2" />
+                </radialGradient>
+                <linearGradient id="no-data-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#f8fafc" />
+                  <stop offset="100%" stopColor="#e2e8f0" />
+                </linearGradient>
+              </defs>
               {provinsi.map((prov) => (
                 <path
                   key={prov.provinsiId}
                   d={cleanPath(prov.svgPath)}
-                  fill={getColor(prov.jumlahAlumni)}
-                  fillOpacity={0.85}
-                  stroke="#FFD700"
-                  strokeWidth={0.4}
-                  onMouseEnter={() => setHovered(prov)}
-                  onMouseLeave={() => setHovered(null)}
-                  style={{
-                    cursor: "pointer",
-                    transition: "opacity 0.2s ease-in-out",
-                    opacity: hovered?.provinsiId === prov.provinsiId ? 1 : 0.85,
+                  fill={hovered?.provinsiId === prov.provinsiId ? "url(#prov-hover-gradient)" : (prov.jumlahAlumni > 0 ? getColor(prov.jumlahAlumni) : "url(#no-data-gradient)")}
+                  stroke="#1E3A8A"
+                  strokeWidth={0.5}
+                  strokeOpacity={0.3}
+                  onMouseEnter={() => {
+                    setHovered(prov);
+                    setShowTooltip(true);
                   }}
-                />
+                  onMouseLeave={() => {
+                    setHovered(null);
+                    setShowTooltip(false);
+                  }}
+                  className="cursor-pointer transition-all duration-200 ease-in-out"
+                >
+                  <title>{prov.provinsiNama} ({prov.jumlahAlumni} alumni)</title>
+                </path>
               ))}
+              {/* Tooltip Hover di pojok kanan atas */}
+              {showTooltip && hovered && (
+                <foreignObject x={770} y={10} width={220} height={60} className="pointer-events-none">
+                  <div className="bg-white/95 border border-blue-300 rounded-lg p-2 shadow-lg text-xs sm:text-sm font-semibold text-blue-800 backdrop-blur-sm animate-fadeIn">
+                    <div className="font-bold">{hovered.provinsiNama}</div>
+                    <div>Jumlah Alumni: {hovered.jumlahAlumni}</div>
+                  </div>
+                </foreignObject>
+              )}
             </svg>
           </div>
         </div>
+
         {/* Legend Card */}
-        <div className="w-full lg:w-64 flex flex-col items-start justify-start bg-white/90 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg border-2 border-[#2196F3] outline-2 outline-[#2196F3] p-3 md:p-5 gap-2 md:gap-4 h-fit self-start mt-4 md:mt-0 transition-all duration-300 hover:shadow-xl">
-          <h2 className="font-bold text-[#1976D2] text-lg md:text-xl tracking-wide">Legenda</h2>
-          {colorScale.map((c) => (
-            <div key={c.label} className="flex items-center gap-2 md:gap-3 w-full">
-              <span
-                className="inline-block w-6 h-6 md:w-7 md:h-7 rounded-md border border-[#FFD700] shadow-sm"
-                style={{ backgroundColor: c.color }}
-              ></span>
-              <span className="text-sm md:text-base text-gray-700 font-medium">{c.label} responden</span>
-            </div>
-          ))}
-        </div>
+        <div className="w-full lg:w-64 flex flex-col bg-white/90 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg border-2 border-[#2196F3] p-4 md:p-5 gap-3 md:gap-4 h-fit self-start transition-all duration-300 hover:shadow-xl mt-4 lg:mt-0">
+                <h2 className="font-bold text-[#1976D2] text-lg md:text-xl tracking-wide text-center">LEGENDA</h2>
+                <div className="space-y-2 mt-2">
+                  {colorScale.map((scale, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <span
+                        className="inline-block w-6 h-6 rounded border border-blue-300"
+                        style={{
+                          background: scale.color,
+                        }}
+                      ></span>
+                      <span className="text-sm text-gray-700">{scale.label}</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center gap-2 mt-2">
+                    <span
+                      className="inline-block w-6 h-6 rounded border border-gray-300"
+                      style={{
+                        background: "linear-gradient(90deg, #f8fafc 0%, #e2e8f0 100%)",
+                      }}
+                    ></span>
+                    <span className="text-sm text-gray-500">Belum ada data</span>
+                  </div>
+                </div>
+              </div>
       </div>
     </section>
-  );
+      );
 }

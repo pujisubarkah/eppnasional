@@ -1,18 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useProfileFormStore } from '@/lib/store/globalStore';
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { useProfileStore } from "@/lib/store/profileStore";
-import { useSaranMasukanStore } from "@/lib/store/saranmasukan";
+
 
 export default function SaranMasukanPage() {
   const router = useRouter();
-  const { id: user_id } = useProfileStore();
+  // Ambil id dari globalStore
+  const profileStore = useProfileFormStore();
+  const user_id = profileStore.id || "";
+  const [materi, setMateri] = useState("");
+  const [metode, setMetode] = useState("");
+  const [waktu, setWaktu] = useState("");
+  const [pengajar, setPengajar] = useState("");
 
-  const { materi, setMateri, metode, setMetode, waktu, setWaktu, pengajar, setPengajar } = useSaranMasukanStore();
+  // If you need to get user_id, fetch from localStorage or API here
+  useEffect(() => {
+    // Example: setUserId(localStorage.getItem("user_id") || "");
+  }, []);
 
   // State untuk label pertanyaan dari API
   const [pertanyaanLabels, setPertanyaanLabels] = useState({
@@ -46,12 +55,6 @@ export default function SaranMasukanPage() {
   }, []);
 
   // Simpan id pertanyaan dari API
-  const pertanyaanIds = {
-    materi: 21,
-    metode: 22,
-    waktu: 23,
-    pengajar: 24,
-  };
 
   // Jika ingin fetch text pertanyaan dari API, bisa gunakan useEffect di sini
   // Tapi karena id sudah fix dan text sudah sesuai, cukup gunakan id saja
@@ -125,44 +128,29 @@ export default function SaranMasukanPage() {
             type="button"
             onClick={async () => {
               try {
-                await fetch("/api/answers", {
+                // Gabungkan jawaban ke format JSON
+                const answersJson: Record<string, string> = {
+                  q1: materi,
+                  q2: metode,
+                  q3: waktu,
+                  q4: pengajar,
+                };
+                const res = await fetch("/api/jawaban", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    question_id: pertanyaanIds.materi,
                     user_id,
-                    answer: materi ? materi : null,
+                    answers: answersJson,
+                    category_id: 7,
                   }),
                 });
-                await fetch("/api/answers", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    question_id: pertanyaanIds.metode,
-                    user_id,
-                    answer: metode ? metode : null,
-                  }),
-                });
-                await fetch("/api/answers", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    question_id: pertanyaanIds.waktu,
-                    user_id,
-                    answer: waktu ? waktu : null,
-                  }),
-                });
-                await fetch("/api/answers", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    question_id: pertanyaanIds.pengajar,
-                    user_id,
-                    answer: pengajar ? pengajar : null,
-                  }),
-                });
-                toast.success("Saran & masukan berhasil disimpan!");
-                router.push("/alumni/konfirmasi");
+                if (res.ok) {
+                  toast.success("Saran & masukan berhasil disimpan!");
+                  router.push("/alumni/konfirmasi");
+                } else {
+                  const errorData = await res.json();
+                  toast.error(errorData.message || "Gagal menyimpan saran & masukan!");
+                }
               } catch {
                 toast.error("Gagal menyimpan saran & masukan!");
               }

@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { useNamaProfileStore } from "@/lib/store/namaprofile";
 import Image from "next/image";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import lanLogo from "/public/lanri_.png";
 import { toast } from "sonner";
 
-import { useProfileStore } from "@/lib/store/profileStore";
-import lanLogo from "/public/lanri_.png";
 
 const images = [
   "/DSC_0216.JPG",
@@ -22,7 +22,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { setProfile } = useProfileStore();
+  const { nama, setNama, clearNama } = useNamaProfileStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,17 +35,21 @@ export default function LoginPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setProfile(data.user); // simpan user ke zustand
+        setNama(data.user.nama || null); // simpan nama ke zustand
         toast.success(`Login berhasil. Selamat datang, ${data.user.nama}!`);
         router.push("/admin");
       } else {
         alert("Login gagal. Periksa username dan password Anda.");
       }
-    } catch {
-      alert("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    clearNama();
+    toast.success("Logout berhasil.");
+    router.push("/login");
   };
 
   return (
@@ -60,7 +64,7 @@ export default function LoginPage() {
             <Image
               src={lanLogo}
               alt="Logo LAN"
-              width={96} // diperbesar dari 64 ke 96
+              width={96}
               height={96}
               className="mb-2"
             />
@@ -68,7 +72,16 @@ export default function LoginPage() {
               Login
             </h2>
             <p className="text-xs text-gray-500 text-center mb-2">
-              Evaluasi Pasca Pelatihan Nasional 
+              Evaluasi Pasca Pelatihan Nasional
+              {nama && (
+                <button
+                  type="button"
+                  className="mt-2 px-4 py-1 bg-red-500 text-white rounded text-xs font-semibold hover:bg-red-600"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+              )}
             </p>
           </div>
           <div>

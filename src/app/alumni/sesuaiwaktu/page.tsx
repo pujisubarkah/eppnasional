@@ -1,21 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useProfileFormStore } from '@/lib/store/globalStore';
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { useProfileStore } from "@/lib/store/profileStore";
-import { useSesuaiWaktuStore } from "@/lib/store/sesuaiwaktu";
+
 
 type Option = { id: number; option_text: string };
 type Question = { id: number; text: string; options: Option[] };
 
 export default function PenilaianInvestasiWaktuPage() {
   const [pertanyaan, setPertanyaan] = useState<Question | null>(null);
-  const { jawaban, setJawaban } = useSesuaiWaktuStore();
+  const [jawaban, setJawaban] = useState<string>("");
+  // Ambil id, nama dari globalStore
+  const profileStore = useProfileFormStore();
+  const user_id = profileStore.id || "";
+  const nama = profileStore.nama;
 
   const router = useRouter();
-  const { nama, id: user_id } = useProfileStore();
+
+  // If you need to get nama and user_id, fetch from localStorage or API here
+  useEffect(() => {
+    // Example:
+    // setNama(localStorage.getItem("nama") || "");
+    // setUserId(localStorage.getItem("user_id") || "");
+  }, []);
 
   useEffect(() => {
     async function fetchPertanyaan() {
@@ -90,17 +100,27 @@ export default function PenilaianInvestasiWaktuPage() {
               return;
             }
             try {
-              await fetch("/api/answers", {
+              // Gabungkan jawaban ke format JSON
+              const answersJson: Record<string, string> = {};
+              if (pertanyaan?.id) {
+                answersJson[`q1`] = jawaban;
+              }
+              const res = await fetch("/api/jawaban", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  question_id: pertanyaan?.id,
                   user_id,
-                  answer: jawaban,
+                  answers: answersJson,
+                  category_id: 4,
                 }),
               });
-              toast.success(`Jawaban berhasil disimpan! Terima kasih ${nama ? nama : ""}, tinggal satu tahap lagi terkait saran dan masukan pelatihan!`);
-              router.push("/alumni/saranmasukan");
+              if (res.ok) {
+                toast.success(`Jawaban berhasil disimpan! Terima kasih ${nama ? nama : ""}, tinggal satu tahap lagi terkait saran dan masukan pelatihan!`);
+                router.push("/alumni/saranmasukan");
+              } else {
+                const errorData = await res.json();
+                toast.error(errorData.message || "Gagal menyimpan jawaban!");
+              }
             } catch {
               toast.error("Gagal menyimpan jawaban!");
             }

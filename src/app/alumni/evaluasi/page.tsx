@@ -1,10 +1,10 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import { useProfileStore } from '@/lib/store/profileStore'
-import { useEvaluasiStore } from '@/lib/store/evaluasiStore' // Gunakan kembali store
+
 import { toast } from 'sonner'
 import { ArrowRight, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useProfileFormStore } from '@/lib/store/globalStore';
 
 interface SubAgenda {
   id: number
@@ -32,10 +32,21 @@ export interface EvaluasiState {
 }
 
 export default function EvaluasiPage() {
-  const { nama, pelatihan_id } = useProfileStore();
-  
-  // Gunakan state dan action dari store
-  const { relevan, setRelevan, tidakRelevan, setTidakRelevan, reset } = useEvaluasiStore();
+  // Ambil data dari globalStore (zustand)
+  const profileStore = useProfileFormStore();
+  const nama = profileStore.nama;
+  const pelatihan_id = Number(profileStore.pelatihan);
+  const id = profileStore.id;
+
+  // Local state for evaluasi
+  const [relevan, setRelevan] = useState<string[]>([]);
+  const [tidakRelevan, setTidakRelevan] = useState<string[]>([]);
+
+  // Reset function
+  const reset = useCallback(() => {
+    setRelevan([]);
+    setTidakRelevan([]);
+  }, []);
 
   const [materiList, setMateriList] = useState<Agenda[]>([])
   const [namaPelatihan, setNamaPelatihan] = useState<string>('Memuat...')
@@ -89,7 +100,7 @@ export default function EvaluasiPage() {
 
   useEffect(() => {
     reset(); // Reset pilihan saat halaman dibuka
-  }, []);
+  }, [reset]);
 
   // Logika checkbox diperbaiki untuk sinkronisasi antar list
   const handleCheckbox = (list: string[], setList: (v: string[]) => void, value: string) => {
@@ -116,7 +127,44 @@ export default function EvaluasiPage() {
 
   // Fungsi untuk langsung ke halaman berikutnya
   const handleNext = () => {
-    router.push("/alumni/dukunganlingkungan");
+    // Kirim data ke API sebelum pindah halaman
+    const sendData = async () => {
+      const body = {
+        user_id: id,
+        answers: {
+          q1: relevan[0] || '',
+          q2: relevan[1] || '',
+          q3: relevan[2] || '',
+          q4: tidakRelevan[0] || '',
+          q5: tidakRelevan[1] || '',
+          q6: tidakRelevan[2] || ''
+        },
+        category_id: 1
+      };
+
+      try {
+        const res = await fetch('/api/jawaban', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (res.ok) {
+          // Jika berhasil, lanjut ke halaman berikutnya
+          router.push("/alumni/dukunganlingkungan");
+        } else {
+          // Jika gagal, tampilkan pesan error
+          const errorData = await res.json();
+          toast.error(errorData.message || 'Terjadi kesalahan, silakan coba lagi.');
+        }
+      } catch (error) {
+        toast.error('Terjadi kesalahan, silakan coba lagi.');
+      }
+    };
+
+    sendData();
   }
 
   return (

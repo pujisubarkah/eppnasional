@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useProfileFormStore } from '@/lib/store/globalStore';
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft } from "lucide-react"; // Hapus Send karena tidak digunakan
-import { useProfileStore } from "@/lib/store/profileStore";
-import { useSikapPrilakuStore } from "@/lib/store/sikapprilaku";
 
 type Option = {
   id: number;
@@ -22,36 +21,37 @@ type Question = {
 };
 
 export default function SikapPrilakuPage() {
-  const profile = useProfileStore();
+  // Ambil id, nama, pelatihan_id dari globalStore
+  const profileStore = useProfileFormStore();
+  const profile = { pelatihan_id: Number(profileStore.pelatihan), id: profileStore.id || "" };
+  const user_id = profileStore.id || "";
+  // ...existing code...
   const [pertanyaanSikap, setPertanyaanSikap] = useState<Question | null>(null);
   const [pertanyaanKinerja, setPertanyaanKinerja] = useState<Question | null>(null);
   const [pertanyaanEkonomi, setPertanyaanEkonomi] = useState<Question | null>(null);
   const [pertanyaanDampak, setPertanyaanDampak] = useState<Question | null>(null);
   const [pertanyaanTransformasi, setPertanyaanTransformasi] = useState<Question | null>(null);
-  // State untuk pertanyaan Transformasi (baru)
   const [selectedTransformasi, setSelectedTransformasi] = useState<number | null>(null);
   const [selectedSubTransformasi, setSelectedSubTransformasi] = useState<number | null>(null);
 
-  const {
-    sikap,
-    setSikap,
-    kinerja,
-    setKinerja,
-    ekonomi,
-    setEkonomi,
-    dampak,
-    setDampak,
-    dampakLain,
-    setDampakLain,
-    // tema, setTema // Dihapus karena tidak digunakan
-  } = useSikapPrilakuStore();
+  // Local state for answers
+  const [sikap, setSikap] = useState<string[]>([]);
+  const [kinerja, setKinerja] = useState<string[]>([]);
+  const [ekonomi, setEkonomi] = useState<string>("");
+  const [dampak, setDampak] = useState<string[]>([]);
+  const [dampakLain, setDampakLain] = useState<string>("");
 
   const router = useRouter();
-  const { id: user_id } = useProfileStore();
 
-  // Tentukan apakah ini pelatihan jenis khusus (hanya 1, 2, dan 5)
-  // Perbaikan: Cek eksplisit untuk pelatihan_id 1, 2, dan 5
-  const isPelatihanKhusus = profile.pelatihan_id === 1 || profile.pelatihan_id === 2 || profile.pelatihan_id === 5;
+  // Fetch profile from localStorage or API if needed
+  useEffect(() => {
+    // Example:
+    // setProfile({ pelatihan_id: Number(localStorage.getItem("pelatihan_id")), id: localStorage.getItem("user_id") || "" });
+    // setUserId(localStorage.getItem("user_id") || "");
+  }, []);
+
+  // Tampilkan hanya pertanyaan 1 dan 2 jika pelatihan_id === 5
+  const isPelatihanLima = profile.pelatihan_id === 5;
 
   useEffect(() => {
     async function fetchQuestions() {
@@ -64,6 +64,14 @@ export default function SikapPrilakuPage() {
       try {
         const pelId = profile.pelatihan_id;
 
+        // Tentukan endpoint ekonomi sesuai pelatihan_id
+        let ekonomiEndpoint = "/api/pertanyaan/9";
+        if (pelId === 1 || pelId === 2) {
+          ekonomiEndpoint = "/api/pertanyaan/9/1";
+        } else if (pelId === 3 || pelId === 4) {
+          ekonomiEndpoint = "/api/pertanyaan/9/2";
+        }
+
         // Fetch semua pertanyaan secara paralel
         const [
           sikapRes,
@@ -72,44 +80,45 @@ export default function SikapPrilakuPage() {
           resDampak,
           resTransformasi
         ] = await Promise.all([
-          // Perbaikan: Gunakan endpoint dinamis berdasarkan pelatihan_id
           fetch(`/api/pertanyaan/8/${pelId}`).then((r) => {
-             if (!r.ok) throw new Error(`Gagal memuat pertanyaan sikap untuk pelatihan ID ${pelId}`);
-             return r.json();
+            if (!r.ok) throw new Error(`Gagal memuat pertanyaan sikap untuk pelatihan ID ${pelId}`);
+            return r.json();
           }),
           fetch("/api/pertanyaan/11").then((r) => {
-             if (!r.ok) throw new Error("Gagal memuat pertanyaan kinerja");
-             return r.json();
+            if (!r.ok) throw new Error("Gagal memuat pertanyaan kinerja");
+            return r.json();
           }),
-          fetch("/api/pertanyaan/9").then((r) => {
-             if (!r.ok) throw new Error("Gagal memuat pertanyaan ekonomi");
-             return r.json();
+          fetch(ekonomiEndpoint).then(async (r) => {
+            if (!r.ok) throw new Error("Gagal memuat pertanyaan ekonomi");
+            const json = await r.json();
+            console.log("[DEBUG] Response ekonomiEndpoint", ekonomiEndpoint, json);
+            return json;
           }),
           fetch("/api/pertanyaan/10").then((r) => {
-             if (!r.ok) throw new Error("Gagal memuat pertanyaan dampak");
-             return r.json();
+            if (!r.ok) throw new Error("Gagal memuat pertanyaan dampak");
+            return r.json();
           }),
           fetch("/api/pertanyaan/26").then((r) => {
-             if (!r.ok) throw new Error("Gagal memuat pertanyaan transformasi");
-             return r.json();
+            if (!r.ok) throw new Error("Gagal memuat pertanyaan transformasi");
+            return r.json();
           }),
         ]);
 
         // Format pertanyaanSikap agar options dari data.option
-        // Asumsi struktur respon API: { question: { id, text }, option: Option[] }
         setPertanyaanSikap({
           id: sikapRes.question?.id,
           text: sikapRes.question?.text,
-          options: sikapRes.option || [], // Gunakan options dari res.option
+          options: sikapRes.option || [],
         });
 
-        // Asumsi struktur respon API untuk pertanyaan lain: { id, text, options: Option[] }
         setPertanyaanKinerja(resKinerja);
-        setPertanyaanEkonomi(resEkonomi);
+        setPertanyaanEkonomi({
+          ...resEkonomi.question,
+          options: resEkonomi.option || [],
+        });
         setPertanyaanDampak(resDampak);
         setPertanyaanTransformasi(resTransformasi);
 
-        // Reset state transformasi jika data baru dimuat
         setSelectedTransformasi(null);
         setSelectedSubTransformasi(null);
 
@@ -145,7 +154,7 @@ export default function SikapPrilakuPage() {
   // Fungsi untuk menyimpan jawaban dan navigasi
   const saveAnswersAndNavigate = async () => {
     // Validasi berdasarkan jenis pelatihan
-    if (isPelatihanKhusus) {
+    if (isPelatihanLima) {
       if (!sikap || !Array.isArray(sikap) || sikap.length === 0 || kinerja.length !== 3) {
         toast.error("Mohon isi pertanyaan 1 dan 2 dengan lengkap!");
         return false; // Indikasi gagal
@@ -168,86 +177,68 @@ export default function SikapPrilakuPage() {
     }
 
     try {
-      // Kirim jawaban pertanyaan 1 (bisa lebih dari satu)
-      if (Array.isArray(sikap) && pertanyaanSikap?.id) {
-        for (const ans of sikap) {
-          await fetch("/api/answers", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              question_id: pertanyaanSikap.id, // Gunakan ID yang sudah di-set
-              user_id,
-              answer: ans,
-            }),
-          });
+      // Gabungkan semua jawaban ke format JSON
+      const answersJson: Record<string, string> = {};
+      // Pertanyaan 1: sikap
+      if (Array.isArray(sikap) && pertanyaanSikap?.options) {
+        pertanyaanSikap.options.forEach((opt, i) => {
+          answersJson[`q${i + 1}`] = sikap.includes(opt.option_text) ? opt.option_text : "";
+        });
+      }
+      // Pertanyaan 2: kinerja
+      if (Array.isArray(kinerja) && pertanyaanKinerja?.options) {
+        pertanyaanKinerja.options.forEach((opt, i) => {
+          answersJson[`q${i + 1 + (pertanyaanSikap?.options?.length || 0)}`] = kinerja.includes(opt.option_text) ? opt.option_text : "";
+        });
+      }
+      // Pertanyaan 3: ekonomi
+      if (!isPelatihanLima && pertanyaanEkonomi?.options) {
+        pertanyaanEkonomi.options.forEach((opt, i) => {
+          answersJson[`q${i + 1 + (pertanyaanSikap?.options?.length || 0) + (pertanyaanKinerja?.options?.length || 0)}`] = ekonomi === opt.option_text ? opt.option_text : "";
+        });
+      }
+      // Pertanyaan 4: dampak
+      if (!isPelatihanLima && pertanyaanDampak?.options) {
+        pertanyaanDampak.options.forEach((opt, i) => {
+          answersJson[`q${i + 1 + (pertanyaanSikap?.options?.length || 0) + (pertanyaanKinerja?.options?.length || 0) + (pertanyaanEkonomi?.options?.length || 0)}`] = dampak[0] === opt.option_text ? (opt.option_text === "Yang lain:" ? dampakLain : opt.option_text) : "";
+        });
+      }
+      // Pertanyaan 5: transformasi
+      if (!isPelatihanLima && pertanyaanTransformasi?.options) {
+        pertanyaanTransformasi.options.forEach((opt, i) => {
+          answersJson[`q${i + 1 + (pertanyaanSikap?.options?.length || 0) + (pertanyaanKinerja?.options?.length || 0) + (pertanyaanEkonomi?.options?.length || 0) + (pertanyaanDampak?.options?.length || 0)}`] = selectedTransformasi === opt.id ? opt.option_text : "";
+        });
+        // Sub bidang
+        if (selectedTransformasi !== null && selectedSubTransformasi !== null) {
+          const subOpt = pertanyaanTransformasi.options.find(opt => opt.id === selectedTransformasi)?.sub_pertanyaan?.find(sub => sub.id === selectedSubTransformasi);
+          if (subOpt) {
+            answersJson[`sub_bidang`] = subOpt.text;
+          }
         }
       }
 
-      // Kirim jawaban pertanyaan 2
-      if(pertanyaanKinerja?.id) {
-         for (const ans of kinerja) {
-           await fetch("/api/answers", {
-             method: "POST",
-             headers: { "Content-Type": "application/json" },
-             body: JSON.stringify({
-               question_id: pertanyaanKinerja.id,
-               user_id,
-               answer: ans,
-             }),
-           });
-         }
+      const res = await fetch("/api/jawaban", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id,
+          answers: answersJson,
+          category_id: 3,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success("Jawaban berhasil disimpan!");
+        return true;
+      } else {
+        const errorData = await res.json();
+        toast.error(errorData.message || "Gagal menyimpan jawaban!");
+        return false;
       }
-
-      // Kirim jawaban pertanyaan 3, 4, dan 5 hanya jika bukan pelatihan khusus
-      if (!isPelatihanKhusus) {
-        if(pertanyaanEkonomi?.id) {
-           await fetch("/api/answers", {
-             method: "POST",
-             headers: { "Content-Type": "application/json" },
-             body: JSON.stringify({
-               question_id: pertanyaanEkonomi.id,
-               user_id,
-               answer: ekonomi,
-             }),
-           });
-        }
-
-        if(pertanyaanDampak?.id) {
-           for (const ans of dampak) {
-             await fetch("/api/answers", {
-               method: "POST",
-               headers: { "Content-Type": "application/json" },
-               body: JSON.stringify({
-                 question_id: pertanyaanDampak.id,
-                 user_id,
-                 answer: ans === "Yang lain:" ? dampakLain : ans,
-               }),
-             });
-           }
-        }
-
-        // Kirim jawaban untuk pertanyaan Transformasi (pertanyaan 5)
-        if (pertanyaanTransformasi?.id && selectedTransformasi !== null) {
-          await fetch("/api/answers", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              question_id: pertanyaanTransformasi.id,
-              user_id,
-              answer: selectedTransformasi.toString(),
-            }),
-          });
-        }
-        // Catatan: Sub_pertanyaan tidak dikirim sebagai jawaban terpisah berdasarkan logika saat ini.
-        // Jika perlu, tambahkan logika pengiriman untuk selectedSubTransformasi di sini.
-      }
-
-      toast.success("Jawaban berhasil disimpan!");
-      return true; // Indikasi sukses
     } catch (error: unknown) {
       console.error("Error submitting answers:", error);
       toast.error("Gagal menyimpan jawaban!");
-      return false; // Indikasi gagal
+      return false;
     }
   };
 
@@ -343,26 +334,17 @@ export default function SikapPrilakuPage() {
         )}
       </div>
 
-      {/* 3. Pilih salah satu nilai ekonomi - Hanya ditampilkan jika bukan pelatihan khusus */}
-      {!isPelatihanKhusus && (
-        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
-          <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
-            3. {pertanyaanEkonomi?.text || "Memuat pertanyaan..."}
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
-            {pertanyaanEkonomi?.options?.length ? (
-              pertanyaanEkonomi.options
-                // Filter sesuai pelatihan_id dan ordering
-                ?.filter((opt) => {
-                  // Perbaikan: Filter berdasarkan pelatihan_id dan ordering
-                  if (profile.pelatihan_id === 3 || profile.pelatihan_id === 4) {
-                    return opt.ordering === 1;
-                  } else if (profile.pelatihan_id === 5) {
-                    return opt.ordering === 2;
-                  }
-                  return false; // Default tidak menampilkan jika tidak sesuai
-                })
-                .map((opt) => (
+      {/* Tampilkan pertanyaan 3, 4, dan 5 hanya jika pelatihan_id bukan 5 */}
+      {!isPelatihanLima && (
+        <>
+          {/* 3. Pilih salah satu nilai ekonomi */}
+          <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
+            <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
+              3. {pertanyaanEkonomi?.text || "Memuat pertanyaan..."}
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
+              {pertanyaanEkonomi?.options?.length ? (
+                pertanyaanEkonomi.options.map((opt) => (
                   <label
                     key={opt.id}
                     className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
@@ -377,114 +359,111 @@ export default function SikapPrilakuPage() {
                     <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
                   </label>
                 ))
-            ) : (
-              <p className="text-gray-500 text-sm md:text-base">Tidak ada opsi tersedia.</p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 4. Dampak (radio, hanya satu pilihan) - Hanya ditampilkan jika bukan pelatihan khusus */}
-      {!isPelatihanKhusus && (
-        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
-          <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
-            4. {pertanyaanDampak?.text || "Memuat pertanyaan..."}
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
-            {pertanyaanDampak?.options?.length ? (
-              pertanyaanDampak.options.map((opt) => (
-                <label
-                  key={opt.id}
-                  className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    value={opt.option_text}
-                    checked={dampak[0] === opt.option_text}
-                    onChange={() => setDampak([opt.option_text])}
-                    className="accent-[#2196F3] scale-110 md:scale-125"
-                  />
-                  <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
-                </label>
-              ))
-            ) : (
-              <p className="text-gray-500 text-sm md:text-base">Tidak ada opsi tersedia.</p>
-            )}
-          </div>
-          {dampak[0] === "Yang lain:" && (
-            <input
-              type="text"
-              value={dampakLain}
-              onChange={(e) => setDampakLain(e.target.value)}
-              placeholder="Sebutkan dampak lain..."
-              className="mt-2 p-2 border rounded w-full text-xs md:text-base"
-              required // Tambahkan required jika field ini wajib
-            />
-          )}
-        </div>
-      )}
-
-      {/* 5. Penerapan hasil pelatihan mendukung transformasi - Hanya ditampilkan jika bukan pelatihan khusus */}
-      {!isPelatihanKhusus && (
-        <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
-          <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
-            5. {pertanyaanTransformasi?.text || "Memuat pertanyaan..."}
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
-            {pertanyaanTransformasi?.options?.length ? (
-              pertanyaanTransformasi.options.map((opt: Option & { sub_pertanyaan?: { id: number; text: string }[] }) => (
-                <label
-                  key={opt.id}
-                  className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    value={opt.id} // Gunakan ID untuk identifikasi unik
-                    checked={selectedTransformasi === opt.id}
-                    onChange={() => {
-                      setSelectedTransformasi(opt.id);
-                      setSelectedSubTransformasi(null); // Reset sub jika option utama berubah
-                    }}
-                    className="accent-[#2196F3] scale-110 md:scale-125"
-                  />
-                  <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
-                </label>
-              ))
-            ) : (
-              <p className="text-gray-500 text-sm md:text-base">Tidak ada opsi tersedia.</p>
-            )}
-          </div>
-          {/* Sub pertanyaan muncul jika ada dan option dipilih */}
-          {selectedTransformasi && (
-            <div className="mt-4">
-              <div className="font-semibold text-[#1976D2] mb-2 text-sm md:text-base">Sub Bidang:</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
-                {pertanyaanTransformasi?.options
-                  ?.find((opt: Option) => opt.id === selectedTransformasi)?.sub_pertanyaan?.length ? (
-                    pertanyaanTransformasi.options
-                      .find((opt: Option) => opt.id === selectedTransformasi)!
-                      .sub_pertanyaan!.map((sub: { id: number; text: string }) => (
-                        <label
-                          key={sub.id}
-                          className="flex items-center gap-2 md:gap-3 bg-blue-100 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-200 transition cursor-pointer"
-                        >
-                          <input
-                            type="radio"
-                            value={sub.id} // Gunakan ID sub untuk identifikasi unik
-                            checked={selectedSubTransformasi === sub.id}
-                            onChange={() => setSelectedSubTransformasi(sub.id)}
-                            className="accent-[#1976D2] scale-110 md:scale-125"
-                          />
-                          <span className="text-[#1976D2] font-medium text-xs md:text-base">{sub.text}</span>
-                        </label>
-                      ))
-                  ) : (
-                    <p className="text-gray-500 text-sm md:text-base">Tidak ada sub bidang tersedia.</p>
-                  )}
-              </div>
+              ) : (
+                <p className="text-gray-500 text-sm md:text-base">Tidak ada opsi tersedia.</p>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+
+          {/* 4. Dampak (radio, hanya satu pilihan) */}
+          <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
+            <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
+              4. {pertanyaanDampak?.text || "Memuat pertanyaan..."}
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
+              {pertanyaanDampak?.options?.length ? (
+                pertanyaanDampak.options.map((opt) => (
+                  <label
+                    key={opt.id}
+                    className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      value={opt.option_text}
+                      checked={dampak[0] === opt.option_text}
+                      onChange={() => setDampak([opt.option_text])}
+                      className="accent-[#2196F3] scale-110 md:scale-125"
+                    />
+                    <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
+                  </label>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm md:text-base">Tidak ada opsi tersedia.</p>
+              )}
+            </div>
+            {dampak[0] === "Yang lain:" && (
+              <input
+                type="text"
+                value={dampakLain}
+                onChange={(e) => setDampakLain(e.target.value)}
+                placeholder="Sebutkan dampak lain..."
+                className="mt-2 p-2 border rounded w-full text-xs md:text-base"
+                required // Tambahkan required jika field ini wajib
+              />
+            )}
+          </div>
+
+          {/* 5. Penerapan hasil pelatihan mendukung transformasi */}
+          <div className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 mb-4 md:mb-6">
+            <label className="block font-semibold text-[#1976D2] mb-2 md:mb-4 text-sm md:text-base">
+              5. {pertanyaanTransformasi?.text || "Memuat pertanyaan..."}
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
+              {pertanyaanTransformasi?.options?.length ? (
+                pertanyaanTransformasi.options.map((opt: Option & { sub_pertanyaan?: { id: number; text: string }[] }) => (
+                  <label
+                    key={opt.id}
+                    className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-100 transition cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      value={opt.id} // Gunakan ID untuk identifikasi unik
+                      checked={selectedTransformasi === opt.id}
+                      onChange={() => {
+                        setSelectedTransformasi(opt.id);
+                        setSelectedSubTransformasi(null); // Reset sub jika option utama berubah
+                      }}
+                      className="accent-[#2196F3] scale-110 md:scale-125"
+                    />
+                    <span className="text-[#1976D2] font-medium text-xs md:text-base">{opt.option_text}</span>
+                  </label>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm md:text-base">Tidak ada opsi tersedia.</p>
+              )}
+            </div>
+            {/* Sub pertanyaan muncul jika ada dan option dipilih */}
+            {selectedTransformasi && (
+              <div className="mt-4">
+                <div className="font-semibold text-[#1976D2] mb-2 text-sm md:text-base">Sub Bidang:</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
+                  {pertanyaanTransformasi?.options
+                    ?.find((opt: Option) => opt.id === selectedTransformasi)?.sub_pertanyaan?.length ? (
+                      pertanyaanTransformasi.options
+                        .find((opt: Option) => opt.id === selectedTransformasi)!
+                        .sub_pertanyaan!.map((sub: { id: number; text: string }) => (
+                          <label
+                            key={sub.id}
+                            className="flex items-center gap-2 md:gap-3 bg-blue-100 rounded-lg px-2 md:px-3 py-2 shadow-sm hover:bg-blue-200 transition cursor-pointer"
+                          >
+                            <input
+                              type="radio"
+                              value={sub.id} // Gunakan ID sub untuk identifikasi unik
+                              checked={selectedSubTransformasi === sub.id}
+                              onChange={() => setSelectedSubTransformasi(sub.id)}
+                              className="accent-[#1976D2] scale-110 md:scale-125"
+                            />
+                            <span className="text-[#1976D2] font-medium text-xs md:text-base">{sub.text}</span>
+                          </label>
+                        ))
+                    ) : (
+                      <p className="text-gray-500 text-sm md:text-base">Tidak ada sub bidang tersedia.</p>
+                    )}
+                </div>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       <div className="pt-6 md:pt-8 flex flex-col md:flex-row justify-between gap-3 md:gap-6">

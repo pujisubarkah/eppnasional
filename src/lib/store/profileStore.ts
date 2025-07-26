@@ -30,7 +30,7 @@ interface ProfileState {
 
 export const useProfileStore = create<ProfileState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       id: null,
       nama: '',
       pelatihan_id: null,

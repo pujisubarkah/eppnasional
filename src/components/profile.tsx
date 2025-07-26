@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useProfileFormStore } from "@/lib/store/globalStore";
+
 import {
   Select,
   SelectTrigger,
@@ -19,6 +20,7 @@ import {
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Save } from "lucide-react";
+
 
 type JenisInstansi = { id: number; name: string };
 type Instansi = { id: number; agency_name: string };
@@ -73,13 +75,15 @@ export default function ProfileForm() {
         <p className="text-gray-700 text-base md:text-lg leading-relaxed mb-2 text-center max-w-2xl">
           Sebagai bagian dari upaya peningkatan mutu pelatihan, Direktorat Penjaminan Mutu Pengembangan Kapasitas Lembaga Administrasi Negara menyelenggarakan Evaluasi Pascapelatihan Nasional untuk mengidentifikasi hasil pelatihan, khususnya pada level perilaku (behaviour) dan dampak yang ditimbulkan dari pelaksanaan pelatihan.<br /><br />
           Formulir ini ditujukan bagi Alumni Pelatihan Tahun 2021-2024 pada:
-          <ol className="list-decimal list-inside ml-4 my-2 text-left">
-            <li>Pelatihan Kepemimpinan Nasional Tingkat I</li>
-            <li>Pelatihan Kepemimpinan Nasional Tingkat II</li>
-            <li>Pelatihan Kepemimpinan Administrator</li>
-            <li>Pelatihan Kepemimpinan Pengawas</li>
-            <li>Pelatihan Dasar CPNS</li>
-          </ol>
+        </p>
+        <ol className="list-decimal list-inside ml-4 my-2 text-left">
+          <li>Pelatihan Kepemimpinan Nasional Tingkat I</li>
+          <li>Pelatihan Kepemimpinan Nasional Tingkat II</li>
+          <li>Pelatihan Kepemimpinan Administrator</li>
+          <li>Pelatihan Kepemimpinan Pengawas</li>
+          <li>Pelatihan Dasar CPNS</li>
+        </ol>
+        <p className="text-gray-700 text-base md:text-lg leading-relaxed mb-2 text-center max-w-2xl">
           Kami mohon kesediaan Bapak/Ibu untuk mengisi formulir ini secara objektif. Masukan Anda sangat berharga dalam mendukung perbaikan berkelanjutan pelatihan ASN. Data dan informasi pribadi yang Bapak/Ibu sampaikan akan dijaga kerahasiaannya, digunakan hanya untuk keperluan evaluasi, dan tidak akan disebarluaskan tanpa izin.<br /><br />
           <span className="font-semibold">Waktu pengisian membutuhkan 3 - 5 menit.</span><br />
           <span className="italic text-sm">Catatan: Jika Anda pernah mengikuti lebih dari satu pelatihan, silahkan gunakan informasi Pelatihan terakhir Anda</span>
@@ -152,12 +156,12 @@ export default function ProfileForm() {
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm(f => ({ ...f, [name]: value }));
-    profileStore.setForm({ [name]: value });
+    profileStore.setForm({ [name]: value }); // update ke zustand
   }
 
   function handleSelectChange(name: string, value: string) {
     setForm(f => ({ ...f, [name]: value }));
-    profileStore.setForm({ [name]: value });
+    profileStore.setForm({ [name]: value }); // update ke zustand
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -168,16 +172,15 @@ export default function ProfileForm() {
       setDialogOpen(true);
       return;
     }
-    // Ambil dari zustand
-    const { nama, pelatihan, nip } = profileStore;
+    // Ambil dari form state
     const payload = {
-      namaAlumni: nama,
-      nipNrpNik: nip,
+      namaAlumni: form.nama,
+      nipNrpNik: form.nip,
       instansiKategoriId: Number(form.jenisInstansi),
       instansiId: Number(form.instansi),
       domisiliId: Number(form.domisiliLembagaPenyelenggara),
       jabatanId: Number(form.jabatan),
-      pelatihanId: Number(pelatihan),
+      pelatihanId: Number(form.pelatihan),
       tahunPelatihanId: Number(form.tahunPelatihan),
       lemdik: form.lembagaPenyelenggara,
       handphone: form.handphone,
@@ -192,8 +195,22 @@ export default function ProfileForm() {
       if (result.status === "success") {
         setSaved(true);
         setDialogType("success");
-        setDialogMessage(`Terima kasih ${profileStore.nama} sudah mengisi profilnya. Silakan lanjut ke pengisian survey.`);
+        setDialogMessage(`Terima kasih ${form.nama} sudah mengisi profilnya. Silakan lanjut ke pengisian survey.`);
         setDialogOpen(true);
+        // Simpan semua data payload ke zustand globalStore
+        profileStore.setForm({
+          id: result.id || form.nip,
+          nama: form.nama,
+          nip: form.nip,
+          instansi: form.instansi,
+          jenisInstansi: form.jenisInstansi,
+          domisili: form.domisiliLembagaPenyelenggara,
+          jabatan: form.jabatan,
+          pelatihan: form.pelatihan,
+          tahunPelatihan: form.tahunPelatihan,
+          lembagaPenyelenggara: form.lembagaPenyelenggara,
+          handphone: form.handphone,
+        });
         // Simpan ke localStorage jika perlu
       } else {
         setDialogType("error");
