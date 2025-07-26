@@ -9,14 +9,13 @@ type MateriRow = {
 };
 
 export default function MateriPage() {
-  const [pelatihan, setPelatihan] = useState<{ id: number; nama: string }[]>([]);
   const [selected, setSelected] = useState<string | "all">("all");
   const [materiTable, setMateriTable] = useState<MateriRow[]>([]);
 
   useEffect(() => {
-    fetch("/api/pelatihan")
-      .then((res) => res.json())
-      .then((data) => setPelatihan(data));
+    // fetch("/api/pelatihan")
+    //   .then((res) => res.json())
+    //   .then((data) => setPelatihan(data));
   }, []);
 
   useEffect(() => {
@@ -24,7 +23,11 @@ export default function MateriPage() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.result)) {
-          const mapped = data.result.map((row: any) => ({
+          const mapped = data.result.map((row: {
+            pelatihanId: number;
+            namaPelatihan: string;
+            answers: { q1?: string; q2?: string; q3?: string; q4?: string; q5?: string; q6?: string };
+          }) => ({
             pelatihanId: row.pelatihanId,
             namaPelatihan: row.namaPelatihan,
             relevan: [row.answers.q1, row.answers.q2, row.answers.q3].filter(Boolean),

@@ -307,18 +307,35 @@ export default function ProfileForm() {
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Instansi</label>
           </div>
           <div className="w-full">
-          <Select value={form.instansi} onValueChange={value => handleSelectChange("instansi", value)} disabled={!form.jenisInstansi} required>
-            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
-              <SelectValue placeholder="Pilih Instansi" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl shadow-lg bg-white">
-              {filteredInstansiList.map(item => (
-                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
-                  {item.agency_name}
-                </SelectItem>
+            <input
+              list="instansi-list"
+              name="instansi"
+              value={(() => {
+                // Cari nama instansi dari id yang tersimpan di form
+                const found = filteredInstansiList.find(i => i.id.toString() === form.instansi);
+                return found ? found.agency_name : form.instansi;
+              })()}
+              onChange={e => {
+                // Cari id dari nama yang dipilih
+                const selected = filteredInstansiList.find(i => i.agency_name === e.target.value);
+                if (selected) {
+                  handleSelectChange("instansi", selected.id.toString());
+                } else {
+                  // Jika tidak ditemukan, simpan string mentah (misal user ketik manual)
+                  handleSelectChange("instansi", e.target.value);
+                }
+              }}
+              className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition"
+              placeholder="Cari atau pilih Instansi"
+              required
+              autoComplete="off"
+              disabled={!form.jenisInstansi}
+            />
+            <datalist id="instansi-list">
+              {filteredInstansiList.map((item, idx) => (
+                <option key={item.agency_name + '-' + idx} value={item.agency_name} />
               ))}
-            </SelectContent>
-          </Select>
+            </datalist>
           </div>
           {/* Jabatan */}
           <div className="flex items-center md:justify-end">
@@ -376,21 +393,26 @@ export default function ProfileForm() {
           </div>
           {/* Instansi Lembaga Penyelenggara */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Instansi Lembaga Penyelenggara</label>
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">
+              Instansi Lembaga Penyelenggara
+            </label>
           </div>
           <div className="w-full">
-          <Select value={form.lembagaPenyelenggara} onValueChange={value => handleSelectChange("lembagaPenyelenggara", value)} required>
-            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
-              <SelectValue placeholder="Pilih Instansi Lembaga Penyelenggara" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl shadow-lg bg-white">
+            <input
+              list="lembaga-list"
+              name="lembagaPenyelenggara"
+              value={form.lembagaPenyelenggara}
+              onChange={e => handleSelectChange("lembagaPenyelenggara", e.target.value)}
+              className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition"
+              placeholder="Cari atau pilih Instansi Lembaga Penyelenggara"
+              required
+              autoComplete="off"
+            />
+            <datalist id="lembaga-list">
               {filteredLemdikList.map(item => (
-                <SelectItem key={item.id} value={item.namalemdik} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
-                  {item.namalemdik}
-                </SelectItem>
+                <option key={item.id} value={item.namalemdik} />
               ))}
-            </SelectContent>
-          </Select>
+            </datalist>
           </div>
           {/* Domisili Instansi Lembaga Penyelenggara */}
           <div className="flex items-center md:justify-end">

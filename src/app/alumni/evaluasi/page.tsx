@@ -159,7 +159,7 @@ export default function EvaluasiPage() {
           const errorData = await res.json();
           toast.error(errorData.message || 'Terjadi kesalahan, silakan coba lagi.');
         }
-      } catch (error) {
+      } catch {
         toast.error('Terjadi kesalahan, silakan coba lagi.');
       }
     };
