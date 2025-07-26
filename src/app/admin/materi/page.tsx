@@ -18,6 +18,7 @@ export default function MateriPage() {
     //   .then((data) => setPelatihan(data));
   }, []);
 
+  const [frekuensi, setFrekuensi] = useState<{ relevan: Record<string, number>; tidakRelevan: Record<string, number> }>({ relevan: {}, tidakRelevan: {} });
   useEffect(() => {
     fetch("/api/materi")
       .then((res) => res.json())
@@ -37,6 +38,11 @@ export default function MateriPage() {
           setMateriTable(mapped);
         } else {
           setMateriTable([]);
+        }
+        if (data.frekuensi) {
+          setFrekuensi(data.frekuensi);
+        } else {
+          setFrekuensi({ relevan: {}, tidakRelevan: {} });
         }
       });
   }, []);
@@ -95,6 +101,30 @@ export default function MateriPage() {
             )}
           </tbody>
         </table>
+      </div>
+      {/* Rekap jumlah materi relevan & tidak relevan */}
+      <div className="mt-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-xl shadow text-[#1976D2]">
+        <h2 className="text-lg font-semibold mb-2">Rekap Jumlah Materi</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="font-bold mb-2 text-green-700">Materi Relevan</h3>
+            <ul className="list-disc ml-6">
+              {Object.entries(frekuensi.relevan).map(([materi, jumlah]) => (
+                <li key={materi}>{materi}: <span className="font-bold">{jumlah}</span></li>
+              ))}
+              {Object.keys(frekuensi.relevan).length === 0 && <li className="text-gray-500">Tidak ada data materi relevan.</li>}
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-bold mb-2 text-red-600">Materi Tidak Relevan</h3>
+            <ul className="list-disc ml-6">
+              {Object.entries(frekuensi.tidakRelevan).map(([materi, jumlah]) => (
+                <li key={materi}>{materi}: <span className="font-bold">{jumlah}</span></li>
+              ))}
+              {Object.keys(frekuensi.tidakRelevan).length === 0 && <li className="text-gray-500">Tidak ada data materi tidak relevan.</li>}
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
