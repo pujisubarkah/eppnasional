@@ -1,20 +1,24 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
+import { useProfileFormStore } from "@/lib/store/globalStore";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+} from "./ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "./ui/dialog";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useProfileStore } from "@/lib/store/profileStore"; // pastikan path sesuai
-import { ArrowRight } from "lucide-react"; // Tambahkan import ini
-import { AlertCircle } from "lucide-react";
+import { ArrowRight, Save } from "lucide-react";
 
 type JenisInstansi = { id: number; name: string };
 type Instansi = { id: number; agency_name: string };
@@ -22,20 +26,28 @@ type Domisili = { id: number; nama: string };
 type Pelatihan = { id: number; nama: string };
 type Jabatan = { id: number; nama: string };
 type TahunPelatihan = { id: number; tahun: string };
+type Lemdik = { id: number; namalemdik: string; provinsi: number };
 
-export default function ProfileForm() {  // State untuk list dropdown
+export default function ProfileForm() {
+  const profileStore = useProfileFormStore();
+  const router = useRouter();
+
+  // State
   const [jenisInstansiList, setJenisInstansiList] = useState<JenisInstansi[]>([]);
-  const [instansiList, setInstansiList] = useState<Instansi[]>([]);
+  // Removed unused setInstansiList
   const [filteredInstansiList, setFilteredInstansiList] = useState<Instansi[]>([]);
   const [domisiliList, setDomisiliList] = useState<Domisili[]>([]);
   const [filteredDomisiliList, setFilteredDomisiliList] = useState<Domisili[]>([]);
   const [pelatihanList, setPelatihanList] = useState<Pelatihan[]>([]);
   const [jabatanList, setJabatanList] = useState<Jabatan[]>([]);
   const [tahunPelatihanList, setTahunPelatihanList] = useState<TahunPelatihan[]>([]);
-  const [lemdikList, setLemdikList] = useState<{ id: number; namaLemdik: string }[]>([]);
-  const [filteredLemdikList, setFilteredLemdikList] = useState<{ id: number; namaLemdik: string }[]>([]);
+  // Removed unused setLemdikList
+  const [filteredLemdikList, setFilteredLemdikList] = useState<Lemdik[]>([]);
+  const [saved, setSaved] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
+  const [dialogType, setDialogType] = useState<"success"|"error">("success");
 
-  // State untuk form
   const [form, setForm] = useState({
     nama: "",
     nip: "",
@@ -50,147 +62,122 @@ export default function ProfileForm() {  // State untuk list dropdown
     domisiliLembagaPenyelenggara: "",
     handphone: "",
   });
-  const [saved, setSaved] = useState(false);
-  const [showNamaModal, setShowNamaModal] = useState(false);
-  const router = useRouter();  const { nama, formData, setFormData, hasHydrated } = useProfileStore(); // ambil data dari zustand  // Debugging effect untuk melihat status hydration dan data
-  useEffect(() => {
-    console.log("Current hydration status:", hasHydrated);
-    console.log("Current formData in store:", formData);
-    
-    // Cek localStorage secara manual
-    const storedData = localStorage.getItem('profile-storage');
-    console.log("Raw localStorage content:", storedData);
-    
-    // Coba parse localStorage untuk debugging
-    try {
-      const parsedData = storedData ? JSON.parse(storedData) : null;
-      console.log("Parsed localStorage content:", parsedData);
-    } catch (e) {
-      console.error("Failed to parse localStorage:", e);
-    }
-  }, [hasHydrated]);
 
-  // Load data dari store setelah hydration dan ketika formData berubah
-  useEffect(() => {
-    // Cek status hydration terlebih dahulu
-    if (!hasHydrated) {
-      console.log("Not yet hydrated, skipping form load");
-      return;
-    }
-    
-    // Cek formData apakah ada dan memiliki data
-    if (formData) {
-      // Cek apakah formData memiliki data yang valid (setidaknya ada nama atau nip)
-      if (formData.nama || formData.nip || formData.instansi) {
-        console.log("Loading form data from store:", formData);
-        setForm(formData);
-        setSaved(true); // Juga set status saved jika data sudah ada
-      } else {
-        console.log("FormData exists but has no valid data");
-      }
-    } else {
-      console.log("FormData is null or undefined");
-    }
-  }, [hasHydrated, formData]); // Dependensi pada hasHydrated dan formData
+  // UI: Hero header
+  const Hero = () => (
+    <div className="relative w-full max-w-4xl mx-auto mb-8">
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#2196F3]/70 via-[#E3F2FD]/80 to-[#1976D2]/60 blur-xl opacity-60 z-0" />
+      <div className="relative z-10 flex flex-col items-center justify-center py-10 px-6 md:px-12 rounded-3xl shadow-2xl border-2 border-[#B3E5FC] bg-white/90">
+        <CheckCircle2 size={64} className="text-[#2196F3] mb-4 drop-shadow-lg" />
+        <h1 className="text-3xl md:text-4xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">Evaluasi Pascapelatihan Nasional - Alumni</h1>
+        <p className="text-gray-700 text-base md:text-lg leading-relaxed mb-2 text-center max-w-2xl">
+          Sebagai bagian dari upaya peningkatan mutu pelatihan, Direktorat Penjaminan Mutu Pengembangan Kapasitas Lembaga Administrasi Negara menyelenggarakan Evaluasi Pascapelatihan Nasional untuk mengidentifikasi hasil pelatihan, khususnya pada level perilaku (behaviour) dan dampak yang ditimbulkan dari pelaksanaan pelatihan.<br /><br />
+          Formulir ini ditujukan bagi Alumni Pelatihan Tahun 2021-2024 pada:
+          <ol className="list-decimal list-inside ml-4 my-2 text-left">
+            <li>Pelatihan Kepemimpinan Nasional Tingkat I</li>
+            <li>Pelatihan Kepemimpinan Nasional Tingkat II</li>
+            <li>Pelatihan Kepemimpinan Administrator</li>
+            <li>Pelatihan Kepemimpinan Pengawas</li>
+            <li>Pelatihan Dasar CPNS</li>
+          </ol>
+          Kami mohon kesediaan Bapak/Ibu untuk mengisi formulir ini secara objektif. Masukan Anda sangat berharga dalam mendukung perbaikan berkelanjutan pelatihan ASN. Data dan informasi pribadi yang Bapak/Ibu sampaikan akan dijaga kerahasiaannya, digunakan hanya untuk keperluan evaluasi, dan tidak akan disebarluaskan tanpa izin.<br /><br />
+          <span className="font-semibold">Waktu pengisian membutuhkan 3 - 5 menit.</span><br />
+          <span className="italic text-sm">Catatan: Jika Anda pernah mengikuti lebih dari satu pelatihan, silahkan gunakan informasi Pelatihan terakhir Anda</span>
+        </p>
+      </div>
+    </div>
+  );
 
-  // Fetch data dropdown saat mount
+  // Fetch dropdown data
   useEffect(() => {
     async function fetchData() {
-      const jenisRes = await fetch("/api/jenis_instansi");
-      setJenisInstansiList(await jenisRes.json());
-      const pelatihanRes = await fetch("/api/pelatihan");
-      setPelatihanList(await pelatihanRes.json());      const provRes = await fetch("/api/provinsi");
-      const domisiliData = await provRes.json();
-      // Urutkan domisili secara ascending (A ke Z)
-      const sortedDomisiliData = domisiliData.sort((a: Domisili, b: Domisili) => 
-        a.nama.localeCompare(b.nama)
-      );
-      setDomisiliList(sortedDomisiliData);
-      setFilteredDomisiliList(sortedDomisiliData);
-      const jabatanRes = await fetch("/api/jabatan");
-      setJabatanList(await jabatanRes.json());
-      const tahunRes = await fetch("/api/tahun_pelatihan");
-      setTahunPelatihanList(await tahunRes.json());
-      const lemdikRes = await fetch("/api/lembaga_penyelenggara");
-      setLemdikList(await lemdikRes.json());
+      try {
+        const jenisRes = await fetch("/api/jenis_instansi");
+        setJenisInstansiList(await jenisRes.json());
+        const pelatihanRes = await fetch("/api/pelatihan");
+        setPelatihanList(await pelatihanRes.json());
+        const provRes = await fetch("/api/provinsi");
+        const domisiliData = await provRes.json();
+        const sortedDomisiliData = domisiliData.sort((a: Domisili, b: Domisili) => a.nama.localeCompare(b.nama));
+        setDomisiliList(sortedDomisiliData);
+        setFilteredDomisiliList(sortedDomisiliData);
+        const jabatanRes = await fetch("/api/jabatan");
+        setJabatanList(await jabatanRes.json());
+        const tahunRes = await fetch("/api/tahun_pelatihan");
+        setTahunPelatihanList(await tahunRes.json());
+        const lemdikRes = await fetch("/api/master_lemdik");
+        const lemdikJson = await lemdikRes.json();
+        // setLemdikList removed
+        setFilteredLemdikList(lemdikJson.data);
+      } catch {
+        // handle error
+      }
     }
     fetchData();
-  }, []);  // Fetch instansi saat jenisInstansi berubah
+  }, []);
+
+  // Instansi filter
   useEffect(() => {
     async function fetchInstansi() {
       if (form.jenisInstansi) {
-        try {
-          const res = await fetch(`/api/instansi/${form.jenisInstansi}`);
-          const data = await res.json();
-          // Urutkan instansi secara ascending (A ke Z)
-          const sortedData = data.sort((a: Instansi, b: Instansi) => 
-            a.agency_name.localeCompare(b.agency_name)
-          );
-          setInstansiList(sortedData);
-          setFilteredInstansiList(sortedData);        } catch {
-          setInstansiList([]);
-          setFilteredInstansiList([]);
-        }
-        const newForm = { ...form, instansi: "" };
-        setForm(newForm);
-        setFormData(newForm);      } else {
-        setInstansiList([]);
+        const res = await fetch(`/api/instansi/${form.jenisInstansi}`);
+        const data = await res.json();
+        const sortedData = data.sort((a: Instansi, b: Instansi) => a.agency_name.localeCompare(b.agency_name));
+        // setInstansiList removed
+        setFilteredInstansiList(sortedData);
+        setForm(f => ({ ...f, instansi: "" }));
+      } else {
+        // setInstansiList removed
         setFilteredInstansiList([]);
-        const newForm = { ...form, instansi: "" };
-        setForm(newForm);
-        setFormData(newForm);
+        setForm(f => ({ ...f, instansi: "" }));
       }
     }
     fetchInstansi();
- 
   }, [form.jenisInstansi]);
-  // Fetch lemdik dari API eksternal
+
+  // Auto-select domisili when lembagaPenyelenggara changes
   useEffect(() => {
-    async function fetchLemdik() {
-      try {
-        const res = await fetch("https://api-smartbangkom.lan.go.id/master/lemdik");
-        const data = await res.json();
-        // Urutkan lembaga penyelenggara secara ascending (A ke Z)
-        const sortedData = data.sort((a: { namaLemdik: string }, b: { namaLemdik: string }) => 
-          a.namaLemdik.localeCompare(b.namaLemdik)
-        );
-        setLemdikList(sortedData);
-        setFilteredLemdikList(sortedData);
-      } catch {
-        setLemdikList([]);
-        setFilteredLemdikList([]);
+    if (form.lembagaPenyelenggara) {
+      const selectedLemdik = filteredLemdikList.find(item => item.namalemdik === form.lembagaPenyelenggara);
+      if (selectedLemdik) {
+        const domisili = domisiliList.find(d => d.id === selectedLemdik.provinsi);
+        if (domisili) {
+          setForm(f => ({ ...f, domisiliLembagaPenyelenggara: domisili.id.toString() }));
+        }
       }
     }
-    fetchLemdik();
-  }, []); 
-    // Handle input change
+  }, [form.lembagaPenyelenggara, domisiliList, filteredLemdikList]);
+
+  // Handlers
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
-    const newForm = { ...form, [name]: value };
-    setForm(newForm);
-    setFormData(newForm); // Simpan ke Zustand store
-  }  // Handle select change
-  function handleSelectChange(name: string, value: string) {
-    const newForm = { ...form, [name]: value };
-    setForm(newForm);
-    setFormData(newForm); // Simpan ke Zustand store
+    setForm(f => ({ ...f, [name]: value }));
+    profileStore.setForm({ [name]: value });
   }
 
-  // Handle submit
+  function handleSelectChange(name: string, value: string) {
+    setForm(f => ({ ...f, [name]: value }));
+    profileStore.setForm({ [name]: value });
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.domisiliLembagaPenyelenggara) {
-      toast.error("Mohon pilih domisili instansi lembaga penyelenggara!");
+      setDialogType("error");
+      setDialogMessage("Mohon pilih domisili instansi lembaga penyelenggara!");
+      setDialogOpen(true);
       return;
     }
+    // Ambil dari zustand
+    const { nama, pelatihan, nip } = profileStore;
     const payload = {
-      namaAlumni: form.nama,
-      nipNrpNik: form.nip,
+      namaAlumni: nama,
+      nipNrpNik: nip,
       instansiKategoriId: Number(form.jenisInstansi),
       instansiId: Number(form.instansi),
       domisiliId: Number(form.domisiliLembagaPenyelenggara),
       jabatanId: Number(form.jabatan),
-      pelatihanId: Number(form.pelatihan),
+      pelatihanId: Number(pelatihan),
       tahunPelatihanId: Number(form.tahunPelatihan),
       lemdik: form.lembagaPenyelenggara,
       handphone: form.handphone,
@@ -199,358 +186,235 @@ export default function ProfileForm() {  // State untuk list dropdown
       const res = await fetch("/api/profile_alumni", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),      });
+        body: JSON.stringify(payload),
+      });
       const result = await res.json();
-      if (result.status === "success") {        // Simpan profile data dan form data ke store
-        const profileData = {
-          id: result.id,
-          nama: result.nama,
-          pelatihan_id: result.pelatihan_id,
-        };
-        
-        console.log("Saving profile to store:", profileData);
-        useProfileStore.getState().setProfile(profileData);
-        
-        console.log("Saving form data to store:", form);
-        useProfileStore.getState().setFormData(form);
-        
-        // Simpan langsung ke localStorage juga untuk redundansi
-        const currentStorage = localStorage.getItem('profile-storage');
-        if (currentStorage) {
-          try {
-            const parsedStorage = JSON.parse(currentStorage);
-            const updatedStorage = {
-              ...parsedStorage,
-              state: {
-                ...parsedStorage.state,
-                id: result.id,
-                nama: result.nama,
-                pelatihan_id: result.pelatihan_id,
-                formData: form
-              }
-            };
-            localStorage.setItem('profile-storage', JSON.stringify(updatedStorage));
-            console.log("Updated localStorage directly:", updatedStorage);
-          } catch (e) {
-            console.error("Failed to update localStorage directly:", e);
-          }
-        }
-        toast.success(
-          `Terima kasih ${nama ? nama : ""} sudah bersedia mengisi survey! Silakan lanjut ke tahap berikutnya.`
-        );
-        setSaved(true); // Data tersimpan, munculkan tombol lanjut
+      if (result.status === "success") {
+        setSaved(true);
+        setDialogType("success");
+        setDialogMessage(`Terima kasih ${profileStore.nama} sudah mengisi profilnya. Silakan lanjut ke pengisian survey.`);
+        setDialogOpen(true);
+        // Simpan ke localStorage jika perlu
       } else {
-        toast.error("Gagal menyimpan data: " + (result.message || "Unknown error"));
+        setDialogType("error");
+        let detailMsg = "Gagal menyimpan data: " + (result.message || "Unknown error");
+        if (result.detail) {
+          detailMsg += `\nDetail: ${result.detail}`;
+        }
+        setDialogMessage(detailMsg);
+        setDialogOpen(true);
       }
     } catch {
-      toast.error("Terjadi error saat menyimpan data!");
+      setDialogType("error");
+      setDialogMessage("Terjadi error saat menyimpan data!");
+      setDialogOpen(true);
     }
   }
 
   return (
     <>
-      <div className="max-w-4xl mx-auto mt-6 mb-8 bg-white rounded-2xl shadow p-6 border border-[#B3E5FC]">
-        <div className="text-xl font-bold text-[#1976D2] mb-2 text-center">
-          Evaluasi Pascapelatihan Nasional - Alumni
-        </div>
-        <div className="text-gray-700 text-base leading-relaxed mb-2">
-          Sebagai bagian dari upaya peningkatan mutu pelatihan, Direktorat Penjaminan Mutu Pengembangan Kapasitas Lembaga Administrasi Negara menyelenggarakan Evaluasi Pascapelatihan Nasional untuk mengidentifikasi hasil pelatihan, khususnya pada level perilaku (behaviour) dan dampak yang ditimbulkan dari pelaksanaan pelatihan.
-          <br /><br />
-          Formulir ini ditujukan bagi Alumni Pelatihan Tahun 2021-2024 pada:
-          <ol className="list-decimal list-inside ml-4 my-2">
-            <li>Pelatihan Kepemimpinan Nasional Tingkat I</li>
-            <li>Pelatihan Kepemimpinan Nasional Tingkat II</li>
-            <li>Pelatihan Kepemimpinan Administrator</li>
-            <li>Pelatihan Kepemimpinan Pengawas</li>
-            <li>Pelatihan Dasar CPNS</li>
-          </ol>
-          Kami mohon kesediaan Bapak/Ibu untuk mengisi formulir ini secara objektif. Masukan Anda sangat berharga dalam mendukung perbaikan berkelanjutan pelatihan ASN. Data dan informasi pribadi yang Bapak/Ibu sampaikan akan dijaga kerahasiaannya, digunakan hanya untuk keperluan evaluasi, dan tidak akan disebarluaskan tanpa izin.
-          <br /><br />
-          <span className="font-semibold">Waktu pengisian membutuhkan 3 - 5 menit.</span>
-          <br /><span className="italic text-sm">Catatan: Jika Anda pernah mengikuti lebih dari satu pelatihan, silahkan gunakan informasi Pelatihan terakhir Anda</span>
-        </div>
-      </div>
-      <form
-        className="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-4 md:p-10 space-y-8 border border-[#B3E5FC]"
-        onSubmit={handleSubmit}
-      >
-        <h2 className="text-2xl md:text-3xl font-extrabold text-[#1976D2] mb-2 text-center tracking-wide drop-shadow">Profil Responden</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-8 gap-y-4 md:gap-y-6">
+      <Hero />
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        {dialogOpen && (
+          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm transition-opacity" aria-hidden="true" />
+        )}
+        <DialogContent className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border-2 border-[#B3E5FC] flex flex-col items-center gap-6 animate-fade-in z-[101]">
+          <div className="flex flex-col items-center gap-4 w-full">
+            {dialogType === "success" ? (
+              <CheckCircle2 size={56} className="text-green-500 mb-2 drop-shadow-lg" />
+            ) : (
+              <XCircle size={56} className="text-red-500 mb-2 drop-shadow-lg" />
+            )}
+            <DialogTitle className={dialogType === "success" ? "text-green-700 text-3xl font-extrabold tracking-wide" : "text-red-700 text-3xl font-extrabold tracking-wide"}>
+              {dialogType === "success" ? "Berhasil" : "Error"}
+            </DialogTitle>
+            <DialogDescription className="text-lg md:text-xl text-gray-700 text-center mb-2 font-medium">
+              {dialogMessage}
+            </DialogDescription>
+            <DialogFooter className="w-full flex justify-center mt-4">
+              {dialogType === "success" ? (
+                <button
+                  className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-4 rounded-2xl shadow-lg font-bold text-xl hover:from-[#1976D2] hover:to-[#2196F3] transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-2"
+                  onClick={() => { setDialogOpen(false); router.push("/alumni/evaluasi"); }}
+                >
+                  Lanjut ke Survey
+                  <ArrowRight size={24} />
+                </button>
+              ) : (
+                <button
+                  className="bg-gradient-to-r from-red-400 to-red-600 text-white px-10 py-4 rounded-2xl shadow-lg font-bold text-xl hover:from-red-600 hover:to-red-400 transition-all focus:outline-none focus:ring-2 focus:ring-red-400"
+                  onClick={() => setDialogOpen(false)}
+                >Tutup</button>
+              )}
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <form className="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-3xl shadow-2xl p-2 md:p-10 space-y-8 md:space-y-10 border-2 border-[#B3E5FC]" onSubmit={handleSubmit}>
+        <h2 className="text-2xl md:text-4xl font-extrabold text-[#1976D2] mb-4 text-center tracking-wide drop-shadow">Profil Responden</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-10 gap-y-4 md:gap-y-8">
           {/* Nama Lengkap */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">
-              Nama Lengkap
-            </label>
+          <div className="flex items-center justify-start md:justify-end">
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Nama Lengkap</label>
           </div>
           <div className="w-full">
-            <Input
-              type="text"
-              name="nama"
-              value={form.nama}
-              onChange={handleChange}
-              className="w-full border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
-              placeholder="Masukkan nama lengkap"
-              required
-            />
+            <input type="text" name="nama" value={form.nama} onChange={handleChange} className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3] bg-white shadow transition" placeholder="Masukkan nama lengkap" required />
           </div>
-
           {/* NIP/NRP/NIK */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">NIP/NRP/NIK</label>
           </div>
           <div className="w-full">
-            <Input
-              type="text"
-              name="nip"
-              value={form.nip}
-              onChange={handleChange}
-              className="w-full border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
-              placeholder="Masukkan NIP/NRP/NIK"
-              required
-            />
+            <input type="text" name="nip" value={form.nip} onChange={handleChange} className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3] bg-white shadow transition" placeholder="Masukkan NIP/NRP/NIK" required />
           </div>
-
           {/* Jenis Instansi */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Jenis Instansi</label>
           </div>
-          <div className="w-full">            <Select
-              value={form.jenisInstansi}
-              onValueChange={(value) => handleSelectChange("jenisInstansi", value)}
-              required
-            >
-              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
-                <SelectValue placeholder="Pilih Jenis Instansi" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white">
-                {jenisInstansiList.map((item) => (
-                  <SelectItem key={item.id} value={item.id.toString()}>{item.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="w-full">
+          <Select value={form.jenisInstansi} onValueChange={value => handleSelectChange("jenisInstansi", value)} required>
+            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
+              <SelectValue placeholder="Pilih Jenis Instansi" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl shadow-lg bg-white">
+              {jenisInstansiList.map(item => (
+                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
+                  {item.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           </div>
-
           {/* Instansi */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Instansi</label>
           </div>
-          <div className="w-full">            <Select
-              value={form.instansi}
-              onValueChange={(value) => handleSelectChange("instansi", value)}
-              disabled={!form.jenisInstansi}
-              required
-            >
-              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
-                <SelectValue placeholder="Pilih Instansi" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">                <input
-                  type="text"
-                  placeholder="Cari instansi..."
-                  className="w-full px-2 py-1 mb-2 border rounded"
-                  onChange={e => {
-                    const val = e.target.value.toLowerCase();
-                    const filtered = instansiList.filter(i => i.agency_name.toLowerCase().includes(val));
-                    // Tetap urutkan hasil filter secara ascending
-                    const sortedFiltered = filtered.sort((a, b) => a.agency_name.localeCompare(b.agency_name));
-                    setFilteredInstansiList(sortedFiltered);
-                  }}
-                />
-                {filteredInstansiList.map((item) => (
-                  <SelectItem key={item.id} value={item.id.toString()}>{item.agency_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="w-full">
+          <Select value={form.instansi} onValueChange={value => handleSelectChange("instansi", value)} disabled={!form.jenisInstansi} required>
+            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
+              <SelectValue placeholder="Pilih Instansi" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl shadow-lg bg-white">
+              {filteredInstansiList.map(item => (
+                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
+                  {item.agency_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           </div>
-
           {/* Jabatan */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Jabatan</label>
           </div>
           <div className="w-full">
-            <Select
-              value={form.jabatan}
-              onValueChange={(value) => handleSelectChange("jabatan", value)}
-              required
-            >
-              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
-                <SelectValue placeholder="Pilih Jabatan" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white">
-                {jabatanList.map((item) => (
-                  <SelectItem key={item.id} value={item.id.toString()}>{item.nama}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <Select value={form.jabatan} onValueChange={value => handleSelectChange("jabatan", value)} required>
+            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
+              <SelectValue placeholder="Pilih Jabatan" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl shadow-lg bg-white">
+              {jabatanList.map(item => (
+                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
+                  {item.nama}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           </div>
-
           {/* Nama Pelatihan */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Nama Pelatihan</label>
           </div>
           <div className="w-full">
-            <Select
-              value={form.pelatihan}
-              onValueChange={(value) => handleSelectChange("pelatihan", value)}
-              required
-            >
-              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
-                <SelectValue placeholder="Pilih Nama Pelatihan" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white">
-                {pelatihanList.map((item) => (
-                  <SelectItem key={item.id} value={item.id.toString()}>{item.nama}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <Select value={form.pelatihan} onValueChange={value => handleSelectChange("pelatihan", value)} required>
+            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
+              <SelectValue placeholder="Pilih Nama Pelatihan" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl shadow-lg bg-white">
+              {pelatihanList.map(item => (
+                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
+                  {item.nama}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           </div>
-
           {/* Tahun Pelatihan */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Tahun Pelatihan</label>
           </div>
           <div className="w-full">
-            <Select
-              value={form.tahunPelatihan}
-              onValueChange={(value) => handleSelectChange("tahunPelatihan", value)}
-              required
-            >
-              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
-                <SelectValue placeholder="Pilih Tahun Pelatihan" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white">
-                {tahunPelatihanList.map((item) => (
-                  <SelectItem key={item.id} value={item.id.toString()}>{item.tahun}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <Select value={form.tahunPelatihan} onValueChange={value => handleSelectChange("tahunPelatihan", value)} required>
+            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
+              <SelectValue placeholder="Pilih Tahun Pelatihan" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl shadow-lg bg-white">
+              {tahunPelatihanList.map(item => (
+                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
+                  {item.tahun}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           </div>
-
           {/* Instansi Lembaga Penyelenggara */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Instansi Lembaga Penyelenggara</label>
           </div>
           <div className="w-full">
-            <Select
-              value={form.lembagaPenyelenggara}
-              onValueChange={(value) => handleSelectChange("lembagaPenyelenggara", value)}
-              required
-            >
-              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
-                <SelectValue placeholder="Pilih Instansi Lembaga Penyelenggara" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">                <input
-                  type="text"
-                  placeholder="Cari lembaga..."
-                  className="w-full px-2 py-1 mb-2 border rounded"
-                  onChange={e => {
-                    const val = e.target.value.toLowerCase();
-                    const filtered = lemdikList.filter(i => i.namaLemdik.toLowerCase().includes(val));
-                    // Tetap urutkan hasil filter secara ascending
-                    const sortedFiltered = filtered.sort((a, b) => a.namaLemdik.localeCompare(b.namaLemdik));
-                    setFilteredLemdikList(sortedFiltered);
-                  }}
-                />
-                {filteredLemdikList.map((item) => (
-                  <SelectItem key={item.id} value={item.namaLemdik}>
-                    {item.namaLemdik}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <Select value={form.lembagaPenyelenggara} onValueChange={value => handleSelectChange("lembagaPenyelenggara", value)} required>
+            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
+              <SelectValue placeholder="Pilih Instansi Lembaga Penyelenggara" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl shadow-lg bg-white">
+              {filteredLemdikList.map(item => (
+                <SelectItem key={item.id} value={item.namalemdik} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
+                  {item.namalemdik}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           </div>
-
           {/* Domisili Instansi Lembaga Penyelenggara */}
           <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">
-              Domisili Instansi Lembaga Penyelenggara
-            </label>
+            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Domisili Instansi Lembaga Penyelenggara</label>
           </div>
           <div className="w-full">
-            <Select
-              value={form.domisiliLembagaPenyelenggara}
-              onValueChange={(value) => handleSelectChange("domisiliLembagaPenyelenggara", value)}
-              required
-            >
-              <SelectTrigger className="w-full border border-[#90CAF9] rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#C2E7F6]">
-                <SelectValue placeholder="Pilih Domisili Instansi Lembaga Penyelenggara" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white max-h-72 overflow-y-auto">                <input
-                  type="text"
-                  placeholder="Cari domisili..."
-                  className="w-full px-2 py-1 mb-2 border rounded"
-                  onChange={e => {
-                    const val = e.target.value.toLowerCase();
-                    const filtered = domisiliList.filter(i => i.nama.toLowerCase().includes(val));
-                    // Tetap urutkan hasil filter secara ascending
-                    const sortedFiltered = filtered.sort((a, b) => a.nama.localeCompare(b.nama));
-                    setFilteredDomisiliList(sortedFiltered);
-                  }}
-                />
-                {filteredDomisiliList.map((item) => (
-                  <SelectItem key={item.id} value={item.id.toString()}>
-                    {item.nama}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <Select value={form.domisiliLembagaPenyelenggara} onValueChange={value => handleSelectChange("domisiliLembagaPenyelenggara", value)} required>
+            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
+              <SelectValue placeholder="Pilih Domisili Instansi Lembaga Penyelenggara" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl shadow-lg bg-white">
+              {filteredDomisiliList.map(item => (
+                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
+                  {item.nama}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           </div>
-
           {/* Nomor HP */}
           <div className="flex items-center md:justify-end">
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Nomor HP</label>
           </div>
           <div className="w-full">
-            <Input
-              type="tel"
-              name="handphone"
-              value={form.handphone}
-              onChange={handleChange}
-              className="w-full border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
-              placeholder="Masukkan nomor HP"
-              required
-            />
+            <input type="tel" name="handphone" value={form.handphone} onChange={handleChange} className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3] bg-white shadow transition" placeholder="Masukkan nomor HP" required />
           </div>
         </div>
-        <div className="text-center pt-2">
+        <div className="text-center pt-4">
           {!saved ? (
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition"
-            >
+            <button type="submit" className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-4 rounded-2xl shadow-xl hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-xl tracking-wide transition-all flex items-center gap-3">
+              <Save size={24} />
               Simpan
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={() => router.push("/alumni/evaluasi")}
-              className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition flex items-center gap-2"
-            >
-              Lanjut <ArrowRight size={20} />
+            <button type="button" onClick={() => router.push("/alumni/evaluasi")} className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-4 rounded-2xl shadow-xl hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-xl tracking-wide transition-all flex items-center gap-3">
+              Lanjut
+              <ArrowRight size={24} />
             </button>
           )}
         </div>
       </form>
-
-      {/* Modal Keterangan Nama Lengkap */}
-      {showNamaModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-lg p-6 max-w-xs w-full text-center">
-            <div className="flex justify-center mb-2">
-              <AlertCircle size={32} className="text-[#F59E42]" />
-            </div>
-            <div className="text-[#1976D2] font-semibold mb-2">Keterangan Nama Lengkap</div>
-            <div className="text-gray-700 text-sm mb-4">
-              Nama lengkap adalah nama Anda sebagai alumni pelatihan.
-            </div>
-            <button
-              onClick={() => setShowNamaModal(false)}
-              className="bg-[#1976D2] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#1565C0] transition"
-            >
-              Tutup
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
