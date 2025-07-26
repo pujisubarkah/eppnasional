@@ -19,19 +19,20 @@ export default function MateriPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/jawaban/1")
+    fetch("/api/materi")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.result)) {
           const mapped = data.result.map((row: {
             pelatihanId: number;
             namaPelatihan: string;
-            answers: { q1?: string; q2?: string; q3?: string; q4?: string; q5?: string; q6?: string };
+            relevan: Record<string, string>;
+            tidakRelevan: Record<string, string>;
           }) => ({
             pelatihanId: row.pelatihanId,
             namaPelatihan: row.namaPelatihan,
-            relevan: [row.answers.q1, row.answers.q2, row.answers.q3].filter(Boolean),
-            tidakRelevan: [row.answers.q4, row.answers.q5, row.answers.q6].filter(Boolean),
+            relevan: Object.values(row.relevan).filter(Boolean),
+            tidakRelevan: Object.values(row.tidakRelevan).filter(Boolean),
           }));
           setMateriTable(mapped);
         } else {
@@ -61,7 +62,7 @@ export default function MateriPage() {
           onChange={e => setSelected(e.target.value)}
         >
           <option value="all">Semua Pelatihan</option>
-          {Array.from(new Set(materiTable.map((row) => row.namaPelatihan))).map((nama) => (
+          {Array.from(new Set(materiTable.map((row) => row.namaPelatihan).filter(nama => !!nama))).map((nama) => (
             <option key={nama} value={nama}>{nama}</option>
           ))}
         </select>
