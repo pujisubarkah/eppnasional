@@ -53,7 +53,7 @@ function mapKalimatToKategori(frekuensiKalimat: Record<string, number>) {
 
   // Inisialisasi
   for (const [groupKey, groupValue] of Object.entries(mapping)) {
-    for (const [label, _] of Object.entries(groupValue)) {
+    for (const label of Object.keys(groupValue)) {
       result[groupKey as keyof typeof result][label] = 0;
     }
   }
