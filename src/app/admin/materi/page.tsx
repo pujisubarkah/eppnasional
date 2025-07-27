@@ -85,7 +85,7 @@ export default function MateriPage() {
           </thead>
           <tbody>
             {filteredTable.map((row, idx) => (
-              <tr key={row.pelatihanId} className="text-center">
+              <tr key={`${row.pelatihanId}-${idx}`} className="text-center">
                 <td className="px-4 py-2 border">{idx + 1}</td>
                 <td className="px-4 py-2 border">{row.namaPelatihan}</td>
                 <td className="px-4 py-2 border text-green-700 font-bold">{row.relevan.join(", ")}</td>
