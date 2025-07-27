@@ -5,7 +5,11 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } fro
 
 type ChartRow = {
   pertanyaan: string;
-} & Record<"Sangat Tidak Setuju" | "Tidak Setuju" | "Setuju" | "Sangat Setuju", number>;
+  "Sangat Tidak Setuju": number;
+  "Tidak Setuju": number;
+  "Setuju": number;
+  "Sangat Setuju": number;
+};
 
 function transformFrekuensiToChartData(frekuensi: Record<string, Record<string, number>>): ChartRow[] {
   // Map API answer keys to chart keys
@@ -25,7 +29,7 @@ function transformFrekuensiToChartData(frekuensi: Record<string, Record<string, 
     };
     for (const [jawaban, jumlah] of Object.entries(jawabanObj)) {
       const key = answerMap[jawaban];
-      if (key) (row as any)[key] = jumlah;
+      if (key) row[key as "Sangat Tidak Setuju" | "Tidak Setuju" | "Setuju" | "Sangat Setuju"] = jumlah;
     }
     return row;
   });
@@ -74,8 +78,12 @@ function DukunganLingkunganPage() {
         const chartRows = transformFrekuensiToChartData(data.frekuensi);
         setChartData(chartRows);
         setStats(getSummaryStats(chartRows));
-      } catch (err: any) {
-        setError(err.message || "Terjadi kesalahan");
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message || "Terjadi kesalahan");
+        } else {
+          setError("Terjadi kesalahan");
+        }
       } finally {
         setLoading(false);
       }
