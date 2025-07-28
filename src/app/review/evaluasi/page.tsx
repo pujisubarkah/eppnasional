@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useProfileFormStore } from "@/lib/store/alumni_profile";
-import { toast } from "sonner";
 import { CheckCircle } from "lucide-react";
 
 type Option = { id: number; option_text: string };
@@ -17,10 +16,24 @@ export default function ReviewEvaluasiPage() {
   const [likertAnswers, setLikertAnswers] = useState<string[]>([]);
   const [openQuestion, setOpenQuestion] = useState<Question | null>(null);
   const [saran, setSaran] = useState("");
+
+  // Hydrate answers from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('review_evaluasi_answers');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed.likertAnswers)) setLikertAnswers(parsed.likertAnswers);
+          if (typeof parsed.saran === 'string') setSaran(parsed.saran);
+        } catch {}
+      }
+    }
+  }, []);
   // Removed unused isSubmitted state
   // Toast sonner
-  // Gunakan id dari zustand sebagai user_id
-  const user_id = form?.id;
+  // Gunakan id dari zustand sebagai user_id (langsung ambil form.id)
+  const user_id = form.id;
 
   useEffect(() => {
     // Fetch Likert questions
@@ -29,7 +42,8 @@ export default function ReviewEvaluasiPage() {
       ids.map((id) => fetch(`/api/pertanyaan/${id}`).then((r) => r.json()))
     ).then((results) => {
       setLikertQuestions(results);
-      setLikertAnswers(Array(results.length).fill(""));
+      // Only set empty answers if not already hydrated
+      setLikertAnswers(prev => prev.length === results.length ? prev : Array(results.length).fill(""));
     });
 
     // Fetch open question
@@ -42,22 +56,36 @@ export default function ReviewEvaluasiPage() {
     const updated = [...likertAnswers];
     updated[idx] = value;
     setLikertAnswers(updated);
+    // Auto-save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('review_evaluasi_answers', JSON.stringify({ likertAnswers: updated, saran }));
+    }
+  };
+
+  // Auto-save saran to localStorage
+  const handleSaranChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setSaran(e.target.value);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('review_evaluasi_answers', JSON.stringify({ likertAnswers, saran: e.target.value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Gabungkan semua pertanyaan dan jawaban
-    const pertanyaanList = openQuestion
-      ? [...likertQuestions, openQuestion]
-      : [...likertQuestions];
-    const answers = openQuestion
-      ? [...likertAnswers, saran]
-      : [...likertAnswers];
-    if (answers.some((ans) => !ans)) {
-      toast.error("Mohon isi semua pertanyaan terlebih dahulu!");
-      return;
-    }
     try {
+      // Gabungkan semua pertanyaan dan jawaban
+      const pertanyaanList = openQuestion
+        ? [...likertQuestions, openQuestion]
+        : [...likertQuestions];
+      const answers = openQuestion
+        ? [...likertAnswers, saran]
+        : [...likertAnswers];
+      if (answers.some((ans) => !ans)) {
+        setDialogError("Mohon isi semua pertanyaan terlebih dahulu!");
+        return;
+      }
+      // Debug: cek user_id
+      console.log('DEBUG user_id before submit:', user_id);
       // Gabungkan jawaban ke format JSON
       const answersJson: Record<string, string> = {};
       pertanyaanList.forEach((q, i) => {
@@ -73,29 +101,21 @@ export default function ReviewEvaluasiPage() {
         }),
       });
       if (res.ok) {
-        toast.success(
-          <div className="flex items-center gap-3">
-            <CheckCircle className="text-green-500" size={28} />
-            <span>
-              <span className="font-bold">Jawaban berhasil disimpan!</span><br />
-              Terima kasih atas partisipasi Anda. Pendapat Anda sangat berarti!
-            </span>
-          </div>,
-          {
-            duration: 4000,
-            position: "top-center",
-            style: { background: "#E3F2FD", color: "#1976D2", border: "2px solid #B3E5FC" }
-          }
-        );
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('review_evaluasi_answers');
+        }
         setShowModal(true);
       } else {
         const errorData = await res.json();
-        toast.error(errorData.message || "Gagal menyimpan jawaban!");
+        setDialogError(errorData.message || "Gagal menyimpan jawaban!");
       }
     } catch {
-      toast.error("Gagal menyimpan jawaban!");
+      setDialogError("Gagal menyimpan jawaban!");
     }
   };
+
+  // Dialog error state
+  const [dialogError, setDialogError] = useState<string | null>(null);
 
   return (
     <>
@@ -119,6 +139,20 @@ export default function ReviewEvaluasiPage() {
           </div>
         </div>
       )}
+      {dialogError && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center border border-[#EF9A9A]">
+            <h3 className="text-2xl font-bold text-[#D32F2F] mb-4">Gagal</h3>
+            <p className="mb-6 text-gray-700">{dialogError}</p>
+            <button
+              className="bg-gradient-to-r from-[#EF5350] to-[#D32F2F] text-white px-8 py-3 rounded-xl shadow-lg font-bold text-lg tracking-wide transition flex items-center justify-center gap-2"
+              onClick={() => setDialogError(null)}
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
       <form
         className="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-2xl shadow-2xl p-10 space-y-10 border border-[#B3E5FC]"
         onSubmit={handleSubmit}
@@ -136,16 +170,17 @@ export default function ReviewEvaluasiPage() {
         {likertQuestions.map((q, idx) => (
           <div
             key={q.id}
-            className="bg-white/90 rounded-xl border border-[#B3E5FC] shadow p-6 flex flex-col gap-3 hover:shadow-lg transition"
+            className="bg-white rounded-xl border border-[#B3E5FC] shadow p-4 md:p-6 flex flex-col gap-3 hover:shadow-lg transition"
           >
             <label className="block font-semibold text-[#1976D2] text-base mb-2">
               {idx + 1}. {q.text}
             </label>
-            <div className="flex justify-between gap-4 mt-2">
-              {q.options?.map((opt) => (
+            <div className="flex flex-col xs:flex-row md:flex-row justify-between gap-2 md:gap-4 mt-2 w-full">
+              {q.options?.map((opt, optIdx) => (
                 <label
                   key={opt.id}
-                  className="flex flex-col items-center text-xs font-medium"
+                  className="flex flex-col items-center text-xs font-medium cursor-pointer gap-1 md:gap-2 px-1 md:px-2 w-full"
+                  style={{ minWidth: 0 }}
                 >
                   <input
                     type="radio"
@@ -154,17 +189,21 @@ export default function ReviewEvaluasiPage() {
                     checked={likertAnswers[idx] === opt.option_text}
                     onChange={() => handleLikertChange(idx, opt.option_text)}
                     required
-                    className="accent-[#2196F3] scale-125 mb-1"
+                    className="accent-[#2196F3] scale-110 md:scale-125 mb-0 sm:mb-1"
                   />
-                  <span className="text-[#1976D2] font-bold">
+                  <span className="text-[#1976D2] font-bold text-xs md:text-sm">
                     {opt.option_text.split(" ")[0]}
                   </span>
+                  <span className="text-gray-500 text-[10px] md:text-xs mt-1 text-center font-normal">
+                    {(() => {
+                      if (optIdx === 0) return "Sangat Tidak Setuju";
+                      if (optIdx === 1) return "Tidak Setuju";
+                      if (optIdx === 2) return "Setuju";
+                      if (optIdx === 3) return "Sangat Setuju";
+                      return opt.option_text;
+                    })()}
+                  </span>
                 </label>
-              ))}
-            </div>
-            <div className="flex justify-between gap-2 mt-1 text-xs text-gray-500">
-              {q.options?.map((opt) => (
-                <span key={opt.id}>{opt.option_text}</span>
               ))}
             </div>
           </div>
@@ -178,7 +217,7 @@ export default function ReviewEvaluasiPage() {
           </label>
           <textarea
             value={saran}
-            onChange={(e) => setSaran(e.target.value)}
+            onChange={handleSaranChange}
             required
             className="w-full border border-[#90CAF9] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C2E7F6] bg-white shadow-sm transition"
             rows={3}

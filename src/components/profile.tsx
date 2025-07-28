@@ -50,7 +50,8 @@ export default function ProfileForm() {
   const [dialogMessage, setDialogMessage] = useState("");
   const [dialogType, setDialogType] = useState<"success"|"error">("success");
 
-  const [form, setForm] = useState({
+  const initialForm = {
+    id: undefined as string | number | undefined,
     nama: "",
     nip: "",
     instansi: "",
@@ -63,7 +64,24 @@ export default function ProfileForm() {
     lembagaPenyelenggara: "",
     domisiliLembagaPenyelenggara: "",
     handphone: "",
-  });
+  };
+  const [form, setForm] = useState<typeof initialForm>(initialForm);
+
+  // Hydrate form from localStorage after mount (client only)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_profile_form");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setForm(parsed);
+        // Sync id ke profileStore jika ada dan berbeda
+        if (parsed.id && profileStore.id !== parsed.id) {
+          profileStore.setForm({ id: parsed.id });
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // UI: Hero header
   const Hero = () => (
@@ -129,46 +147,109 @@ export default function ProfileForm() {
         const sortedData = data.sort((a: Instansi, b: Instansi) => a.agency_name.localeCompare(b.agency_name));
         // setInstansiList removed
         setFilteredInstansiList(sortedData);
-        setForm(f => ({ ...f, instansi: "" }));
+        setForm((f: typeof form) => ({ ...f, instansi: "" }));
       } else {
         // setInstansiList removed
         setFilteredInstansiList([]);
-        setForm(f => ({ ...f, instansi: "" }));
+        setForm((f: typeof form) => ({ ...f, instansi: "" }));
       }
     }
     fetchInstansi();
   }, [form.jenisInstansi]);
 
   // Auto-select domisili when lembagaPenyelenggara changes
+  // Auto-select domisili only if user selects a new lembaga
   useEffect(() => {
     if (form.lembagaPenyelenggara) {
       const selectedLemdik = filteredLemdikList.find(item => item.namalemdik === form.lembagaPenyelenggara);
       if (selectedLemdik) {
         const domisili = domisiliList.find(d => d.id === selectedLemdik.provinsi);
-        if (domisili) {
-          setForm(f => ({ ...f, domisiliLembagaPenyelenggara: domisili.id.toString() }));
+        if (domisili && form.domisiliLembagaPenyelenggara !== domisili.id.toString()) {
+          setForm((f: typeof form) => ({ ...f, domisiliLembagaPenyelenggara: domisili.id.toString() }));
         }
       }
     }
-  }, [form.lembagaPenyelenggara, domisiliList, filteredLemdikList]);
+  }, [form.lembagaPenyelenggara, form.domisiliLembagaPenyelenggara, domisiliList, filteredLemdikList]);
 
   // Handlers
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
+    setForm((f: typeof form) => {
+      // Ambil id lama dari localStorage jika ada
+      let id = f.id;
+      if (typeof window !== "undefined") {
+        const saved = localStorage.getItem("alumni_profile_form");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.id) id = parsed.id;
+        }
+      }
+      const updated = { ...f, [name]: value };
+      if (id) updated.id = id;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("alumni_profile_form", JSON.stringify(updated));
+      }
+      return updated;
+    });
     profileStore.setForm({ [name]: value }); // update ke zustand
   }
 
   function handleSelectChange(name: string, value: string) {
-    setForm(f => ({ ...f, [name]: value }));
+    setForm((f: typeof form) => {
+      // Ambil id lama dari localStorage jika ada
+      let id = f.id;
+      if (typeof window !== "undefined") {
+        const saved = localStorage.getItem("alumni_profile_form");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.id) id = parsed.id;
+        }
+      }
+      const updated = { ...f, [name]: value };
+      if (id) updated.id = id;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("alumni_profile_form", JSON.stringify(updated));
+      }
+      return updated;
+    });
     profileStore.setForm({ [name]: value }); // update ke zustand
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.domisiliLembagaPenyelenggara) {
+    if (!form.jenisInstansi || form.jenisInstansi === "0") {
       setDialogType("error");
-      setDialogMessage("Mohon pilih domisili instansi lembaga penyelenggara!");
+      setDialogMessage("Mohon pilih Jenis Instansi!");
+      setDialogOpen(true);
+      return;
+    }
+    if (!form.instansi || form.instansi === "0") {
+      setDialogType("error");
+      setDialogMessage("Mohon pilih Instansi!");
+      setDialogOpen(true);
+      return;
+    }
+    if (!form.jabatan || form.jabatan === "0") {
+      setDialogType("error");
+      setDialogMessage("Mohon pilih Jabatan!");
+      setDialogOpen(true);
+      return;
+    }
+    if (!form.pelatihan || form.pelatihan === "0") {
+      setDialogType("error");
+      setDialogMessage("Mohon pilih Nama Pelatihan!");
+      setDialogOpen(true);
+      return;
+    }
+    if (!form.tahunPelatihan || form.tahunPelatihan === "0") {
+      setDialogType("error");
+      setDialogMessage("Mohon pilih Tahun Pelatihan!");
+      setDialogOpen(true);
+      return;
+    }
+    if (!form.domisiliLembagaPenyelenggara || form.domisiliLembagaPenyelenggara === "0") {
+      setDialogType("error");
+      setDialogMessage("Mohon pilih Domisili Instansi Lembaga Penyelenggara!");
       setDialogOpen(true);
       return;
     }
@@ -186,11 +267,24 @@ export default function ProfileForm() {
       handphone: form.handphone,
     };
     try {
-      const res = await fetch("/api/profile_alumni", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      // Cek apakah sudah ada id integer dari database (bukan NIP/string)
+      const alumniId = profileStore.id && !isNaN(Number(profileStore.id)) ? Number(profileStore.id) : null;
+      let res;
+      if (alumniId) {
+        // PUT update jika sudah ada id integer
+        res = await fetch(`/api/profile_alumni/${alumniId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        // POST create jika belum ada id integer
+        res = await fetch("/api/profile_alumni", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
       const result = await res.json();
       if (result.status === "success") {
         setSaved(true);
@@ -198,8 +292,9 @@ export default function ProfileForm() {
         setDialogMessage(`Terima kasih ${form.nama} sudah mengisi profilnya. Silakan lanjut ke pengisian survey.`);
         setDialogOpen(true);
         // Simpan semua data payload ke zustand globalStore
+        const newId = result.id;
         profileStore.setForm({
-          id: result.id || form.nip,
+          id: newId,
           nama: form.nama,
           nip: form.nip,
           instansi: form.instansi,
@@ -211,7 +306,16 @@ export default function ProfileForm() {
           lembagaPenyelenggara: form.lembagaPenyelenggara,
           handphone: form.handphone,
         });
-        // Simpan ke localStorage jika perlu
+        // Simpan id integer ke localStorage agar update berikutnya selalu pakai id integer
+        if (typeof window !== "undefined" && newId) {
+          const savedProfile = localStorage.getItem("alumni_profile_form");
+          if (savedProfile) {
+            const parsed = JSON.parse(savedProfile);
+            parsed.id = newId;
+            localStorage.setItem("alumni_profile_form", JSON.stringify(parsed));
+          }
+        }
+        // Jangan hapus localStorage di sini, biarkan sampai submit final di konfirmasi
       } else {
         setDialogType("error");
         let detailMsg = "Gagal menyimpan data: " + (result.message || "Unknown error");
@@ -282,7 +386,16 @@ export default function ProfileForm() {
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">NIP/NRP/NIK</label>
           </div>
           <div className="w-full">
-            <input type="text" name="nip" value={form.nip} onChange={handleChange} className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3] bg-white shadow transition" placeholder="Masukkan NIP/NRP/NIK" required />
+            <input
+              type="text"
+              name="nip"
+              value={form.nip}
+              onChange={handleChange}
+              className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3] bg-white shadow transition"
+              placeholder="Masukkan NIP/NRP/NIK"
+              required
+              disabled={form.id !== undefined && form.id !== "" && !isNaN(Number(form.id))}
+            />
           </div>
           {/* Jenis Instansi */}
           <div className="flex items-center md:justify-end">
@@ -437,14 +550,38 @@ export default function ProfileForm() {
             <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Nomor HP</label>
           </div>
           <div className="w-full">
-            <input type="tel" name="handphone" value={form.handphone} onChange={handleChange} className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3] bg-white shadow transition" placeholder="Masukkan nomor HP" required />
+            <div className="flex items-center">
+              <span className="inline-flex items-center px-3 py-3 rounded-l-xl border-2 border-r-0 border-[#2196F3] bg-[#E3F2FD] text-[#1976D2] font-bold text-base md:text-lg select-none" style={{ minWidth: 56, justifyContent: 'center' }}>+62</span>
+              <input
+                type="tel"
+                name="handphone"
+                value={form.handphone.replace(/^\+?62/, '')}
+                onChange={e => {
+                  // Always prepend '+62' to the value
+                  const value = '+62' + e.target.value.replace(/^0+/, '');
+                  setForm(f => {
+                    const updated = { ...f, handphone: value };
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('alumni_profile_form', JSON.stringify(updated));
+                    }
+                    return updated;
+                  });
+                  profileStore.setForm({ handphone: value });
+                }}
+                className="w-full border-2 border-l-0 border-[#2196F3] rounded-r-xl px-4 py-3 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3] bg-white shadow transition"
+                placeholder="Nomor HP tanpa 0 di depan"
+                required
+                style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                inputMode="numeric"
+              />
+            </div>
           </div>
         </div>
         <div className="text-center pt-4">
           {!saved ? (
             <button type="submit" className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-4 rounded-2xl shadow-xl hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-xl tracking-wide transition-all flex items-center gap-3">
               <Save size={24} />
-              Simpan
+              {Number.isInteger(Number(form.id)) && form.id !== "" ? "Update" : "Simpan"}
             </button>
           ) : (
             <button type="button" onClick={() => router.push("/alumni/evaluasi")} className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-4 rounded-2xl shadow-xl hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-xl tracking-wide transition-all flex items-center gap-3">

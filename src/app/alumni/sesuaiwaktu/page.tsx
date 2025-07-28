@@ -13,19 +13,44 @@ type Question = { id: number; text: string; options: Option[] };
 export default function PenilaianInvestasiWaktuPage() {
   const [pertanyaan, setPertanyaan] = useState<Question | null>(null);
   const [jawaban, setJawaban] = useState<string>("");
-  // Ambil id, nama dari globalStore
   const profileStore = useProfileFormStore();
-  const user_id = profileStore.id || "";
+  const [userId, setUserId] = useState<string>("");
   const nama = profileStore.nama;
-
   const router = useRouter();
 
-  // If you need to get nama and user_id, fetch from localStorage or API here
+  // Hydrate user_id dari Zustand, alumni_profile_form, alumni_evaluasi_user_id, atau user_id di localStorage
   useEffect(() => {
-    // Example:
-    // setNama(localStorage.getItem("nama") || "");
-    // setUserId(localStorage.getItem("user_id") || "");
-  }, []);
+    let id = profileStore.id;
+    if (!id && typeof window !== "undefined") {
+      // alumni_profile_form
+      const savedProfile = localStorage.getItem("alumni_profile_form");
+      if (savedProfile) {
+        try {
+          const parsed = JSON.parse(savedProfile);
+          if (parsed.id) id = parsed.id;
+        } catch {}
+      }
+      // alumni_evaluasi_user_id
+      if (!id) {
+        const saved = localStorage.getItem("alumni_evaluasi_user_id");
+        if (saved) id = saved;
+      }
+      // global user_id
+      if (!id) {
+        const globalId = localStorage.getItem("user_id");
+        if (globalId) id = globalId;
+      }
+    }
+    if (!id) {
+      router.replace("/alumni/profile");
+      return;
+    }
+    setUserId(String(id));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user_id", String(id));
+      localStorage.setItem("alumni_evaluasi_user_id", String(id));
+    }
+  }, [profileStore.id, router]);
 
   useEffect(() => {
     async function fetchPertanyaan() {
@@ -109,7 +134,7 @@ export default function PenilaianInvestasiWaktuPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  user_id,
+                  user_id: userId,
                   answers: answersJson,
                   category_id: 4,
                 }),

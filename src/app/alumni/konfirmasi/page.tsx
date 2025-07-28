@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useProfileFormStore } from '@/lib/store/globalStore';
-import { toast } from "sonner";
 import { Send, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -14,24 +13,33 @@ export default function KonfirmasiPage() {
   const profileStore = useProfileFormStore();
   const nama = profileStore.nama;
   const router = useRouter();
-  // Handler for checkbox popup
+  // Handler for checkbox (no popup here)
   const handleSetujuChange = (checked: boolean) => {
     setSetuju(checked);
-    if (checked) {
-      setShowPopup(true);
-    }
   };
 
   const handleSubmit = async () => {
     setLoading(true);
-    // Reset logic for local state only (if needed)
-    toast.success(
-      `Terima Kasih ${nama ? nama : ""}, telah menjadi bagian dari perbaikan! Masukan Anda akan kami gunakan untuk menjadikan pelatihan ke depan lebih relevan, berkualitas, dan bermakna.`
-    );
+    // Simulasi submit sukses, lalu tampilkan popup dan clear localStorage
     setTimeout(() => {
-      router.push("/");
-    }, 1800);
-    setLoading(false);
+      // Clear semua localStorage terkait alumni
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("alumni_profile_form");
+        localStorage.removeItem("alumni_evaluasi_pelatihan_id");
+        localStorage.removeItem("alumni_evaluasi_nama");
+        localStorage.removeItem("alumni_evaluasi_user_id");
+        localStorage.removeItem("alumni_evaluasi_jawaban_id");
+        localStorage.removeItem("alumni_evaluasi_relevan");
+        localStorage.removeItem("alumni_evaluasi_tidakRelevan");
+        localStorage.removeItem("alumni_dukunganlingkungan_answers");
+        // Tambahkan key lain jika ada step survey lain
+      }
+      setShowPopup(true);
+      setLoading(false);
+      setTimeout(() => {
+        router.push("/");
+      }, 1800);
+    }, 800);
   };
 
   return (

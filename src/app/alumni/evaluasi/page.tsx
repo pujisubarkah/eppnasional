@@ -34,18 +34,41 @@ export interface EvaluasiState {
 export default function EvaluasiPage() {
   // Ambil data dari globalStore (zustand)
   const profileStore = useProfileFormStore();
-  const nama = profileStore.nama;
-  const pelatihan_id = Number(profileStore.pelatihan);
-  const id = profileStore.id;
+  const [nama, setNama] = useState<string>(profileStore.nama || "");
+  const [pelatihanId, setPelatihanId] = useState<number>(() => {
+    if (profileStore.pelatihan) return Number(profileStore.pelatihan);
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_evaluasi_pelatihan_id");
+      if (saved) return Number(saved);
+    }
+    return 0;
+  });
+  const [userId, setUserId] = useState<string>("");
 
   // Local state for evaluasi
-  const [relevan, setRelevan] = useState<string[]>([]);
-  const [tidakRelevan, setTidakRelevan] = useState<string[]>([]);
+  const [relevan, setRelevan] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_evaluasi_relevan");
+      if (saved) return JSON.parse(saved);
+    }
+    return [];
+  });
+  const [tidakRelevan, setTidakRelevan] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_evaluasi_tidakRelevan");
+      if (saved) return JSON.parse(saved);
+    }
+    return [];
+  });
 
   // Reset function
   const reset = useCallback(() => {
     setRelevan([]);
     setTidakRelevan([]);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("alumni_evaluasi_relevan");
+      localStorage.removeItem("alumni_evaluasi_tidakRelevan");
+    }
   }, []);
 
   const [materiList, setMateriList] = useState<Agenda[]>([])
@@ -70,17 +93,17 @@ export default function EvaluasiPage() {
 
   const fetchRelevanOptions = useCallback(async () => {
     try {
-      const res = await fetch(`/api/pertanyaan/1/${pelatihan_id}`)
+      const res = await fetch(`/api/pertanyaan/1/${pelatihanId}`)
       const data = await res.json()
       setRelevanOptions(data.option || [])
     } catch {
       setRelevanOptions([])
     }
-  }, [pelatihan_id])
+  }, [pelatihanId])
 
   const fetchTidakRelevanOptions = useCallback(async () => {
     try {
-      const res = await fetch(`/api/pertanyaan/2/${pelatihan_id}`)
+      const res = await fetch(`/api/pertanyaan/2/${pelatihanId}`)
       const data = await res.json()
       // Urutkan berdasarkan option_value
       const sortedOptions = (data.option || []).slice().sort((a: Option, b: Option) => (a.option_value ?? 0) - (b.option_value ?? 0));
@@ -88,15 +111,74 @@ export default function EvaluasiPage() {
     } catch {
       setTidakRelevanOptions([])
     }
-  }, [pelatihan_id])
+  }, [pelatihanId])
+
+  // Sync zustand to localStorage for pelatihan_id, nama, dan user_id
+  useEffect(() => {
+    if (profileStore.pelatihan) {
+      setPelatihanId(Number(profileStore.pelatihan));
+      if (typeof window !== "undefined") {
+        localStorage.setItem("alumni_evaluasi_pelatihan_id", String(profileStore.pelatihan));
+      }
+    }
+    if (profileStore.nama) {
+      setNama(profileStore.nama);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("alumni_evaluasi_nama", profileStore.nama);
+      }
+    }
+    // Hydrate user_id dari beberapa sumber
+    let id = profileStore.id;
+    if (!id && typeof window !== "undefined") {
+      // alumni_profile_form
+      const savedProfile = localStorage.getItem("alumni_profile_form");
+      if (savedProfile) {
+        try {
+          const parsed = JSON.parse(savedProfile);
+          if (parsed.id) id = parsed.id;
+        } catch {}
+      }
+      // alumni_evaluasi_user_id
+      if (!id) {
+        const saved = localStorage.getItem("alumni_evaluasi_user_id");
+        if (saved) id = saved;
+      }
+      // global user_id
+      if (!id) {
+        const globalId = localStorage.getItem("user_id");
+        if (globalId) id = globalId;
+      }
+    }
+    if (!id) {
+      router.replace("/alumni/profile");
+      return;
+    }
+    setUserId(String(id));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user_id", String(id));
+      localStorage.setItem("alumni_evaluasi_user_id", String(id));
+    }
+  }, [profileStore.pelatihan, profileStore.nama, profileStore.id, router]);
+
+  // Restore from localStorage if zustand kosong (pelatihan/nama saja, userId sudah di atas)
+  useEffect(() => {
+    if (!profileStore.pelatihan && typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_evaluasi_pelatihan_id");
+      if (saved) setPelatihanId(Number(saved));
+    }
+    if (!profileStore.nama && typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_evaluasi_nama");
+      if (saved) setNama(saved);
+    }
+  }, [profileStore.pelatihan, profileStore.nama]);
 
   useEffect(() => {
-    if (pelatihan_id) {
-      fetchData(pelatihan_id);
+    if (pelatihanId) {
+      fetchData(pelatihanId);
       fetchRelevanOptions();
       fetchTidakRelevanOptions();
     }
-  }, [pelatihan_id, fetchRelevanOptions, fetchTidakRelevanOptions]);
+  }, [pelatihanId, fetchRelevanOptions, fetchTidakRelevanOptions]);
 
   useEffect(() => {
     reset(); // Reset pilihan saat halaman dibuka
@@ -104,33 +186,60 @@ export default function EvaluasiPage() {
 
   // Logika checkbox diperbaiki untuk sinkronisasi antar list
   const handleCheckbox = (list: string[], setList: (v: string[]) => void, value: string) => {
+    let updated: string[];
     if (list.includes(value)) {
-      // Jika sudah dipilih, hapus
-      setList(list.filter((v) => v !== value));
+      updated = list.filter((v) => v !== value);
     } else {
-      // Batasi hanya 3 pilihan
       if (list.length >= 3) {
         toast.info('Hapus salah satu pilihan terlebih dahulu.');
         return;
       }
       // Sinkronisasi antar list: Hapus dari list lawan jika ada
       if (setList === setRelevan && tidakRelevan.includes(value)) {
-        setTidakRelevan(tidakRelevan.filter((v) => v !== value));
+        setTidakRelevan(prev => {
+          const arr = prev.filter((v) => v !== value);
+          if (typeof window !== "undefined") localStorage.setItem("alumni_evaluasi_tidakRelevan", JSON.stringify(arr));
+          return arr;
+        });
       }
       if (setList === setTidakRelevan && relevan.includes(value)) {
-        setRelevan(relevan.filter((v) => v !== value));
+        setRelevan(prev => {
+          const arr = prev.filter((v) => v !== value);
+          if (typeof window !== "undefined") localStorage.setItem("alumni_evaluasi_relevan", JSON.stringify(arr));
+          return arr;
+        });
       }
-      // Tambahkan pilihan baru
-      setList([...list, value]);
+      updated = [...list, value];
+    }
+    setList(updated);
+    // Simpan ke localStorage
+    if (typeof window !== "undefined") {
+      if (setList === setRelevan) localStorage.setItem("alumni_evaluasi_relevan", JSON.stringify(updated));
+      if (setList === setTidakRelevan) localStorage.setItem("alumni_evaluasi_tidakRelevan", JSON.stringify(updated));
     }
   };
 
-  // Fungsi untuk langsung ke halaman berikutnya
+  // State untuk id jawaban (jika sudah pernah submit)
+  const [idJawaban, setIdJawaban] = useState<string | number | null>(null);
+
+  // Cek localStorage untuk id jawaban saat mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_evaluasi_jawaban_id");
+      if (saved) setIdJawaban(saved);
+    }
+  }, []);
+
+  // Fungsi untuk submit (POST/PUT)
   const handleNext = () => {
-    // Kirim data ke API sebelum pindah halaman
+    if (!userId) {
+      toast.error("Data profil tidak ditemukan. Silakan lengkapi profil terlebih dahulu.");
+      router.push("/alumni/profile");
+      return;
+    }
     const sendData = async () => {
       const body = {
-        user_id: id,
+        user_id: userId,
         answers: {
           q1: relevan[0] || '',
           q2: relevan[1] || '',
@@ -143,19 +252,38 @@ export default function EvaluasiPage() {
       };
 
       try {
-        const res = await fetch('/api/jawaban', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
+        let res;
+        if (idJawaban) {
+          // PUT jika sudah ada id jawaban
+          res = await fetch(`/api/jawaban/${idJawaban}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+          });
+        } else {
+          // POST jika belum ada id jawaban
+          res = await fetch('/api/jawaban', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+          });
+        }
 
         if (res.ok) {
-          // Jika berhasil, lanjut ke halaman berikutnya
+          // Simpan id jawaban ke localStorage jika POST
+          const data = await res.json();
+          if (!idJawaban && data?.data?.id) {
+            setIdJawaban(data.data.id);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("alumni_evaluasi_jawaban_id", String(data.data.id));
+            }
+          }
           router.push("/alumni/dukunganlingkungan");
         } else {
-          // Jika gagal, tampilkan pesan error
           const errorData = await res.json();
           toast.error(errorData.message || 'Terjadi kesalahan, silakan coba lagi.');
         }
@@ -163,9 +291,8 @@ export default function EvaluasiPage() {
         toast.error('Terjadi kesalahan, silakan coba lagi.');
       }
     };
-
     sendData();
-  }
+  };
 
   return (
     <>
@@ -174,13 +301,13 @@ export default function EvaluasiPage() {
         <div className="mb-4">
           <span className="block text-[#1976D2] text-base">
             {nama ? (
-              pelatihan_id && namaPelatihan ? (
+              pelatihanId && namaPelatihan ? (
                 <>
                   Halo <b>{nama}</b>! Kami ingin meminta waktu Anda terkait pelatihan yang pernah Anda ikuti yaitu <b>{namaPelatihan}</b>. Cuma 3–5 menit, tapi dampaknya besar banget buat perbaikan pelatihan ke depan!
                 </>
-              ) : pelatihan_id ? (
+              ) : pelatihanId ? (
                 <>
-                  Halo <b>{nama}</b>! Kami ingin meminta waktu Anda terkait pelatihan yang pernah Anda ikuti yaitu <b>ID {pelatihan_id}</b>. Cuma 3–5 menit, tapi dampaknya besar banget buat perbaikan pelatihan ke depan!
+                  Halo <b>{nama}</b>! Kami ingin meminta waktu Anda terkait pelatihan yang pernah Anda ikuti yaitu <b>ID {pelatihanId}</b>. Cuma 3–5 menit, tapi dampaknya besar banget buat perbaikan pelatihan ke depan!
                 </>
               ) : (
                 <>
@@ -303,7 +430,7 @@ export default function EvaluasiPage() {
             onClick={handleNext}
             className="flex items-center gap-2 bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition w-full md:w-auto justify-center"
           >
-            Lanjut <ArrowRight size={20} />
+            {idJawaban ? "Update" : "Lanjut"} <ArrowRight size={20} />
           </button>
         </div>
       </div>

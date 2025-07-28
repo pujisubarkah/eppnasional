@@ -1,3 +1,4 @@
+// ...tidak ada kode di luar fungsi komponen...
 "use client";
 import { useEffect, useState } from "react";
 import { useProfileFormStore } from '@/lib/store/globalStore';
@@ -21,10 +22,42 @@ type Question = {
 };
 
 export default function SikapPrilakuPage() {
-  // Ambil id, nama, pelatihan_id dari globalStore
   const profileStore = useProfileFormStore();
-  const profile = { pelatihan_id: Number(profileStore.pelatihan), id: profileStore.id || "" };
-  const user_id = profileStore.id || "";
+  const router = useRouter();
+  const [userId, setUserId] = useState<string>("");
+  const [pelatihanId, setPelatihanId] = useState<number | null>(null);
+
+  // Hydrate user_id dan pelatihan_id dari Zustand, alumni_profile_form, atau localStorage
+  useEffect(() => {
+    let id = profileStore.id;
+    let pel = profileStore.pelatihan;
+    if (!id && typeof window !== "undefined") {
+      const savedProfile = localStorage.getItem("alumni_profile_form");
+      if (savedProfile) {
+        try {
+          const parsed = JSON.parse(savedProfile);
+          if (parsed.id) id = parsed.id;
+          if (!pel && parsed.pelatihan) pel = parsed.pelatihan;
+        } catch {}
+      }
+      if (!id) id = localStorage.getItem("user_id") || "";
+      if (!pel) pel = localStorage.getItem("pelatihan_id") || "";
+    }
+    if (!id) {
+      router.replace("/alumni/profile");
+      return;
+    }
+    setUserId(id);
+    setPelatihanId(pel ? Number(pel) : null);
+    // Sync ke localStorage
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user_id", id);
+      if (pel) localStorage.setItem("pelatihan_id", pel.toString());
+    }
+  }, [profileStore.id, profileStore.pelatihan, router]);
+
+  const user_id = userId;
+  const profile = { pelatihan_id: pelatihanId ?? Number(profileStore.pelatihan), id: user_id };
   // ...existing code...
   const [pertanyaanSikap, setPertanyaanSikap] = useState<Question | null>(null);
   const [pertanyaanKinerja, setPertanyaanKinerja] = useState<Question | null>(null);
@@ -41,7 +74,7 @@ export default function SikapPrilakuPage() {
   const [dampak, setDampak] = useState<string[]>([]);
   const [dampakLain, setDampakLain] = useState<string>("");
 
-  const router = useRouter();
+  // router sudah dideklarasi di atas
 
   // Fetch profile from localStorage or API if needed
   useEffect(() => {
@@ -153,6 +186,11 @@ export default function SikapPrilakuPage() {
 
   // Fungsi untuk menyimpan jawaban dan navigasi
   const saveAnswersAndNavigate = async () => {
+    // Pastikan user_id ada
+    if (!user_id) {
+      toast.error("Data user tidak ditemukan. Silakan refresh halaman atau isi ulang profil.");
+      return false;
+    }
     // Validasi berdasarkan jenis pelatihan
     if (isPelatihanLima) {
       if (!sikap || !Array.isArray(sikap) || sikap.length === 0 || kinerja.length !== 3) {

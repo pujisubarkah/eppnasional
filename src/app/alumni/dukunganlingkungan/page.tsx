@@ -13,10 +13,46 @@ type Question = { id: number; text: string; options: Option[] };
 export default function DukunganLingkunganPage() {
   const [pertanyaanList, setPertanyaanList] = useState<Question[]>([]);
   const router = useRouter();
-  // Ambil id, nama, pelatihan_id dari globalStore
   const profileStore = useProfileFormStore();
-  const user_id = profileStore.id || "";
+  const [userId, setUserId] = useState<string>("");
   const [answers, setAnswers] = useState<(string|null)[]>([]);
+
+  // Hydrate user_id dari Zustand, alumni_profile_form, atau user_id di localStorage
+  useEffect(() => {
+    let id = profileStore.id;
+    if (!id && typeof window !== "undefined") {
+      const savedProfile = localStorage.getItem("alumni_profile_form");
+      if (savedProfile) {
+        try {
+          const parsed = JSON.parse(savedProfile);
+          if (parsed.id) id = parsed.id;
+        } catch {}
+      }
+      if (!id) id = localStorage.getItem("user_id") || "";
+    }
+    if (!id) {
+      router.replace("/alumni/profile");
+      return;
+    }
+    setUserId(id);
+    // Sync ke localStorage
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user_id", id);
+    }
+  }, [profileStore.id, router]);
+
+  // Hydrate answers from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_dukunganlingkungan_answers");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) setAnswers(parsed);
+        } catch {}
+      }
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchQuestions() {
@@ -29,7 +65,22 @@ export default function DukunganLingkunganPage() {
         );
         setPertanyaanList(responses);
         // Inisialisasi jawaban jika belum ada
-        if (!answers.length) setAnswers(Array(responses.length).fill(null));
+        if (!answers.length) {
+          setAnswers(Array(responses.length).fill(null));
+        } else if (answers.length !== responses.length) {
+          // Jika jumlah pertanyaan berubah, sesuaikan panjang array
+          setAnswers((prev) => {
+            const arr = Array(responses.length).fill(null);
+            for (let i = 0; i < Math.min(prev.length, arr.length); i++) {
+              arr[i] = prev[i];
+            }
+            // Auto-save to localStorage
+            if (typeof window !== "undefined") {
+              localStorage.setItem("alumni_dukunganlingkungan_answers", JSON.stringify(arr));
+            }
+            return arr;
+          });
+        }
       } catch {
         // handle error, optionally show toast
       }
@@ -42,6 +93,10 @@ export default function DukunganLingkunganPage() {
     setAnswers(prev => {
       const updated = [...prev];
       updated[idx] = value;
+      // Auto-save to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("alumni_dukunganlingkungan_answers", JSON.stringify(updated));
+      }
       return updated;
     });
   };
@@ -115,6 +170,12 @@ export default function DukunganLingkunganPage() {
               toast.error("Mohon isi semua pertanyaan terlebih dahulu!");
               return;
             }
+            // Pastikan user_id selalu ada, fallback ke localStorage alumni_profile_form
+            if (!userId) {
+              toast.error("Data profil tidak ditemukan. Silakan lengkapi profil terlebih dahulu.");
+              router.push("/alumni/profile");
+              return;
+            }
             try {
               // Gabungkan jawaban ke format JSON
               const answersJson: Record<string, string> = {};
@@ -125,7 +186,7 @@ export default function DukunganLingkunganPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  user_id,
+                  user_id: userId,
                   answers: answersJson,
                   category_id: 2,
                 }),
@@ -133,6 +194,9 @@ export default function DukunganLingkunganPage() {
               if (res.ok) {
                 toast.success("Jawaban berhasil disimpan!");
                 setAnswers(Array(pertanyaanList.length).fill(null));
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem("alumni_dukunganlingkungan_answers");
+                }
                 router.push("/alumni/sikapprilaku");
               } else {
                 const errorData = await res.json();

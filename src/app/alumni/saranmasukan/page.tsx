@@ -10,18 +10,92 @@ import { toast } from "sonner";
 
 export default function SaranMasukanPage() {
   const router = useRouter();
-  // Ambil id dari globalStore
   const profileStore = useProfileFormStore();
-  const user_id = profileStore.id || "";
-  const [materi, setMateri] = useState("");
-  const [metode, setMetode] = useState("");
-  const [waktu, setWaktu] = useState("");
-  const [pengajar, setPengajar] = useState("");
-
-  // If you need to get user_id, fetch from localStorage or API here
+  const [userId, setUserId] = useState<string>("");
+  // Hydrate user_id dari Zustand, alumni_profile_form, alumni_evaluasi_user_id, atau user_id di localStorage
   useEffect(() => {
-    // Example: setUserId(localStorage.getItem("user_id") || "");
-  }, []);
+    let id = profileStore.id;
+    if (!id && typeof window !== "undefined") {
+      // alumni_profile_form
+      const savedProfile = localStorage.getItem("alumni_profile_form");
+      if (savedProfile) {
+        try {
+          const parsed = JSON.parse(savedProfile);
+          if (parsed.id) id = parsed.id;
+        } catch {}
+      }
+      // alumni_evaluasi_user_id
+      if (!id) {
+        const saved = localStorage.getItem("alumni_evaluasi_user_id");
+        if (saved) id = saved;
+      }
+      // global user_id
+      if (!id) {
+        const globalId = localStorage.getItem("user_id");
+        if (globalId) id = globalId;
+      }
+    }
+    if (!id) {
+      router.replace("/alumni/profile");
+      return;
+    }
+    setUserId(String(id));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user_id", String(id));
+      localStorage.setItem("alumni_evaluasi_user_id", String(id));
+    }
+  }, [profileStore.id, router]);
+  // Restore from localStorage if available
+  const [materi, setMateri] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_saranmasukan_materi");
+      if (saved) return saved;
+    }
+    return "";
+  });
+  const [metode, setMetode] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_saranmasukan_metode");
+      if (saved) return saved;
+    }
+    return "";
+  });
+  const [waktu, setWaktu] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_saranmasukan_waktu");
+      if (saved) return saved;
+    }
+    return "";
+  });
+  const [pengajar, setPengajar] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("alumni_saranmasukan_pengajar");
+      if (saved) return saved;
+    }
+    return "";
+  });
+
+  // Simpan ke localStorage setiap kali berubah
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("alumni_saranmasukan_materi", materi);
+    }
+  }, [materi]);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("alumni_saranmasukan_metode", metode);
+    }
+  }, [metode]);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("alumni_saranmasukan_waktu", waktu);
+    }
+  }, [waktu]);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("alumni_saranmasukan_pengajar", pengajar);
+    }
+  }, [pengajar]);
 
   // State untuk label pertanyaan dari API
   const [pertanyaanLabels, setPertanyaanLabels] = useState({
@@ -139,12 +213,19 @@ export default function SaranMasukanPage() {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    user_id,
+                    user_id: userId,
                     answers: answersJson,
                     category_id: 7,
                   }),
                 });
                 if (res.ok) {
+                  // Clear localStorage on success
+                  if (typeof window !== "undefined") {
+                    localStorage.removeItem("alumni_saranmasukan_materi");
+                    localStorage.removeItem("alumni_saranmasukan_metode");
+                    localStorage.removeItem("alumni_saranmasukan_waktu");
+                    localStorage.removeItem("alumni_saranmasukan_pengajar");
+                  }
                   toast.success("Saran & masukan berhasil disimpan!");
                   router.push("/alumni/konfirmasi");
                 } else {

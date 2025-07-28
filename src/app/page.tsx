@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -8,7 +8,21 @@ import DashboardMap from "@/components/DashboardMap";
 import DashboardCharts from "@/components/DashboardCharts";
 
 export default function Home() {
-  // Removed unused state variables: eligible, setEligible, menuOpen, setMenuOpen
+  // Clear all relevant localStorage keys on homepage load
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("alumni_profile_form");
+      localStorage.removeItem("alumni_evaluasi_pelatihan_id");
+      localStorage.removeItem("alumni_evaluasi_nama");
+      localStorage.removeItem("alumni_evaluasi_user_id");
+      localStorage.removeItem("alumni_evaluasi_jawaban_id");
+      localStorage.removeItem("alumni_evaluasi_relevan");
+      localStorage.removeItem("alumni_evaluasi_tidakRelevan");
+      localStorage.removeItem("alumni_dukunganlingkungan_answers");
+      localStorage.removeItem("review_evaluasi_answers");
+      // Tambahkan key lain jika ada step survey lain
+    }
+  }, []);
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300 px-4 mt-24">
