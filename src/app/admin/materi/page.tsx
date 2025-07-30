@@ -60,6 +60,7 @@ export default function MateriPage() {
           Tabel berikut memperlihatkan perbandingan jumlah responden yang menilai materi pelatihan <b>Relevan</b> dan <b>Tidak Relevan</b> dalam mendukung kinerja, berdasarkan jenis pelatihan.
         </p>
       </div>
+      {/* ...existing code... */}
       <div className="mb-4 flex items-center gap-2">
         <label className="font-semibold text-[#1976D2]">Filter Pelatihan:</label>
         <select
@@ -129,6 +130,43 @@ export default function MateriPage() {
             </ul>
           </div>
         </div>
+      </div>
+      {/* Simpulan Top 3 Materi Relevan & Tidak Relevan di bawah */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 mt-8 p-6 rounded-xl shadow text-[#1976D2]">
+        <h2 className="text-lg font-semibold mb-4">Simpulan 3 Materi Teratas</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="font-bold mb-2 text-green-700">Top 3 Materi Relevan</h3>
+            <ul className="list-decimal ml-6">
+              {Object.entries(frekuensi.relevan)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(([materi, jumlah]) => (
+                  <li key={materi}>
+                    <span className="font-bold">{materi}</span> <span className="text-gray-700">({jumlah} responden)</span>
+                  </li>
+                ))}
+              {Object.keys(frekuensi.relevan).length === 0 && <li className="text-gray-500">Tidak ada data materi relevan.</li>}
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-bold mb-2 text-red-600">Top 3 Materi Tidak Relevan</h3>
+            <ul className="list-decimal ml-6">
+              {Object.entries(frekuensi.tidakRelevan)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(([materi, jumlah]) => (
+                  <li key={materi}>
+                    <span className="font-bold">{materi}</span> <span className="text-gray-700">({jumlah} responden)</span>
+                  </li>
+                ))}
+              {Object.keys(frekuensi.tidakRelevan).length === 0 && <li className="text-gray-500">Tidak ada data materi tidak relevan.</li>}
+            </ul>
+          </div>
+        </div>
+        <p className="mt-4 text-sm text-gray-700">
+          Simpulan di atas menampilkan 3 materi yang paling sering dinilai relevan dan tidak relevan oleh responden. Materi relevan menunjukkan topik yang paling mendukung kinerja alumni, sedangkan materi tidak relevan dapat menjadi bahan evaluasi untuk perbaikan kurikulum pelatihan berikutnya.
+        </p>
       </div>
     </div>
   );

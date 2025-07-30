@@ -33,6 +33,11 @@ export default function DashboardMap() {
   const [provinsi, setProvinsi] = useState<Provinsi[]>([]);
   const [hovered, setHovered] = useState<Provinsi | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  // Zoom & Pan State
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     async function fetchProvinsi() {
@@ -52,6 +57,30 @@ export default function DashboardMap() {
     }
     fetchProvinsi();
   }, []);
+
+  // Mouse events for pan
+  function handleMouseDown(e: React.MouseEvent) {
+    setDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  }
+  function handleMouseUp() {
+    setDragging(false);
+    setDragStart(null);
+  }
+  function handleMouseMove(e: React.MouseEvent) {
+    if (!dragging || !dragStart) return;
+    setPan((prev) => ({
+      x: prev.x + (e.clientX - dragStart.x),
+      y: prev.y + (e.clientY - dragStart.y),
+    }));
+    setDragStart({ x: e.clientX, y: e.clientY });
+  }
+  // Wheel event for zoom
+  function handleWheel(e: React.WheelEvent) {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom((z) => Math.max(0.5, Math.min(3, z + delta)));
+  }
 
   return (
     <section className="w-full max-w-7xl mx-auto px-2 md:px-6 py-6 md:py-12">
@@ -73,53 +102,84 @@ export default function DashboardMap() {
             <hr className="w-1/4 h-1 bg-gradient-to-r from-blue-700 via-blue-400 to-cyan-400 mx-auto my-3 sm:my-4" />
           </div>
 
-          {/* Kontainer Peta */}
+          {/* Kontainer Peta dengan Zoom & Pan */}
           <div className="relative overflow-hidden rounded-lg shadow-md border border-[#2196F3]/30 flex-1">
+            {/* Zoom Controls */}
+            <div className="absolute z-10 top-4 left-4 flex flex-col gap-2 bg-white/80 rounded shadow p-2 border border-blue-200">
+              <button
+                className="px-2 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold"
+                onClick={() => setZoom((z) => Math.min(z + 0.2, 3))}
+                aria-label="Zoom in"
+              >+
+              </button>
+              <button
+                className="px-2 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold"
+                onClick={() => setZoom((z) => Math.max(z - 0.2, 0.5))}
+                aria-label="Zoom out"
+              >−
+              </button>
+              <button
+                className="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold"
+                onClick={() => {
+                  setZoom(1);
+                  setPan({ x: 0, y: 0 });
+                }}
+                aria-label="Reset"
+              >Reset
+              </button>
+            </div>
             <svg
               viewBox="0 0 1000 600"
-              className="w-full h-auto max-h-[70vh]"
+              className="w-full h-auto max-h-[70vh] select-none"
               preserveAspectRatio="xMidYMid meet"
+              style={{ cursor: dragging ? 'grabbing' : 'grab' }}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
+              onWheel={handleWheel}
             >
-              <defs>
-                <radialGradient id="prov-hover-gradient" cx="50%" cy="50%" r="70%">
-                  <stop offset="0%" stopColor="#BBDEFB" />
-                  <stop offset="100%" stopColor="#1976D2" />
-                </radialGradient>
-                <linearGradient id="no-data-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#f8fafc" />
-                  <stop offset="100%" stopColor="#e2e8f0" />
-                </linearGradient>
-              </defs>
-              {provinsi.map((prov) => (
-                <path
-                  key={prov.provinsiId}
-                  d={cleanPath(prov.svgPath)}
-                  fill={hovered?.provinsiId === prov.provinsiId ? "url(#prov-hover-gradient)" : (prov.jumlahAlumni > 0 ? getColor(prov.jumlahAlumni) : "url(#no-data-gradient)")}
-                  stroke="#1E3A8A"
-                  strokeWidth={0.5}
-                  strokeOpacity={0.3}
-                  onMouseEnter={() => {
-                    setHovered(prov);
-                    setShowTooltip(true);
-                  }}
-                  onMouseLeave={() => {
-                    setHovered(null);
-                    setShowTooltip(false);
-                  }}
-                  className="cursor-pointer transition-all duration-200 ease-in-out"
-                >
-                  <title>{prov.provinsiNama} ({prov.jumlahAlumni} alumni)</title>
-                </path>
-              ))}
-              {/* Tooltip Hover di pojok kanan atas */}
-              {showTooltip && hovered && (
-                <foreignObject x={770} y={10} width={220} height={60} className="pointer-events-none">
-                  <div className="bg-white/95 border border-blue-300 rounded-lg p-2 shadow-lg text-xs sm:text-sm font-semibold text-blue-800 backdrop-blur-sm animate-fadeIn">
-                    <div className="font-bold">{hovered.provinsiNama}</div>
-                    <div>Jumlah Alumni: {hovered.jumlahAlumni}</div>
-                  </div>
-                </foreignObject>
-              )}
+              <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
+                <defs>
+                  <radialGradient id="prov-hover-gradient" cx="50%" cy="50%" r="70%">
+                    <stop offset="0%" stopColor="#BBDEFB" />
+                    <stop offset="100%" stopColor="#1976D2" />
+                  </radialGradient>
+                  <linearGradient id="no-data-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#f8fafc" />
+                    <stop offset="100%" stopColor="#e2e8f0" />
+                  </linearGradient>
+                </defs>
+                {provinsi.map((prov) => (
+                  <path
+                    key={prov.provinsiId}
+                    d={cleanPath(prov.svgPath)}
+                    fill={hovered?.provinsiId === prov.provinsiId ? "url(#prov-hover-gradient)" : (prov.jumlahAlumni > 0 ? getColor(prov.jumlahAlumni) : "url(#no-data-gradient)")}
+                    stroke="#1E3A8A"
+                    strokeWidth={0.5}
+                    strokeOpacity={0.3}
+                    onMouseEnter={() => {
+                      setHovered(prov);
+                      setShowTooltip(true);
+                    }}
+                    onMouseLeave={() => {
+                      setHovered(null);
+                      setShowTooltip(false);
+                    }}
+                    className="cursor-pointer transition-all duration-200 ease-in-out"
+                  >
+                    <title>{prov.provinsiNama} ({prov.jumlahAlumni} alumni)</title>
+                  </path>
+                ))}
+                {/* Tooltip Hover di pojok kanan atas */}
+                {showTooltip && hovered && (
+                  <foreignObject x={770} y={10} width={220} height={60} className="pointer-events-none">
+                    <div className="bg-white/95 border border-blue-300 rounded-lg p-2 shadow-lg text-xs sm:text-sm font-semibold text-blue-800 backdrop-blur-sm animate-fadeIn">
+                      <div className="font-bold">{hovered.provinsiNama}</div>
+                      <div>Jumlah Alumni: {hovered.jumlahAlumni}</div>
+                    </div>
+                  </foreignObject>
+                )}
+              </g>
             </svg>
           </div>
         </div>

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell } from "recharts";
+const PIE_COLORS = ["#FF1744", "#FFB74D", "#90CAF9", "#1976D2"];
 
 type ChartRow = {
   pertanyaan: string;
@@ -121,13 +123,51 @@ function DukunganLingkunganPage() {
               />
               <Tooltip />
               <Legend />
-              <Bar dataKey="Sangat Tidak Setuju" stackId="a" fill="#EF9A9A" />
+              <Bar dataKey="Sangat Tidak Setuju" stackId="a" fill="#FF1744" />
               <Bar dataKey="Tidak Setuju" stackId="a" fill="#FFB74D" />
               <Bar dataKey="Setuju" stackId="a" fill="#90CAF9" />
               <Bar dataKey="Sangat Setuju" stackId="a" fill="#1976D2" />
             </BarChart>
           </ResponsiveContainer>
         )}
+        {/* Pie Chart per pertanyaan */}
+        <div className="mt-8">
+          <h3 className="text-md font-semibold mb-4 text-[#1976D2]">Distribusi Jawaban per Pertanyaan</h3>
+          <div className="grid md:grid-cols-2 gap-8">
+            {chartData.map((row, idx) => {
+              const pieData = [
+                { name: "Sangat Tidak Setuju", value: row["Sangat Tidak Setuju"] },
+                { name: "Tidak Setuju", value: row["Tidak Setuju"] },
+                { name: "Setuju", value: row["Setuju"] },
+                { name: "Sangat Setuju", value: row["Sangat Setuju"] },
+              ];
+              return (
+                <div key={row.pertanyaan} className="bg-white rounded-xl shadow p-4 border border-[#E3F2FD]">
+                  <h4 className="font-semibold mb-2 text-[#1976D2]">{row.pertanyaan}</h4>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={70}
+                        label
+                      >
+                        {pieData.map((entry, i) => (
+                          <Cell key={`cell-${i}`} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
       {/* Simpulan */}
       <div className="bg-blue-50 border-l-4 border-blue-400 mt-8 p-6 rounded-xl shadow text-[#1976D2]">
