@@ -109,18 +109,22 @@ export default function MateriPage() {
           <div>
             <h3 className="font-bold mb-2 text-green-700">Materi Relevan</h3>
             <ul className="list-disc ml-6">
-              {Object.entries(frekuensi.relevan).map(([materi, jumlah]) => (
-                <li key={materi}>{materi}: <span className="font-bold">{jumlah}</span></li>
-              ))}
+              {Object.entries(frekuensi.relevan)
+                .sort((a, b) => b[1] - a[1])
+                .map(([materi, jumlah]) => (
+                  <li key={materi}>{materi}: <span className="font-bold">{jumlah}</span></li>
+                ))}
               {Object.keys(frekuensi.relevan).length === 0 && <li className="text-gray-500">Tidak ada data materi relevan.</li>}
             </ul>
           </div>
           <div>
             <h3 className="font-bold mb-2 text-red-600">Materi Tidak Relevan</h3>
             <ul className="list-disc ml-6">
-              {Object.entries(frekuensi.tidakRelevan).map(([materi, jumlah]) => (
-                <li key={materi}>{materi}: <span className="font-bold">{jumlah}</span></li>
-              ))}
+              {Object.entries(frekuensi.tidakRelevan)
+                .sort((a, b) => b[1] - a[1])
+                .map(([materi, jumlah]) => (
+                  <li key={materi}>{materi}: <span className="font-bold">{jumlah}</span></li>
+                ))}
               {Object.keys(frekuensi.tidakRelevan).length === 0 && <li className="text-gray-500">Tidak ada data materi tidak relevan.</li>}
             </ul>
           </div>

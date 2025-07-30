@@ -122,7 +122,7 @@ function DukunganLingkunganPage() {
               <Tooltip />
               <Legend />
               <Bar dataKey="Sangat Tidak Setuju" stackId="a" fill="#EF9A9A" />
-              <Bar dataKey="Tidak Setuju" stackId="a" fill="#FFF59D" />
+              <Bar dataKey="Tidak Setuju" stackId="a" fill="#FFB74D" />
               <Bar dataKey="Setuju" stackId="a" fill="#90CAF9" />
               <Bar dataKey="Sangat Setuju" stackId="a" fill="#1976D2" />
             </BarChart>

@@ -130,9 +130,11 @@ const COLORS = [
 		  <div className="bg-blue-50 border-l-4 border-blue-400 mt-8 p-6 rounded-xl shadow text-[#1976D2]">
 			<h2 className="text-lg font-semibold mb-4">Rekap Frekuensi Kalimat</h2>
 			<ul className="list-disc ml-6">
-			  {Object.entries(frekuensiKalimat).map(([kalimat, jumlah]) => (
-				<li key={kalimat}>{kalimat}: <span className="font-bold">{jumlah}</span></li>
-			  ))}
+			  {Object.entries(frekuensiKalimat)
+				.sort((a, b) => b[1] - a[1])
+				.map(([kalimat, jumlah]) => (
+				  <li key={kalimat}>{kalimat}: <span className="font-bold">{jumlah}</span></li>
+				))}
 			  {Object.keys(frekuensiKalimat).length === 0 && <li className="text-gray-500">Tidak ada data frekuensi kalimat.</li>}
 			</ul>
 		  </div>
