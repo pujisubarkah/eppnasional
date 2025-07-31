@@ -13,28 +13,33 @@ type ChartRow = {
   "Sangat Setuju": number;
 };
 
-function transformFrekuensiToChartData(frekuensi: Record<string, Record<string, number>>): ChartRow[] {
-  // Map API answer keys to chart keys
-  const answerMap: Record<string, keyof ChartRow> = {
+function transformFrekuensiToChartData(frekuensi: Record<string, Array<{ pelatihanId: number, namaPelatihan: string, frekuensi: Record<string, number> }>>): (ChartRow & { namaPelatihan: string; pelatihanId: number })[] {
+  const answerMap: Record<string, "Sangat Tidak Setuju" | "Tidak Setuju" | "Setuju" | "Sangat Setuju"> = {
     "1 - Sangat Tidak Setuju": "Sangat Tidak Setuju",
     "2 - Tidak Setuju": "Tidak Setuju",
     "3 - Setuju": "Setuju",
     "4 - Sangat Setuju": "Sangat Setuju",
   };
-  return Object.entries(frekuensi).map(([pertanyaan, jawabanObj]) => {
-    const row: ChartRow = {
-      pertanyaan,
-      "Sangat Tidak Setuju": 0,
-      "Tidak Setuju": 0,
-      "Setuju": 0,
-      "Sangat Setuju": 0,
-    };
-    for (const [jawaban, jumlah] of Object.entries(jawabanObj)) {
-      const key = answerMap[jawaban];
-      if (key) row[key as "Sangat Tidak Setuju" | "Tidak Setuju" | "Setuju" | "Sangat Setuju"] = jumlah;
-    }
-    return row;
+  const rows: Array<ChartRow & { namaPelatihan: string; pelatihanId: number }> = [];
+  Object.entries(frekuensi).forEach(([pertanyaan, arr]) => {
+    arr.forEach(({ namaPelatihan, pelatihanId, frekuensi }) => {
+      const row: ChartRow & { namaPelatihan: string; pelatihanId: number } = {
+        pertanyaan: pertanyaan,
+        "Sangat Tidak Setuju": 0,
+        "Tidak Setuju": 0,
+        "Setuju": 0,
+        "Sangat Setuju": 0,
+        namaPelatihan: namaPelatihan,
+        pelatihanId: pelatihanId,
+      };
+      for (const [jawaban, jumlah] of Object.entries(frekuensi)) {
+        const key = answerMap[jawaban];
+        if (key) row[key] = jumlah;
+      }
+      rows.push(row);
+    });
   });
+  return rows;
 }
 
 // Hitung persentase dinamis
@@ -64,10 +69,12 @@ function getSummaryStats(data: ChartRow[]) {
 }
 
 function DukunganLingkunganPage() {
-  const [chartData, setChartData] = useState<ChartRow[]>([]);
-  const [stats, setStats] = useState<ReturnType<typeof getSummaryStats>>();
+  const [chartData, setChartData] = useState<(ChartRow & { namaPelatihan: string; pelatihanId: number })[]>([]);
+  // const [stats, setStats] = useState<ReturnType<typeof getSummaryStats>>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pelatihanList, setPelatihanList] = useState<string[]>([]);
+  const [selectedPelatihan, setSelectedPelatihan] = useState<string>("all");
 
   useEffect(() => {
     async function fetchData() {
@@ -77,9 +84,13 @@ function DukunganLingkunganPage() {
         const res = await fetch("/api/dukungan");
         if (!res.ok) throw new Error("Gagal memuat data");
         const data = await res.json();
+        // Parse new API response structure
         const chartRows = transformFrekuensiToChartData(data.frekuensi);
         setChartData(chartRows);
-        setStats(getSummaryStats(chartRows));
+        // Get unique namaPelatihan
+        const uniquePelatihan = Array.from(new Set(chartRows.map(r => r.namaPelatihan)));
+        setPelatihanList(["all", ...uniquePelatihan]);
+        // setStats(getSummaryStats(chartRows));
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message || "Terjadi kesalahan");
@@ -93,9 +104,48 @@ function DukunganLingkunganPage() {
     fetchData();
   }, []);
 
+  // Filter chartData by selectedPelatihan
+  let filteredChartData: (ChartRow & { namaPelatihan: string; pelatihanId: number })[] | ChartRow[] = [];
+  if (selectedPelatihan === "all") {
+    // Group by pertanyaan and sum frequencies
+    const pertanyaanMap = new Map<string, ChartRow>();
+    chartData.forEach(row => {
+      if (!pertanyaanMap.has(row.pertanyaan)) {
+        pertanyaanMap.set(row.pertanyaan, {
+          pertanyaan: row.pertanyaan,
+          "Sangat Tidak Setuju": 0,
+          "Tidak Setuju": 0,
+          "Setuju": 0,
+          "Sangat Setuju": 0,
+        });
+      }
+      const agg = pertanyaanMap.get(row.pertanyaan)!;
+      agg["Sangat Tidak Setuju"] += row["Sangat Tidak Setuju"];
+      agg["Tidak Setuju"] += row["Tidak Setuju"];
+      agg["Setuju"] += row["Setuju"];
+      agg["Sangat Setuju"] += row["Sangat Setuju"];
+    });
+    filteredChartData = Array.from(pertanyaanMap.values());
+  } else {
+    filteredChartData = chartData.filter(row => row.namaPelatihan === selectedPelatihan);
+  }
+  const filteredStats = getSummaryStats(filteredChartData);
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4 text-[#1976D2]">Dukungan Lingkungan</h1>
+      <div className="mb-4 flex items-center gap-2">
+        <label className="font-semibold text-[#1976D2]">Filter Pelatihan:</label>
+        <select
+          className="border border-[#B3E5FC] rounded px-3 py-1 focus:outline-none"
+          value={selectedPelatihan}
+          onChange={e => setSelectedPelatihan(e.target.value)}
+        >
+          {pelatihanList.map((nama) => (
+            <option key={nama} value={nama}>{nama === "all" ? "Semua Pelatihan" : nama}</option>
+          ))}
+        </select>
+      </div>
       <div className="bg-white rounded-xl shadow p-6 border border-[#E3F2FD] mb-8">
         <p>
           Grafik di bawah ini menunjukkan distribusi jawaban responden untuk setiap pertanyaan dukungan lingkungan kerja.
@@ -110,7 +160,7 @@ function DukunganLingkunganPage() {
         ) : (
           <ResponsiveContainer width="100%" height={450}>
             <BarChart
-              data={chartData}
+              data={filteredChartData}
               layout="vertical"
               margin={{ top: 16, right: 32, left: 0, bottom: 8 }}
             >
@@ -131,10 +181,11 @@ function DukunganLingkunganPage() {
           </ResponsiveContainer>
         )}
         {/* Pie Chart per pertanyaan */}
+        {/* filteredChartData is already aggregated per pertanyaan when 'Semua Pelatihan' is selected */}
         <div className="mt-8">
           <h3 className="text-md font-semibold mb-4 text-[#1976D2]">Distribusi Jawaban per Pertanyaan</h3>
           <div className="grid md:grid-cols-2 gap-8">
-            {chartData.map((row, idx) => {
+            {filteredChartData.map((row) => {
               const pieData = [
                 { name: "Sangat Tidak Setuju", value: row["Sangat Tidak Setuju"] },
                 { name: "Tidak Setuju", value: row["Tidak Setuju"] },
@@ -172,23 +223,23 @@ function DukunganLingkunganPage() {
       {/* Simpulan */}
       <div className="bg-blue-50 border-l-4 border-blue-400 mt-8 p-6 rounded-xl shadow text-[#1976D2]">
         <h2 className="text-lg font-semibold mb-4">Simpulan</h2>
-        {stats ? (
+        {filteredStats ? (
           <>
             <p className="mb-2">
               Berdasarkan data distribusi jawaban, mayoritas responden menunjukkan sikap positif terhadap dukungan lingkungan kerja setelah pelatihan. Hal ini terlihat dari persentase jawaban:
             </p>
             <ul className="mb-2 ml-6 list-disc">
               <li>
-                <span className="font-semibold">Sangat Setuju:</span> {stats.persenSS}% ({stats.totalSS} jawaban)
+                <span className="font-semibold">Sangat Setuju:</span> {filteredStats.persenSS}% ({filteredStats.totalSS} jawaban)
               </li>
               <li>
-                <span className="font-semibold">Setuju:</span> {stats.persenS}% ({stats.totalS} jawaban)
+                <span className="font-semibold">Setuju:</span> {filteredStats.persenS}% ({filteredStats.totalS} jawaban)
               </li>
               <li>
-                <span className="font-semibold">Tidak Setuju:</span> {stats.persenTS}% ({stats.totalTS} jawaban)
+                <span className="font-semibold">Tidak Setuju:</span> {filteredStats.persenTS}% ({filteredStats.totalTS} jawaban)
               </li>
               <li>
-                <span className="font-semibold">Sangat Tidak Setuju:</span> {stats.persenSTS}% ({stats.totalSTS} jawaban)
+                <span className="font-semibold">Sangat Tidak Setuju:</span> {filteredStats.persenSTS}% ({filteredStats.totalSTS} jawaban)
               </li>
             </ul>
             <p>
@@ -201,5 +252,4 @@ function DukunganLingkunganPage() {
   );
 }
 
-// ...existing code...
 export default DukunganLingkunganPage;

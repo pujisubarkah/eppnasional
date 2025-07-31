@@ -18,7 +18,6 @@ export default function MateriPage() {
     //   .then((data) => setPelatihan(data));
   }, []);
 
-  const [frekuensi, setFrekuensi] = useState<{ relevan: Record<string, number>; tidakRelevan: Record<string, number> }>({ relevan: {}, tidakRelevan: {} });
   useEffect(() => {
     fetch("/api/materi")
       .then((res) => res.json())
@@ -39,11 +38,7 @@ export default function MateriPage() {
         } else {
           setMateriTable([]);
         }
-        if (data.frekuensi) {
-          setFrekuensi(data.frekuensi);
-        } else {
-          setFrekuensi({ relevan: {}, tidakRelevan: {} });
-        }
+        // Removed frekuensi usage since it's not used
       });
   }, []);
 
@@ -51,6 +46,23 @@ export default function MateriPage() {
     selected === "all"
       ? materiTable
       : materiTable.filter((row) => row.namaPelatihan === selected);
+
+  // Calculate filtered frequencies for Rekap & Simpulan
+  const filteredFrekuensi = filteredTable.reduce<{
+    relevan: Record<string, number>;
+    tidakRelevan: Record<string, number>;
+  }>(
+    (acc, row) => {
+      row.relevan.forEach((materi) => {
+        acc.relevan[materi] = (acc.relevan[materi] || 0) + 1;
+      });
+      row.tidakRelevan.forEach((materi) => {
+        acc.tidakRelevan[materi] = (acc.tidakRelevan[materi] || 0) + 1;
+      });
+      return acc;
+    },
+    { relevan: {}, tidakRelevan: {} }
+  );
 
   return (
     <div>
@@ -60,7 +72,6 @@ export default function MateriPage() {
           Tabel berikut memperlihatkan perbandingan jumlah responden yang menilai materi pelatihan <b>Relevan</b> dan <b>Tidak Relevan</b> dalam mendukung kinerja, berdasarkan jenis pelatihan.
         </p>
       </div>
-      {/* ...existing code... */}
       <div className="mb-4 flex items-center gap-2">
         <label className="font-semibold text-[#1976D2]">Filter Pelatihan:</label>
         <select
@@ -110,23 +121,23 @@ export default function MateriPage() {
           <div>
             <h3 className="font-bold mb-2 text-green-700">Materi Relevan</h3>
             <ul className="list-disc ml-6">
-              {Object.entries(frekuensi.relevan)
+              {Object.entries(filteredFrekuensi.relevan)
                 .sort((a, b) => b[1] - a[1])
                 .map(([materi, jumlah]) => (
                   <li key={materi}>{materi}: <span className="font-bold">{jumlah}</span></li>
                 ))}
-              {Object.keys(frekuensi.relevan).length === 0 && <li className="text-gray-500">Tidak ada data materi relevan.</li>}
+              {Object.keys(filteredFrekuensi.relevan).length === 0 && <li className="text-gray-500">Tidak ada data materi relevan.</li>}
             </ul>
           </div>
           <div>
             <h3 className="font-bold mb-2 text-red-600">Materi Tidak Relevan</h3>
             <ul className="list-disc ml-6">
-              {Object.entries(frekuensi.tidakRelevan)
+              {Object.entries(filteredFrekuensi.tidakRelevan)
                 .sort((a, b) => b[1] - a[1])
                 .map(([materi, jumlah]) => (
                   <li key={materi}>{materi}: <span className="font-bold">{jumlah}</span></li>
                 ))}
-              {Object.keys(frekuensi.tidakRelevan).length === 0 && <li className="text-gray-500">Tidak ada data materi tidak relevan.</li>}
+              {Object.keys(filteredFrekuensi.tidakRelevan).length === 0 && <li className="text-gray-500">Tidak ada data materi tidak relevan.</li>}
             </ul>
           </div>
         </div>
@@ -138,7 +149,7 @@ export default function MateriPage() {
           <div>
             <h3 className="font-bold mb-2 text-green-700">Top 3 Materi Relevan</h3>
             <ul className="list-decimal ml-6">
-              {Object.entries(frekuensi.relevan)
+              {Object.entries(filteredFrekuensi.relevan)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 3)
                 .map(([materi, jumlah]) => (
@@ -146,13 +157,13 @@ export default function MateriPage() {
                     <span className="font-bold">{materi}</span> <span className="text-gray-700">({jumlah} responden)</span>
                   </li>
                 ))}
-              {Object.keys(frekuensi.relevan).length === 0 && <li className="text-gray-500">Tidak ada data materi relevan.</li>}
+              {Object.keys(filteredFrekuensi.relevan).length === 0 && <li className="text-gray-500">Tidak ada data materi relevan.</li>}
             </ul>
           </div>
           <div>
             <h3 className="font-bold mb-2 text-red-600">Top 3 Materi Tidak Relevan</h3>
             <ul className="list-decimal ml-6">
-              {Object.entries(frekuensi.tidakRelevan)
+              {Object.entries(filteredFrekuensi.tidakRelevan)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 3)
                 .map(([materi, jumlah]) => (
@@ -160,7 +171,7 @@ export default function MateriPage() {
                     <span className="font-bold">{materi}</span> <span className="text-gray-700">({jumlah} responden)</span>
                   </li>
                 ))}
-              {Object.keys(frekuensi.tidakRelevan).length === 0 && <li className="text-gray-500">Tidak ada data materi tidak relevan.</li>}
+              {Object.keys(filteredFrekuensi.tidakRelevan).length === 0 && <li className="text-gray-500">Tidak ada data materi tidak relevan.</li>}
             </ul>
           </div>
         </div>
