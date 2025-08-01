@@ -10,7 +10,7 @@ const menu = [
   { href: "/admin/sikap-perilaku", label: "Sikap Perilaku", icon: <Smile size={18} /> },
   { href: "/admin/kesesuaian-waktu", label: "Kesesuaian Waktu dan Manfaat", icon: <Clock size={18} /> },
   { href: "/admin/saran-masukan", label: "Saran dan Masukan", icon: <MessageCircle size={18} /> },
-  { href: "/admin/peer-review", label: "peer reviwe", icon: <Star size={18} /> },
+  { href: "/admin/peer-review", label: "Peer Review", icon: <Star size={18} /> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

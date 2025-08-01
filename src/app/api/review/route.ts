@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
+import { alumni } from "@/db/profile_alumni";
+import { pelatihan } from "@/db/pelatihan";
 import { jawaban } from "@/db/jawaban";
 import { eq } from "drizzle-orm";
 
@@ -20,37 +22,45 @@ export async function GET() {
         created_at: jawaban.created_at,
         answers: jawaban.answers,
         category_id: jawaban.category_id,
+        pelatihanId: pelatihan.id,
+        namaPelatihan: pelatihan.nama,
       })
       .from(jawaban)
-      .where(eq(jawaban.category_id, 6));
+      .where(eq(jawaban.category_id, 6))
+      .leftJoin(alumni, eq(jawaban.user_id, alumni.id))
+      .leftJoin(pelatihan, eq(alumni.pelatihanId, pelatihan.id));
 
-    // Inisialisasi frekuensi pakai teks pertanyaan
-    const frekuensi: Record<string, Record<string, number>> = {};
-
+    // Group frekuensi by pelatihan
+    const pelatihanMap: Record<string, { pelatihanId: number | null, namaPelatihan: string | null, frekuensi: Record<string, Record<string, number>> }> = {};
     for (const row of result) {
       const answers = row.answers as Record<string, string>;
-
+      const pelKey = String(row.pelatihanId ?? 'null');
+      if (!pelatihanMap[pelKey]) {
+        pelatihanMap[pelKey] = {
+          pelatihanId: row.pelatihanId ?? null,
+          namaPelatihan: row.namaPelatihan ?? null,
+          frekuensi: {},
+        };
+      }
       for (let i = 1; i <= 4; i++) {
         const key = `q${i}`;
         const jawaban = answers[key];
-
         if (jawaban && mapping[key]) {
           const pertanyaan = mapping[key];
-
-          if (!frekuensi[pertanyaan]) {
-            frekuensi[pertanyaan] = {};
+          if (!pelatihanMap[pelKey].frekuensi[pertanyaan]) {
+            pelatihanMap[pelKey].frekuensi[pertanyaan] = {};
           }
-
-          if (!frekuensi[pertanyaan][jawaban]) {
-            frekuensi[pertanyaan][jawaban] = 0;
+          if (!pelatihanMap[pelKey].frekuensi[pertanyaan][jawaban]) {
+            pelatihanMap[pelKey].frekuensi[pertanyaan][jawaban] = 0;
           }
-
-          frekuensi[pertanyaan][jawaban]++;
+          pelatihanMap[pelKey].frekuensi[pertanyaan][jawaban]++;
         }
       }
     }
 
-    return NextResponse.json({ result, frekuensi });
+    return NextResponse.json({
+      data: Object.values(pelatihanMap),
+    });
   } catch (error) {
     console.error("Error fetching peer review:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -9,10 +9,10 @@ type PeerReviewAnswer = {
   category_id: number;
 };
 
-type PeerReviewApiResponse = {
-  result: PeerReviewAnswer[];
+type PeerReviewPelatihan = {
+  pelatihanId: number;
+  namaPelatihan: string;
   frekuensi: Record<string, Record<string, number>>;
-  mapping?: Record<string, string>;
 };
 
 type ChartItem = {
@@ -22,15 +22,19 @@ type ChartItem = {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 
 export default function PeerReviewPage() {
-  const [data, setData] = useState<PeerReviewApiResponse | null>(null);
+  const [pelatihanList, setPelatihanList] = useState<PeerReviewPelatihan[]>([]);
+  const [selectedPelatihan, setSelectedPelatihan] = useState<string>('all');
+  const [chartData, setChartData] = useState<ChartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/review")
       .then((res) => res.json())
-      .then((json: PeerReviewApiResponse) => {
-        setData(json);
+      .then((json) => {
+        const pelatihans: PeerReviewPelatihan[] = json.data || [];
+        setPelatihanList(pelatihans);
+        aggregateAll(pelatihans);
         setLoading(false);
       })
       .catch(() => {
@@ -39,23 +43,57 @@ export default function PeerReviewPage() {
       });
   }, []);
 
+  function aggregateAll(pelatihans: PeerReviewPelatihan[]) {
+    // Aggregate all frekuensi by question and answer
+    const agg: Record<string, Record<string, number>> = {};
+    pelatihans.forEach(p => {
+      Object.entries(p.frekuensi).forEach(([question, freq]) => {
+        if (!agg[question]) agg[question] = {};
+        Object.entries(freq).forEach(([answer, count]) => {
+          agg[question][answer] = (agg[question][answer] || 0) + count;
+        });
+      });
+    });
+    setChartData(Object.entries(agg).map(([question, freq]) => ({
+      question,
+      ...freq,
+    })));
+  }
+
+  function handlePelatihanChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const val = e.target.value;
+    setSelectedPelatihan(val);
+    if (val === 'all') {
+      aggregateAll(pelatihanList);
+    } else {
+      const found = pelatihanList.find(p => String(p.pelatihanId) === val);
+      const freq = found?.frekuensi || {};
+      setChartData(Object.entries(freq).map(([question, freqObj]) => ({
+        question,
+        ...freqObj,
+      })));
+    }
+  }
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
-
-  // Transform frekuensi to chart data
-  const chartData: ChartItem[] = data && data.frekuensi
-    ? Object.entries(data.frekuensi).map(([question, freq]) => {
-        const freqObj: Record<string, number> = typeof freq === "object" && freq !== null ? freq : {};
-        return {
-          question,
-          ...freqObj,
-        };
-      })
-    : [];
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4 text-[#1976D2]">Peer Review Alumni</h1>
+      <div className="mb-4 flex items-center gap-2">
+        <label className="font-semibold text-[#1976D2]">Filter Pelatihan:</label>
+        <select
+          className="border border-[#B3E5FC] rounded px-3 py-1 focus:outline-none"
+          value={selectedPelatihan}
+          onChange={handlePelatihanChange}
+        >
+          <option value="all">Semua Pelatihan</option>
+          {pelatihanList.map((p) => (
+            <option key={p.pelatihanId} value={p.pelatihanId}>{p.namaPelatihan}</option>
+          ))}
+        </select>
+      </div>
       <div className="bg-white rounded-xl shadow p-6 border border-[#E3F2FD]">
         <p className="mb-4">Visualisasi frekuensi jawaban untuk setiap pertanyaan peer review alumni.</p>
         {chartData.map((item, idx) => {
