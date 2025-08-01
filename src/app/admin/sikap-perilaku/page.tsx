@@ -7,8 +7,19 @@ import { useEffect, useState } from "react";
 type SikapRow = { kategori: string; jumlah: number };
 type KinerjaRow = { kategori: string; jumlah: number };
 type PieRow = { kategori: string; value: number };
+type PelatihanData = {
+  pelatihanId: number | null;
+  namaPelatihan: string | null;
+  sikapData: SikapRow[];
+  kinerjaData: KinerjaRow[];
+  ekonomiData: { kategori: string; jumlah: number }[];
+  temaData: { kategori: string; jumlah: number }[];
+  transformasiData: { kategori: string; jumlah: number }[];
+};
 
 export default function SikapPerilakuPage() {
+  const [pelatihanList, setPelatihanList] = useState<PelatihanData[]>([]);
+  const [selectedPelatihan, setSelectedPelatihan] = useState<string>('all');
   const [sikapData, setSikapData] = useState<SikapRow[]>([]);
   const [kinerjaData, setKinerjaData] = useState<KinerjaRow[]>([]);
   const [ekonomiData, setEkonomiData] = useState<PieRow[]>([]);
@@ -19,27 +30,65 @@ export default function SikapPerilakuPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-	async function fetchData() {
-	  setLoading(true);
-	  setError(null);
-	  try {
-		const res = await fetch("/api/sikap");
-		if (!res.ok) throw new Error("Gagal memuat data");
-		const data = await res.json();
-		setSikapData(data.sikapData || []);
-		setKinerjaData(data.kinerjaData || []);
-		setEkonomiData(data.ekonomiData || []);
-		setTemaData(data.temaData || []);
-		setTransformasiData(data.transformasiData || []);
-		setFrekuensiKalimat(data.frekuensi_kalimat || {});
-	  } catch (err) {
-		setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-	  } finally {
-		setLoading(false);
-	  }
-	}
-	fetchData();
+    async function fetchData() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/sikap");
+        if (!res.ok) throw new Error("Gagal memuat data");
+        const data = await res.json();
+        const pelatihans: PelatihanData[] = data.data || [];
+        setPelatihanList(pelatihans);
+        setFrekuensiKalimat(data.frekuensi_kalimat || {});
+        // Default: aggregate all
+        aggregateAll(pelatihans);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
   }, []);
+
+  // Aggregate all pelatihan data
+  function aggregateAll(pelatihans: PelatihanData[]) {
+    // Helper to sum arrays by kategori
+    // Aggregate for all pelatihan
+    const allSikap: Record<string, number> = {};
+    const allKinerja: Record<string, number> = {};
+    const allEkonomi: Record<string, number> = {};
+    const allTema: Record<string, number> = {};
+    const allTransformasi: Record<string, number> = {};
+    pelatihans.forEach(p => {
+      p.sikapData.forEach(d => { allSikap[d.kategori] = (allSikap[d.kategori] || 0) + d.jumlah; });
+      p.kinerjaData.forEach(d => { allKinerja[d.kategori] = (allKinerja[d.kategori] || 0) + d.jumlah; });
+      p.ekonomiData.forEach(d => { allEkonomi[d.kategori] = (allEkonomi[d.kategori] || 0) + d.jumlah; });
+      p.temaData.forEach(d => { allTema[d.kategori] = (allTema[d.kategori] || 0) + d.jumlah; });
+      p.transformasiData.forEach(d => { allTransformasi[d.kategori] = (allTransformasi[d.kategori] || 0) + d.jumlah; });
+    });
+    setSikapData(Object.entries(allSikap).map(([kategori, jumlah]) => ({ kategori, jumlah })));
+    setKinerjaData(Object.entries(allKinerja).map(([kategori, jumlah]) => ({ kategori, jumlah })));
+    setEkonomiData(Object.entries(allEkonomi).map(([kategori, value]) => ({ kategori, value })));
+    setTemaData(Object.entries(allTema).map(([kategori, value]) => ({ kategori, value })));
+    setTransformasiData(Object.entries(allTransformasi).map(([kategori, value]) => ({ kategori, value })));
+  }
+
+  // Handle filter change
+  function handlePelatihanChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const val = e.target.value;
+    setSelectedPelatihan(val);
+    if (val === 'all') {
+      aggregateAll(pelatihanList);
+    } else {
+      const found = pelatihanList.find(p => String(p.pelatihanId) === val);
+      setSikapData(found?.sikapData || []);
+      setKinerjaData(found?.kinerjaData || []);
+      setEkonomiData(found?.ekonomiData.map(d => ({ kategori: d.kategori, value: d.jumlah })) || []);
+      setTemaData(found?.temaData.map(d => ({ kategori: d.kategori, value: d.jumlah })) || []);
+      setTransformasiData(found?.transformasiData.map(d => ({ kategori: d.kategori, value: d.jumlah })) || []);
+    }
+  }
 
 const COLORS = [
 	"#1976D2",
@@ -54,6 +103,19 @@ const COLORS = [
   return (
 	<div>
 	  <h1 className="text-2xl font-bold mb-4 text-[#1976D2]">Sikap Perilaku</h1>
+	  <div className="mb-4 flex items-center gap-2">
+        <label className="font-semibold text-[#1976D2]">Filter Pelatihan:</label>
+        <select
+          className="border border-[#B3E5FC] rounded px-3 py-1 focus:outline-none"
+          value={selectedPelatihan}
+          onChange={handlePelatihanChange}
+        >
+          <option value="all">Semua Pelatihan</option>
+          {pelatihanList.map((p) => (
+            <option key={p.pelatihanId ?? 'null'} value={p.pelatihanId ?? 'null'}>{p.namaPelatihan || 'Tidak diketahui'}</option>
+          ))}
+        </select>
+      </div>
 	  {loading ? (
 		<div className="text-center py-12 text-gray-500">Memuat data...</div>
 	  ) : error ? (
