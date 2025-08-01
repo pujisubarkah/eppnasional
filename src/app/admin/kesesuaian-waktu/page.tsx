@@ -9,7 +9,15 @@ type DivergingRow = {
   positif: number;
 };
 
+type PelatihanWaktu = {
+  pelatihanId: number;
+  namaPelatihan: string;
+  data: Record<string, number>;
+};
+
 export default function KesesuaianWaktuPage() {
+  const [pelatihanList, setPelatihanList] = useState<PelatihanWaktu[]>([]);
+  const [selectedPelatihan, setSelectedPelatihan] = useState<string>('all');
   const [chartData, setChartData] = useState<DivergingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,13 +30,10 @@ export default function KesesuaianWaktuPage() {
         const res = await fetch("/api/waktu");
         if (!res.ok) throw new Error("Gagal memuat data");
         const data = await res.json();
-        // Transform to diverging format
-        const negatif = data.data["2 - Tidak Setuju"] ?? 0;
-        const positif = data.data["3 - Setuju"] ?? 0;
-        setChartData([
-          { kategori: "Tidak Setuju", negatif, positif: 0 },
-          { kategori: "Setuju", negatif: 0, positif },
-        ]);
+        const pelatihans: PelatihanWaktu[] = data.data || [];
+        setPelatihanList(pelatihans);
+        // Default: aggregate all
+        aggregateAll(pelatihans);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Terjadi kesalahan");
       } finally {
@@ -38,9 +43,55 @@ export default function KesesuaianWaktuPage() {
     fetchData();
   }, []);
 
+  function aggregateAll(pelatihans: PelatihanWaktu[]) {
+    // Sum all data by key
+    const total: Record<string, number> = {};
+    pelatihans.forEach(p => {
+      for (const [k, v] of Object.entries(p.data)) {
+        total[k] = (total[k] || 0) + v;
+      }
+    });
+    setChartData([
+      { kategori: "Sangat Setuju", negatif: 0, positif: total["4 - Sangat Setuju"] ?? 0 },
+      { kategori: "Setuju", negatif: 0, positif: total["3 - Setuju"] ?? 0 },
+      { kategori: "Tidak Setuju", negatif: total["2 - Tidak Setuju"] ?? 0, positif: 0 },
+      { kategori: "Sangat Tidak Setuju", negatif: total["1 - Sangat Tidak Setuju"] ?? 0, positif: 0 },
+    ]);
+  }
+
+  function handlePelatihanChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const val = e.target.value;
+    setSelectedPelatihan(val);
+    if (val === 'all') {
+      aggregateAll(pelatihanList);
+    } else {
+      const found = pelatihanList.find(p => String(p.pelatihanId) === val);
+      const d = found?.data || {};
+      setChartData([
+        { kategori: "Sangat Setuju", negatif: 0, positif: d["4 - Sangat Setuju"] ?? 0 },
+        { kategori: "Setuju", negatif: 0, positif: d["3 - Setuju"] ?? 0 },
+        { kategori: "Tidak Setuju", negatif: d["2 - Tidak Setuju"] ?? 0, positif: 0 },
+        { kategori: "Sangat Tidak Setuju", negatif: d["1 - Sangat Tidak Setuju"] ?? 0, positif: 0 },
+      ]);
+    }
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4 text-[#1976D2]">Kesesuaian Waktu dan Manfaat</h1>
+      <div className="mb-4 flex items-center gap-2">
+        <label className="font-semibold text-[#1976D2]">Filter Pelatihan:</label>
+        <select
+          className="border border-[#B3E5FC] rounded px-3 py-1 focus:outline-none"
+          value={selectedPelatihan}
+          onChange={handlePelatihanChange}
+        >
+          <option value="all">Semua Pelatihan</option>
+          {pelatihanList.map((p) => (
+            <option key={p.pelatihanId} value={p.pelatihanId}>{p.namaPelatihan}</option>
+          ))}
+        </select>
+      </div>
       <div className="bg-white rounded-xl shadow p-6 border border-[#E3F2FD] mb-8">
         <p>
           Visualisasi berikut menunjukkan persepsi alumni terhadap pernyataan:<br />
