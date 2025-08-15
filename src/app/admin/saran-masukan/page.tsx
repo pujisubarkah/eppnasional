@@ -227,31 +227,51 @@ export default function SaranMasukanPage() {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4 text-[#1976D2]">Saran dan Masukan</h1>
-      
-      {/* Filter Pelatihan */}
-      <div className="bg-white rounded-xl shadow p-6 border border-[#E3F2FD] mb-6">
-        <div className="flex items-center gap-4">
-          <label className="font-semibold text-[#1976D2] whitespace-nowrap">Filter Pelatihan:</label>
-          <select
-            value={selectedPelatihan}
-            onChange={(e) => setSelectedPelatihan(e.target.value)}
-            className="border border-[#B3E5FC] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-64"
-          >
-            <option value="all">Semua Pelatihan</option>
-            {apiData?.pelatihanList?.map((p) => (
-              <option key={p.pelatihanId} value={p.pelatihanId}>
-                {p.namaPelatihan}
-              </option>
-            ))}
-          </select>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-[#E3F2FD] mb-8">
+          <h1 className="text-3xl font-bold mb-4 text-[#1976D2] flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#1976D2] rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            Saran dan Masukan Alumni
+          </h1>
+          <div className="bg-gradient-to-r from-[#E3F2FD] to-[#BBDEFB] p-6 rounded-xl border-l-4 border-[#1976D2]">
+            <p className="text-gray-700 leading-relaxed">
+              Berikut adalah <span className="font-semibold text-[#1976D2]">analisis komprehensif</span> dari data tidak terstruktur saran dan masukan alumni, menggunakan teknik <b className="text-blue-600">text mining</b> dan <b className="text-green-600">natural language processing</b> untuk mengidentifikasi pola, tema, dan insight yang berharga.
+            </p>
+          </div>
         </div>
-      </div>
-      
-      <div className="bg-white rounded-xl shadow p-6 border border-[#E3F2FD] mb-8">
-        <p>Berikut adalah analisis data tidak terstruktur dari saran dan masukan alumni.</p>
-      </div>
+
+        {/* Filter Section */}
+        <div className="bg-white rounded-xl shadow-md p-6 border border-[#E3F2FD] mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <label className="font-semibold text-[#1976D2] flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
+              </svg>
+              Filter Pelatihan:
+            </label>
+            <select
+              value={selectedPelatihan}
+              onChange={(e) => setSelectedPelatihan(e.target.value)}
+              className="border border-[#B3E5FC] rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#1976D2] focus:border-transparent bg-white shadow-sm min-w-[300px] transition-all"
+            >
+              <option value="all">📊 Semua Pelatihan</option>
+              {apiData?.pelatihanList?.map((p) => (
+                <option key={p.pelatihanId} value={p.pelatihanId}>
+                  🎯 {p.namaPelatihan}
+                </option>
+              ))}
+            </select>
+            <div className="text-sm text-gray-600 bg-[#E3F2FD] px-3 py-2 rounded-lg">
+              Total: <span className="font-semibold text-[#1976D2]">{Object.values(currentData.data).flat().length}</span> feedback
+            </div>
+          </div>
+        </div>
       {/* Word Cloud */}
       <div className="bg-white rounded-xl shadow p-6 border border-[#E3F2FD] mb-8">
         <h2 className="text-lg font-semibold mb-2 text-[#1976D2]">Word Cloud Saran & Masukan</h2>
@@ -598,6 +618,7 @@ export default function SaranMasukanPage() {
         <div className="h-48 flex items-center justify-center text-gray-400">
           [Sentiment Pie/Bar Chart]
         </div>
+      </div>
       </div>
     </div>
   );
