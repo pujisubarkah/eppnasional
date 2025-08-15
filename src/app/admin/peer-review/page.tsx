@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 
-type PeerReviewAnswer = {
-  id: string;
-  user_id: number;
-  created_at: string;
-  answers: Record<string, string>;
-  category_id: number;
-};
+//type PeerReviewAnswer = {
+//  id: string;
+//  user_id: number;
+//  created_at: string;
+//  answers: Record<string, string>;
+//  category_id: number;
+//};
 
 type PeerReviewPelatihan = {
   pelatihanId: number;
