@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, LabelList } from "recharts";
 
 type DivergingRow = {
   kategori: string;
@@ -21,6 +21,39 @@ export default function KesesuaianWaktuPage() {
   const [chartData, setChartData] = useState<DivergingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Custom label function to show values at the end of bars
+  const renderCustomLabel = (props: {
+    x?: number | string;
+    y?: number | string;
+    width?: number | string;
+    height?: number | string;
+    value?: number | string;
+  }) => {
+    const { x, y, width, height, value } = props;
+    const numericValue = value !== undefined ? Number(value) : 0;
+    if (numericValue === 0) return null; // Don't show label for zero values
+
+    // Convert possible string values to numbers
+    const numX = x !== undefined ? Number(x) : 0;
+    const numY = y !== undefined ? Number(y) : 0;
+    const numWidth = width !== undefined ? Number(width) : 0;
+    const numHeight = height !== undefined ? Number(height) : 0;
+
+    return (
+      <text 
+        x={numX + numWidth + 5} 
+        y={numY + numHeight / 2} 
+        fill="#333" 
+        textAnchor="start" 
+        dy="0.35em"
+        fontSize="12"
+        fontWeight="bold"
+      >
+        {numericValue}
+      </text>
+    );
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -108,20 +141,20 @@ export default function KesesuaianWaktuPage() {
           <div className="text-center py-12 text-red-500">{error}</div>
         ) : (
           <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={chartData} layout="vertical" margin={{ top: 16, right: 32, left: 0, bottom: 8 }}>
+            <BarChart data={chartData} layout="vertical" margin={{ top: 16, right: 80, left: 0, bottom: 8 }}>
               <XAxis type="number" allowDecimals={false} />
               <YAxis type="category" dataKey="kategori" width={220} />
               <Tooltip />
               <Legend />
-              <Bar dataKey="negatif" stackId="a" fill="#EF9A9A" />
-              <Bar dataKey="positif" stackId="a" fill="#1976D2" />
+              <Bar dataKey="negatif" stackId="a" fill="#EF9A9A">
+                <LabelList content={renderCustomLabel} />
+              </Bar>
+              <Bar dataKey="positif" stackId="a" fill="#1976D2">
+                <LabelList content={renderCustomLabel} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         )}
-        <div className="flex justify-between mt-4 text-xs text-gray-600">
-          <span>2 = Tidak Setuju</span>
-          <span>3 = Setuju</span>
-        </div>
       </div>
       {/* Simpulan */}
       <div className="bg-blue-50 border-l-4 border-blue-400 mt-8 p-6 rounded-xl shadow text-[#1976D2]">
