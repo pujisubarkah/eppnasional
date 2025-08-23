@@ -11,6 +11,7 @@ const menu = [
   { href: "/admin/kesesuaian-waktu", label: "Kesesuaian Waktu dan Manfaat", icon: <Clock size={18} /> },
   { href: "/admin/saran-masukan", label: "Saran dan Masukan", icon: <MessageCircle size={18} /> },
   { href: "/admin/peer-review", label: "Peer Review", icon: <Star size={18} /> },
+   { href: "/admin/laporan", label: "Laporan", icon: <BookOpen size={18} /> }, // 👉 baru
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
