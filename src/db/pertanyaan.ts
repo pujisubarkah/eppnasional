@@ -1,20 +1,20 @@
 import {
-  pgTable,
   serial,
   varchar,
   integer,
   timestamp,
   text,
 } from "drizzle-orm/pg-core";
+import { eppnSchema } from './eppn-schema';
 
 // --- Categories Table ---
-export const categories = pgTable("eppn.categories", {
+export const categories = eppnSchema.table("categories", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
 });
 
 // --- Questions Table ---
-export const questions = pgTable("eppn.questions", {
+export const questions = eppnSchema.table("questions", {
   id: serial("id").primaryKey(),
   text: text("text").notNull(),
   type: varchar("type", { length: 50 }).notNull(),
@@ -26,7 +26,7 @@ export const questions = pgTable("eppn.questions", {
 });
 
 // --- Question Options Table ---
-export const question_options = pgTable("eppn.question_options", {
+export const question_options = eppnSchema.table("question_options", {
   id: serial("id").primaryKey(),
   question_id: integer("question_id")
     .notNull()
@@ -40,7 +40,7 @@ export const question_options = pgTable("eppn.question_options", {
 });
 
 // --- Answers Table ---
-export const answers = pgTable("eppn.answers", {
+export const answers = eppnSchema.table("answers", {
   id: serial("id").primaryKey(),
   question_id: integer("question_id").references(() => questions.id, {
     onDelete: "no action",

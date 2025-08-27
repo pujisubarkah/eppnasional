@@ -1,6 +1,7 @@
 import { pgTable, serial, integer, jsonb, timestamp } from 'drizzle-orm/pg-core';
+import { eppnSchema } from './eppn-schema';
 
-export const jawaban = pgTable('eppn.answers_json', {
+export const jawaban = eppnSchema.table('answers_json', {
   id: serial('id').primaryKey(),
   user_id: integer('user_id').notNull(),
   created_at: timestamp('created_at').defaultNow(),

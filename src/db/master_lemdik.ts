@@ -2,8 +2,9 @@
 import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
 import { integer } from 'drizzle-orm/pg-core';
 import { provinsi } from './provinsi';
+import { eppnSchema } from './eppn-schema';
 
-export const lemdik = pgTable('eppn.master_lemdik', {
+export const lemdik = eppnSchema.table('master_lemdik', {
   id: serial('id').primaryKey(),
   uuid: varchar('uuid', { length: 64 }),
   idsipka: integer('idsipka'),
