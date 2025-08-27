@@ -1,7 +1,8 @@
-import { pgTable, serial, varchar, integer, timestamp } from 'drizzle-orm/pg-core';
+import { serial, varchar, integer, timestamp } from 'drizzle-orm/pg-core';
+import { eppnSchema } from './eppn-schema';
 import { provinsi } from './provinsi'; // pastikan kamu punya definisinya
 
-export const alumni = pgTable('informasi_profile', {
+export const alumni = eppnSchema.table('informasi_profile', {
   id: serial('id').primaryKey(),
   namaAlumni: varchar('nama_alumni', { length: 255 }),
   nipNrpNik: varchar('nip_nrp_nik', { length: 100 }),

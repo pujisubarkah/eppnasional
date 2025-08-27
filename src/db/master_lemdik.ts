@@ -3,7 +3,7 @@ import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
 import { integer } from 'drizzle-orm/pg-core';
 import { provinsi } from './provinsi';
 
-export const lemdik = pgTable('master_lemdik', {
+export const lemdik = pgTable('eppn.master_lemdik', {
   id: serial('id').primaryKey(),
   uuid: varchar('uuid', { length: 64 }),
   idsipka: integer('idsipka'),

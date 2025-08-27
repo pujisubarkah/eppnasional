@@ -1,7 +1,8 @@
 // server/database/schema/provinsi.ts
-import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
+import { serial, varchar } from 'drizzle-orm/pg-core';
+import { eppnSchema } from './eppn-schema';
 
-export const pelatihan = pgTable('pelatihan', {
+export const pelatihan = eppnSchema.table('pelatihan', {
   id: serial('id').primaryKey(),
   nama: varchar('nama', { length: 100 }).notNull(),
  

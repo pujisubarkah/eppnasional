@@ -1,7 +1,7 @@
 // server/database/schema/provinsi.ts
 import { pgTable,  integer, text  } from 'drizzle-orm/pg-core';
 
-export const question_options = pgTable('question_options', {
+export const question_options = pgTable('eppn.question_options', {
   id: integer('id').primaryKey(),
   question_id: integer('question_id').notNull(),
   option_text: text('option_text').notNull(),

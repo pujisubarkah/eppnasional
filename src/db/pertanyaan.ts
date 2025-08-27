@@ -8,13 +8,13 @@ import {
 } from "drizzle-orm/pg-core";
 
 // --- Categories Table ---
-export const categories = pgTable("categories", {
+export const categories = pgTable("eppn.categories", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
 });
 
 // --- Questions Table ---
-export const questions = pgTable("questions", {
+export const questions = pgTable("eppn.questions", {
   id: serial("id").primaryKey(),
   text: text("text").notNull(),
   type: varchar("type", { length: 50 }).notNull(),
@@ -26,7 +26,7 @@ export const questions = pgTable("questions", {
 });
 
 // --- Question Options Table ---
-export const question_options = pgTable("question_options", {
+export const question_options = pgTable("eppn.question_options", {
   id: serial("id").primaryKey(),
   question_id: integer("question_id")
     .notNull()
@@ -40,7 +40,7 @@ export const question_options = pgTable("question_options", {
 });
 
 // --- Answers Table ---
-export const answers = pgTable("answers", {
+export const answers = pgTable("eppn.answers", {
   id: serial("id").primaryKey(),
   question_id: integer("question_id").references(() => questions.id, {
     onDelete: "no action",

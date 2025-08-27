@@ -1,7 +1,8 @@
-import { pgTable, serial, varchar, integer } from 'drizzle-orm/pg-core';
+import { serial, varchar, integer } from 'drizzle-orm/pg-core';
+import { eppnSchema } from './eppn-schema';
 import { roles } from './roles'; // Import dari roles
 
-export const users = pgTable('users', {
+export const users = eppnSchema.table('users', {
   id: serial('id').primaryKey(),
   username: varchar('username', { length: 100 }).notNull(),
   password: varchar('password', { length: 255 }).notNull(),
