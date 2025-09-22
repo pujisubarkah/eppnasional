@@ -10,11 +10,11 @@ type Provinsi = {
 };
 
 const colorScale = [
-  { max: 10, color: "#E3F2FD", label: "0–10" },
-  { max: 50, color: "#90CAF9", label: "11–50" },
-  { max: 100, color: "#42A5F5", label: "51–100" },
-  { max: 200, color: "#2196F3", label: "101–200" },
-  { max: Infinity, color: "#1976D2", label: "201+" },
+  { max: 10, color: "#B3E5FC", label: "0–10" }, // biru sangat terang
+  { max: 50, color: "#4FC3F7", label: "11–50" }, // biru terang
+  { max: 100, color: "#00B8D9", label: "51–100" }, // biru cyan
+  { max: 200, color: "#0288D1", label: "101–200" }, // biru cerah
+  { max: Infinity, color: "#01579B", label: "201+" }, // biru gelap
 ];
 
 function getColor(count: number) {
@@ -84,36 +84,36 @@ export default function DashboardMap() {
 
   return (
     <section className="w-full max-w-7xl mx-auto px-2 md:px-6 py-6 md:py-12">
-      <div className="bg-white/90 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border-2 border-[#2196F3] p-4 md:p-10 flex flex-col lg:flex-row gap-4 md:gap-8 items-stretch">
+  <div className="bg-white/90 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border-2 border-[#00B8D9] p-4 md:p-10 flex flex-col lg:flex-row gap-4 md:gap-8 items-stretch">
         {/* Bagian Utama Peta */}
         <div className="flex-1 flex flex-col">
           {/* Header */}
           <div className="mb-4 md:mb-6 text-center">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center text-[#1976D2] mb-2 md:mb-3">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center text-[#00B8D9] mb-2 md:mb-3">
               PETA SEBARAN RESPONDEN
             </h1>
             <p className="text-center text-gray-700 max-w-4xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed px-2 mb-2">
               Temukan sebaran responden alumni ASN dari seluruh Indonesia!
             </p>
             <p className="text-center text-gray-700 max-w-4xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed px-2">
-              <span className="text-[#1976D2] font-semibold">Semakin banyak responden, semakin biru provinsinya.</span>
+              <span className="text-[#00B8D9] font-semibold">Semakin banyak responden, semakin biru provinsinya.</span>
               Peta interaktif ini menunjukkan partisipasi alumni secara nasional.
             </p>
-            <hr className="w-1/4 h-1 bg-gradient-to-r from-blue-700 via-blue-400 to-cyan-400 mx-auto my-3 sm:my-4" />
+            <hr className="w-1/4 h-1 bg-gradient-to-r from-cyan-400 via-blue-300 to-blue-700 mx-auto my-3 sm:my-4" />
           </div>
 
           {/* Kontainer Peta dengan Zoom & Pan */}
-          <div className="relative overflow-hidden rounded-lg shadow-md border border-[#2196F3]/30 flex-1">
+          <div className="relative overflow-hidden rounded-lg shadow-md border border-[#00B8D9]/30 flex-1">
             {/* Zoom Controls */}
-            <div className="absolute z-10 top-4 left-4 flex flex-col gap-2 bg-white/80 rounded shadow p-2 border border-blue-200">
+            <div className="absolute z-10 top-4 left-4 flex flex-col gap-2 bg-white/80 rounded shadow p-2 border border-cyan-200">
               <button
-                className="px-2 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold"
+                className="px-2 py-1 rounded bg-cyan-100 hover:bg-cyan-200 text-cyan-700 font-bold"
                 onClick={() => setZoom((z) => Math.min(z + 0.2, 3))}
                 aria-label="Zoom in"
               >+
               </button>
               <button
-                className="px-2 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold"
+                className="px-2 py-1 rounded bg-cyan-100 hover:bg-cyan-200 text-cyan-700 font-bold"
                 onClick={() => setZoom((z) => Math.max(z - 0.2, 0.5))}
                 aria-label="Zoom out"
               >−
@@ -141,8 +141,8 @@ export default function DashboardMap() {
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
                 <defs>
                   <radialGradient id="prov-hover-gradient" cx="50%" cy="50%" r="70%">
-                    <stop offset="0%" stopColor="#BBDEFB" />
-                    <stop offset="100%" stopColor="#1976D2" />
+                    <stop offset="0%" stopColor="#B3E5FC" />
+                    <stop offset="100%" stopColor="#00B8D9" />
                   </radialGradient>
                   <linearGradient id="no-data-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f8fafc" />
@@ -173,7 +173,7 @@ export default function DashboardMap() {
                 {/* Tooltip Hover di pojok kanan atas */}
                 {showTooltip && hovered && (
                   <foreignObject x={770} y={10} width={220} height={60} className="pointer-events-none">
-                    <div className="bg-white/95 border border-blue-300 rounded-lg p-2 shadow-lg text-xs sm:text-sm font-semibold text-blue-800 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white/95 border border-cyan-300 rounded-lg p-2 shadow-lg text-xs sm:text-sm font-semibold text-cyan-800 backdrop-blur-sm animate-fadeIn">
                       <div className="font-bold">{hovered.provinsiNama}</div>
                       <div>Jumlah Alumni: {hovered.jumlahAlumni}</div>
                     </div>
@@ -185,13 +185,13 @@ export default function DashboardMap() {
         </div>
 
         {/* Legend Card */}
-        <div className="w-full lg:w-64 flex flex-col bg-white/90 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg border-2 border-[#2196F3] p-4 md:p-5 gap-3 md:gap-4 h-fit self-start transition-all duration-300 hover:shadow-xl mt-4 lg:mt-0">
-                <h2 className="font-bold text-[#1976D2] text-lg md:text-xl tracking-wide text-center">LEGENDA</h2>
+  <div className="w-full lg:w-64 flex flex-col bg-white/90 backdrop-blur-sm rounded-xl md:rounded-2xl shadow-lg border-2 border-[#00B8D9] p-4 md:p-5 gap-3 md:gap-4 h-fit self-start transition-all duration-300 hover:shadow-xl mt-4 lg:mt-0">
+    <h2 className="font-bold text-[#00B8D9] text-lg md:text-xl tracking-wide text-center">LEGENDA</h2>
                 <div className="space-y-2 mt-2">
                   {colorScale.map((scale, idx) => (
                     <div key={idx} className="flex items-center gap-2">
                       <span
-                        className="inline-block w-6 h-6 rounded border border-blue-300"
+                        className="inline-block w-6 h-6 rounded border border-cyan-300"
                         style={{
                           background: scale.color,
                         }}
