@@ -11,7 +11,6 @@ import {
   Cell,
   ResponsiveContainer,
   LabelList,
-  Sector,
 } from "recharts";
 import { useEffect, useState } from "react";
 
@@ -85,41 +84,6 @@ export default function DashboardCharts() {
       .catch((err) => console.error("Error fetching instansi data:", err));
   }, []);
 
-  // Active shape saat slice pie di-hover
-  const renderActiveShape = (props: any) => {
-    const RADIAN = Math.PI / 180;
-    const {
-      cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle,
-      fill, payload, percent, value
-    } = props;
-    const sin = Math.sin(-RADIAN * midAngle);
-    const cos = Math.cos(-RADIAN * midAngle);
-    const sx = cx + (outerRadius + 10) * cos;
-    const sy = cy + (outerRadius + 10) * sin;
-
-    return (
-      <g>
-        <text x={cx} y={cy - 15} textAnchor="middle" fill="#2c3e50" fontWeight="bold" fontSize={16}>
-          {payload.name}
-        </text>
-        <Sector
-          cx={cx}
-          cy={cy}
-          innerRadius={innerRadius}
-          outerRadius={outerRadius + 15}
-          startAngle={startAngle}
-          endAngle={endAngle}
-          fill={fill}
-          stroke="#fff"
-          strokeWidth={2}
-          style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.1))" }}
-        />
-        <text x={sx} y={sy} textAnchor="middle" fill="#2c3e50" fontWeight="bold" fontSize={14}>
-          {value} ({(percent * 100).toFixed(1)}%)
-        </text>
-      </g>
-    );
-  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-10 px-4">
@@ -190,7 +154,6 @@ export default function DashboardCharts() {
                   innerRadius={60}
                   isAnimationActive
                   animationDuration={1000}
-                  // label di dalam chart dihilangkan
                 >
                   {jenisInstansiData.map((entry, idx) => (
                     <Cell
@@ -201,6 +164,31 @@ export default function DashboardCharts() {
                       className="hover:opacity-90 transition-opacity cursor-pointer"
                     />
                   ))}
+                  <LabelList
+                    dataKey="value"
+                    position="inside"
+                    content={({ x, y, value, index }) => {
+                      const total = jenisInstansiData.reduce((sum, d) => sum + d.value, 0);
+                      const percent = total > 0 ? ((value as number) / total * 100).toFixed(1) : "0";
+                      const label = typeof index === "number" && jenisInstansiData[index] ? jenisInstansiData[index].name : "";
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          textAnchor="middle"
+                          fill="#fff"
+                          fontWeight="bold"
+                          fontSize={13}
+                          alignmentBaseline="middle"
+                          style={{ pointerEvents: "none" }}
+                        >
+                          {label}
+                          {"\n"}
+                          {value} ({percent}%)
+                        </text>
+                      );
+                    }}
+                  />
                 </Pie>
                 <Tooltip
                   contentStyle={{
@@ -214,29 +202,44 @@ export default function DashboardCharts() {
             </div>
             {/* Label di samping donat */}
             <div className="flex flex-col justify-center max-h-72 overflow-y-auto scrollbar-thin" style={{ minWidth: 220 }}>
-              <ul className="space-y-3">
+              <div className="mb-2 text-xs text-gray-500 font-medium">
+                <span className="inline-block mr-2">Keterangan warna:</span>
+                {jenisInstansiData.map((entry, idx) => (
+                  <span key={entry.name} className="inline-flex items-center mr-3">
+                    <span style={{ backgroundColor: pieColors[idx % pieColors.length], width: 14, height: 14, display: "inline-block", borderRadius: 3, marginRight: 4, border: "1px solid #eee" }}></span>
+                    <span>{entry.name}</span>
+                  </span>
+                ))}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {jenisInstansiData.map((entry, idx) => {
                   const total = jenisInstansiData.reduce((sum, d) => sum + d.value, 0);
                   const percent = total > 0 ? ((entry.value / total) * 100).toFixed(1) : "0";
                   return (
-                    <li
+                    <div
                       key={entry.name}
-                      className="flex items-center p-2 rounded-lg hover:bg-gray-50 transition-colors group cursor-pointer"
+                      className="flex items-center p-3 rounded-xl shadow-sm bg-gradient-to-r from-white to-gray-50 border border-gray-200 hover:shadow-md transition-all group cursor-pointer"
+                      style={{ minWidth: 0 }}
                     >
                       <span
-                        className="w-4 h-4 rounded mr-3 flex-shrink-0"
+                        className="w-5 h-5 rounded-lg mr-3 flex-shrink-0 border-2 border-white shadow"
                         style={{ backgroundColor: pieColors[idx % pieColors.length] }}
                       ></span>
-                      <span className="font-medium text-gray-800 group-hover:text-blue-600 transition-colors">
-                        {entry.name}
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-semibold text-gray-800 group-hover:text-blue-600 text-sm truncate">
+                          {entry.name}
+                        </span>
+                        <span className="text-xs text-gray-500 truncate">
+                          {entry.value} alumni
+                        </span>
+                      </div>
+                      <span className="ml-auto text-xs font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">
+                        {percent}%
                       </span>
-                      <span className="ml-auto text-sm text-gray-600 font-semibold">
-                        {entry.value} ({percent}%)
-                      </span>
-                    </li>
+                    </div>
                   );
                 })}
-              </ul>
+              </div>
             </div>
           </div>
         </div>
