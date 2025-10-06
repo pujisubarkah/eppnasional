@@ -5,13 +5,22 @@ import WordCloud from 'wordcloud';
 
 type WordItem = [string, number];
 
-export default function CanvasWordCloud({ words }: { words: WordItem[] }) {
+type CanvasWordCloudProps = {
+  words: WordItem[];
+  width?: number;
+  height?: number;
+};
+
+export default function CanvasWordCloud({ words, width = 900, height = 400 }: CanvasWordCloudProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  // Batasi jumlah kata maksimal 200
+  const limitedWords = words.slice(0, 200);
+
   useEffect(() => {
-    if (canvasRef.current && words.length > 0) {
+    if (canvasRef.current && limitedWords.length > 0) {
       WordCloud(canvasRef.current, {
-        list: words,
+        list: limitedWords,
         gridSize: 8,
         weightFactor: 25,
         fontFamily: 'Impact',
@@ -21,7 +30,7 @@ export default function CanvasWordCloud({ words }: { words: WordItem[] }) {
         backgroundColor: '#f9f9f9',
       });
     }
-  }, [words]);
+  }, [limitedWords, width, height]);
 
-  return <canvas ref={canvasRef} width={900} height={400} />;
+  return <canvas ref={canvasRef} width={width} height={height} />;
 }

@@ -371,214 +371,297 @@ export default function ProfileForm() {
           </div>
         </DialogContent>
       </Dialog>
-      <form className="max-w-4xl mx-auto bg-gradient-to-br from-[#E3F2FD] to-[#F8FAFB] rounded-3xl shadow-2xl p-2 md:p-10 space-y-8 md:space-y-10 border-2 border-[#B3E5FC]" onSubmit={handleSubmit}>
-        <h2 className="text-2xl md:text-4xl font-extrabold text-[#1976D2] mb-4 text-center tracking-wide drop-shadow">Profil Responden</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-10 gap-y-4 md:gap-y-8">
-          {/* Nama Lengkap */}
-          <div className="flex items-center justify-start md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Nama Lengkap</label>
-          </div>
-          <div className="w-full">
-            <input type="text" name="nama" value={form.nama} onChange={handleChange} className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3] bg-white shadow transition" placeholder="Masukkan nama lengkap" required />
-          </div>
-          {/* NIP/NRP/NIK */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">NIP/NRP/NIK</label>
-          </div>
-          <div className="w-full">
-            <input
-              type="text"
-              name="nip"
-              value={form.nip}
-              onChange={handleChange}
-              className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3] bg-white shadow transition"
-              placeholder="Masukkan NIP/NRP/NIK"
-              required
-              disabled={form.id !== undefined && form.id !== "" && !isNaN(Number(form.id))}
-            />
-          </div>
-          {/* Jenis Instansi */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Jenis Instansi</label>
-          </div>
-          <div className="w-full">
-          <Select value={form.jenisInstansi} onValueChange={value => handleSelectChange("jenisInstansi", value)} required>
-            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
-              <SelectValue placeholder="Pilih Jenis Instansi" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl shadow-lg bg-white">
-              {jenisInstansiList.map(item => (
-                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
-                  {item.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          </div>
-          {/* Instansi (dropdown) */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Instansi</label>
-          </div>
-          <div className="w-full">
-            <Select value={form.instansi} onValueChange={value => handleSelectChange("instansi", value)} required disabled={!form.jenisInstansi}>
-              <SelectTrigger className="w-full border-2 border-[#00B8D9] rounded-xl px-4 py-3 text-base md:text-lg bg-[#E3F2FD] shadow focus:outline-none focus:ring-2 focus:ring-[#00B8D9] transition-all">
-                <SelectValue placeholder="Pilih Instansi dari daftar" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl shadow-lg bg-white max-h-64 overflow-y-auto">
-                {filteredInstansiList.length === 0 ? (
-                  <div className="px-4 py-2 text-gray-400">Pilih Jenis Instansi terlebih dahulu</div>
-                ) : (
-                  filteredInstansiList.map(item => (
-                    <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#B3E5FC] focus:bg-[#BBDEFB] transition-colors">
-                      {item.agency_name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            <span className="text-xs text-[#00B8D9] mt-1 block">Pilih dari daftar, jangan ketik manual</span>
-          </div>
-          {/* Jabatan */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Jabatan</label>
-          </div>
-          <div className="w-full">
-          <Select value={form.jabatan} onValueChange={value => handleSelectChange("jabatan", value)} required>
-            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
-              <SelectValue placeholder="Pilih Jabatan" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl shadow-lg bg-white">
-              {jabatanList.map(item => (
-                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
-                  {item.nama}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          </div>
-          {/* Nama Pelatihan */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Nama Pelatihan</label>
-          </div>
-          <div className="w-full">
-          <Select value={form.pelatihan} onValueChange={value => handleSelectChange("pelatihan", value)} required>
-            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
-              <SelectValue placeholder="Pilih Nama Pelatihan" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl shadow-lg bg-white">
-              {pelatihanList.map(item => (
-                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
-                  {item.nama}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          </div>
-          {/* Tahun Pelatihan */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Tahun Pelatihan</label>
-          </div>
-          <div className="w-full">
-          <Select value={form.tahunPelatihan} onValueChange={value => handleSelectChange("tahunPelatihan", value)} required>
-            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
-              <SelectValue placeholder="Pilih Tahun Pelatihan" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl shadow-lg bg-white">
-              {tahunPelatihanList.map(item => (
-                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
-                  {item.tahun}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          </div>
-          {/* Instansi Lembaga Penyelenggara (dropdown) */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">
-              Instansi Lembaga Penyelenggara
-            </label>
-          </div>
-          <div className="w-full">
-            <Select value={form.lembagaPenyelenggara} onValueChange={value => handleSelectChange("lembagaPenyelenggara", value)} required>
-              <SelectTrigger className="w-full border-2 border-[#00B8D9] rounded-xl px-4 py-3 text-base md:text-lg bg-[#E3F2FD] shadow focus:outline-none focus:ring-2 focus:ring-[#00B8D9] transition-all">
-                <SelectValue placeholder="Pilih Instansi Lembaga Penyelenggara dari daftar" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl shadow-lg bg-white max-h-64 overflow-y-auto">
-                {filteredLemdikList.length === 0 ? (
-                  <div className="px-4 py-2 text-gray-400">Data belum tersedia</div>
-                ) : (
-                  filteredLemdikList.map(item => (
-                    <SelectItem key={item.id} value={item.namalemdik} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#B3E5FC] focus:bg-[#BBDEFB] transition-colors">
-                      {item.namalemdik}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            <span className="text-xs text-[#00B8D9] mt-1 block">Pilih dari daftar, jangan ketik manual</span>
-          </div>
-          {/* Domisili Instansi Lembaga Penyelenggara */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Domisili Instansi Lembaga Penyelenggara</label>
-          </div>
-          <div className="w-full">
-          <Select value={form.domisiliLembagaPenyelenggara} onValueChange={value => handleSelectChange("domisiliLembagaPenyelenggara", value)} required>
-            <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-xl px-4 py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all">
-              <SelectValue placeholder="Pilih Domisili Instansi Lembaga Penyelenggara" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl shadow-lg bg-white">
-              {filteredDomisiliList.map(item => (
-                <SelectItem key={item.id} value={item.id.toString()} className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#E3F2FD] focus:bg-[#BBDEFB] transition-colors">
-                  {item.nama}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          </div>
-          {/* Nomor HP */}
-          <div className="flex items-center md:justify-end">
-            <label className="font-semibold text-left md:text-right w-full md:w-44 text-[#1976D2]">Nomor HP</label>
-          </div>
-          <div className="w-full">
-            <div className="flex items-center">
-              <span className="inline-flex items-center px-3 py-3 rounded-l-xl border-2 border-r-0 border-[#2196F3] bg-[#E3F2FD] text-[#1976D2] font-bold text-base md:text-lg select-none" style={{ minWidth: 56, justifyContent: 'center' }}>+62</span>
-              <input
-                type="tel"
-                name="handphone"
-                value={form.handphone.replace(/^\+?62/, '')}
-                onChange={e => {
-                  // Always prepend '+62' to the value
-                  const value = '+62' + e.target.value.replace(/^0+/, '');
-                  setForm(f => {
-                    const updated = { ...f, handphone: value };
-                    if (typeof window !== 'undefined') {
-                      localStorage.setItem('alumni_profile_form', JSON.stringify(updated));
-                    }
-                    return updated;
-                  });
-                  profileStore.setForm({ handphone: value });
-                }}
-                className="w-full border-2 border-l-0 border-[#2196F3] rounded-r-xl px-4 py-3 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3] bg-white shadow transition"
-                placeholder="Nomor HP tanpa 0 di depan"
-                required
-                style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-                inputMode="numeric"
-              />
-            </div>
-          </div>
+      <form className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-200" onSubmit={handleSubmit}>
+        <div className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white p-6 rounded-t-2xl">
+          <h2 className="text-2xl md:text-3xl font-bold text-center">Profil Responden</h2>
+          <p className="text-center mt-2 opacity-90">Silakan lengkapi data profil Anda</p>
         </div>
-        <div className="text-center pt-4">
-          {!saved ? (
-            <button type="submit" className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-4 rounded-2xl shadow-xl hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-xl tracking-wide transition-all flex items-center gap-3">
-              <Save size={24} />
-              {Number.isInteger(Number(form.id)) && form.id !== "" ? "Update" : "Simpan"}
-            </button>
-          ) : (
-            <button type="button" onClick={() => router.push("/alumni/evaluasi")} className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-10 py-4 rounded-2xl shadow-xl hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-xl tracking-wide transition-all flex items-center gap-3">
-              Lanjut
-              <ArrowRight size={24} />
-            </button>
-          )}
+        
+        <div className="w-full p-6 bg-gray-50 border rounded-lg">
+          <table className="w-full border-collapse border border-gray-300">
+            <tbody>
+              {/* Nama Lengkap */}
+              <tr className="bg-teal-50 border-b border-gray-300">
+                <td className="px-4 py-3 font-semibold text-[#1976D2] w-1/4 border-r border-gray-300">
+                  Nama Lengkap <span className="text-red-500">*</span>
+                </td>
+                <td className="px-4 py-3 w-3/4">
+                  <input 
+                    type="text" 
+                    name="nama" 
+                    value={form.nama} 
+                    onChange={handleChange} 
+                    className="w-full border-2 border-[#90CAF9] rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] bg-white shadow-sm transition-all hover:shadow-md" 
+                    placeholder="Masukkan nama lengkap" 
+                    required 
+                  />
+                </td>
+              </tr>
+              {/* NIP/NRP/NIK */}
+              <tr className="bg-white border-b border-gray-300">
+                <td className="px-4 py-3 font-semibold text-[#1976D2] w-1/4 border-r border-gray-300">
+                  NIP/NRP/NIK <span className="text-red-500">*</span>
+                </td>
+                <td className="px-4 py-3 w-3/4">
+                  <input
+                    type="text"
+                    name="nip"
+                    value={form.nip}
+                    onChange={handleChange}
+                    className="w-full border-2 border-[#90CAF9] rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] bg-white shadow-sm transition-all hover:shadow-md"
+                    placeholder="Masukkan NIP/NRP/NIK"
+                    required
+                    disabled={form.id !== undefined && form.id !== "" && !isNaN(Number(form.id))}
+                  />
+                </td>
+              </tr>
+              {/* Jenis Instansi */}
+              <tr className="bg-teal-50 border-b border-gray-300">
+                <td className="px-4 py-3 font-semibold text-[#1976D2] w-1/4 border-r border-gray-300">
+                  Jenis Instansi <span className="text-red-500">*</span>
+                </td>
+                <td className="px-4 py-3 w-3/4">
+                  <Select value={form.jenisInstansi} onValueChange={value => handleSelectChange("jenisInstansi", value)} required>
+                    <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-lg px-3 py-2 text-base bg-gradient-to-r from-white to-[#F8FBFF] shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all duration-300 group relative">
+                      <SelectValue placeholder="Pilih Jenis Instansi" />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#90CAF9] group-hover:text-[#2196F3] transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg shadow-xl bg-white/95 backdrop-blur-sm border-2 border-[#90CAF9]/20 p-1 animate-in fade-in-80 zoom-in-95">
+                      {jenisInstansiList.map(item => (
+                        <SelectItem 
+                          key={item.id} 
+                          value={item.id.toString()} 
+                          className="px-3 py-2 rounded-md cursor-pointer bg-white hover:bg-gradient-to-r hover:from-[#E3F2FD] hover:to-[#F8FBFF] focus:bg-[#BBDEFB] transition-all duration-200 hover:scale-[1.01] mb-1 last:mb-0 group/item"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#90CAF9] group-hover/item:bg-[#2196F3] transition-colors"></div>
+                            {item.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <span className="text-xs text-[#2196F3] mt-1 block opacity-70">Pilih dari daftar yang tersedia</span>
+                </td>
+              </tr>
+              {/* Instansi */}
+              <tr className="bg-white border-b border-gray-300">
+                <td className="px-4 py-3 font-semibold text-[#1976D2] w-1/4 border-r border-gray-300">
+                  Instansi <span className="text-red-500">*</span>
+                </td>
+                <td className="px-4 py-3 w-3/4">
+                  <Select value={form.instansi} onValueChange={value => handleSelectChange("instansi", value)} required disabled={!form.jenisInstansi}>
+                    <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-lg px-3 py-2 text-base bg-gradient-to-r from-white to-[#F8FBFF] shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all duration-300 group relative">
+                      <SelectValue placeholder="Pilih Instansi dari daftar" />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#90CAF9] group-hover:text-[#2196F3] transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg shadow-xl bg-white/95 backdrop-blur-sm border-2 border-[#90CAF9]/20 p-1 animate-in fade-in-80 zoom-in-95">
+                      {filteredInstansiList.length === 0 ? (
+                        <div className="px-3 py-2 text-gray-400">Pilih Jenis Instansi terlebih dahulu</div>
+                      ) : (
+                        filteredInstansiList.map(item => (
+                          <SelectItem key={item.id} value={item.id.toString()} className="px-3 py-2 rounded-md cursor-pointer bg-white hover:bg-gradient-to-r hover:from-[#E3F2FD] hover:to-[#F8FBFF] focus:bg-[#BBDEFB] transition-all duration-200 hover:scale-[1.01] mb-1 last:mb-0 group/item">
+                            <div className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#90CAF9] group-hover/item:bg-[#2196F3] transition-colors"></div>
+                              {item.agency_name}
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <span className="text-xs text-[#00B8D9] mt-1 block">Pilih dari daftar, jangan ketik manual</span>
+                </td>
+              </tr>
+              {/* Jabatan */}
+              <tr className="bg-teal-50 border-b border-gray-300">
+                <td className="px-4 py-3 font-semibold text-[#1976D2] w-1/4 border-r border-gray-300">
+                  Jabatan <span className="text-red-500">*</span>
+                </td>
+                <td className="px-4 py-3 w-3/4">
+                  <Select value={form.jabatan} onValueChange={value => handleSelectChange("jabatan", value)} required>
+                    <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-lg px-3 py-2 text-base bg-gradient-to-r from-white to-[#F8FBFF] shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all duration-300 group relative">
+                      <SelectValue placeholder="Pilih Jabatan" />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#90CAF9] group-hover:text-[#2196F3] transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg shadow-xl bg-white/95 backdrop-blur-sm border-2 border-[#90CAF9]/20 p-1 animate-in fade-in-80 zoom-in-95">
+                      {jabatanList.map(item => (
+                        <SelectItem key={item.id} value={item.id.toString()} className="px-3 py-2 rounded-md cursor-pointer bg-white hover:bg-gradient-to-r hover:from-[#E3F2FD] hover:to-[#F8FBFF] focus:bg-[#BBDEFB] transition-all duration-200 hover:scale-[1.01] mb-1 last:mb-0 group/item">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#90CAF9] group-hover/item:bg-[#2196F3] transition-colors"></div>
+                            {item.nama}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </td>
+              </tr>
+              {/* Nama Pelatihan */}
+              <tr className="bg-white border-b border-gray-300">
+                <td className="px-4 py-3 font-semibold text-[#1976D2] w-1/4 border-r border-gray-300">
+                  Nama Pelatihan <span className="text-red-500">*</span>
+                </td>
+                <td className="px-4 py-3 w-3/4">
+                  <Select value={form.pelatihan} onValueChange={value => handleSelectChange("pelatihan", value)} required>
+                    <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-lg px-3 py-2 text-base bg-gradient-to-r from-white to-[#F8FBFF] shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all duration-300 group relative">
+                      <SelectValue placeholder="Pilih Nama Pelatihan" />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#90CAF9] group-hover:text-[#2196F3] transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg shadow-xl bg-white/95 backdrop-blur-sm border-2 border-[#90CAF9]/20 p-1 animate-in fade-in-80 zoom-in-95">
+                      {pelatihanList.map(item => (
+                        <SelectItem key={item.id} value={item.id.toString()} className="px-3 py-2 rounded-md cursor-pointer bg-white hover:bg-gradient-to-r hover:from-[#E3F2FD] hover:to-[#F8FBFF] focus:bg-[#BBDEFB] transition-all duration-200 hover:scale-[1.01] mb-1 last:mb-0 group/item">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#90CAF9] group-hover/item:bg-[#2196F3] transition-colors"></div>
+                            {item.nama}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </td>
+              </tr>
+              {/* Tahun Pelatihan */}
+              <tr className="bg-teal-50 border-b border-gray-300">
+                <td className="px-4 py-3 font-semibold text-[#1976D2] w-1/4 border-r border-gray-300">
+                  Tahun Pelatihan <span className="text-red-500">*</span>
+                </td>
+                <td className="px-4 py-3 w-3/4">
+                  <Select value={form.tahunPelatihan} onValueChange={value => handleSelectChange("tahunPelatihan", value)} required>
+                    <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-lg px-3 py-2 text-base bg-gradient-to-r from-white to-[#F8FBFF] shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all duration-300 group relative">
+                      <SelectValue placeholder="Pilih Tahun Pelatihan" />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#90CAF9] group-hover:text-[#2196F3] transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg shadow-xl bg-white/95 backdrop-blur-sm border-2 border-[#90CAF9]/20 p-1 animate-in fade-in-80 zoom-in-95">
+                      {tahunPelatihanList.map(item => (
+                        <SelectItem key={item.id} value={item.id.toString()} className="px-3 py-2 rounded-md cursor-pointer bg-white hover:bg-gradient-to-r hover:from-[#E3F2FD] hover:to-[#F8FBFF] focus:bg-[#BBDEFB] transition-all duration-200 hover:scale-[1.01] mb-1 last:mb-0 group/item">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#90CAF9] group-hover/item:bg-[#2196F3] transition-colors"></div>
+                            {item.tahun}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </td>
+              </tr>
+              {/* Instansi Lembaga Penyelenggara */}
+              <tr className="bg-white border-b border-gray-300">
+                <td className="px-4 py-3 font-semibold text-[#1976D2] w-1/4 border-r border-gray-300">
+                  Instansi Lembaga Penyelenggara <span className="text-red-500">*</span>
+                </td>
+                <td className="px-4 py-3 w-3/4">
+                  <Select value={form.lembagaPenyelenggara} onValueChange={value => handleSelectChange("lembagaPenyelenggara", value)} required>
+                    <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-lg px-3 py-2 text-base bg-gradient-to-r from-white to-[#F8FBFF] shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all duration-300 group relative min-h-[44px]">
+                      <SelectValue placeholder="Pilih Instansi Lembaga Penyelenggara dari daftar" className="line-clamp-2" />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#90CAF9] group-hover:text-[#2196F3] transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg shadow-xl bg-white/95 backdrop-blur-sm border-2 border-[#90CAF9]/20 p-1 animate-in fade-in-80 zoom-in-95 max-h-64 overflow-y-auto">
+                      {filteredLemdikList.length === 0 ? (
+                        <div className="px-3 py-2 text-gray-400">Data belum tersedia</div>
+                      ) : (
+                        filteredLemdikList.map(item => (
+                          <SelectItem key={item.id} value={item.namalemdik} className="px-3 py-2 rounded-md cursor-pointer bg-white hover:bg-gradient-to-r hover:from-[#E3F2FD] hover:to-[#F8FBFF] focus:bg-[#BBDEFB] transition-all duration-200 hover:scale-[1.01] mb-1 last:mb-0 group/item">
+                            <div className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#90CAF9] group-hover/item:bg-[#2196F3] transition-colors"></div>
+                              {item.namalemdik}
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <span className="text-xs text-[#00B8D9] mt-1 block">Pilih dari daftar, jangan ketik manual</span>
+                </td>
+              </tr>
+              {/* Domisili Instansi Lembaga Penyelenggara */}
+              <tr className="bg-teal-50 border-b border-gray-300">
+                <td className="px-4 py-3 font-semibold text-[#1976D2] w-1/4 border-r border-gray-300">
+                  Domisili Instansi Lembaga Penyelenggara <span className="text-red-500">*</span>
+                </td>
+                <td className="px-4 py-3 w-3/4">
+                  <Select value={form.domisiliLembagaPenyelenggara} onValueChange={value => handleSelectChange("domisiliLembagaPenyelenggara", value)} required>
+                    <SelectTrigger className="w-full border-2 border-[#90CAF9] rounded-lg px-3 py-2 text-base bg-gradient-to-r from-white to-[#F8FBFF] shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#2196F3] transition-all duration-300 group relative">
+                      <SelectValue placeholder="Pilih Domisili Instansi Lembaga Penyelenggara" />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#90CAF9] group-hover:text-[#2196F3] transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg shadow-xl bg-white/95 backdrop-blur-sm border-2 border-[#90CAF9]/20 p-1 animate-in fade-in-80 zoom-in-95">
+                      {filteredDomisiliList.map(item => (
+                        <SelectItem key={item.id} value={item.id.toString()} className="px-3 py-2 rounded-md cursor-pointer bg-white hover:bg-gradient-to-r hover:from-[#E3F2FD] hover:to-[#F8FBFF] focus:bg-[#BBDEFB] transition-all duration-200 hover:scale-[1.01] mb-1 last:mb-0 group/item">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#90CAF9] group-hover/item:bg-[#2196F3] transition-colors"></div>
+                            {item.nama}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </td>
+              </tr>
+              {/* Nomor HP */}
+              <tr className="bg-white border-b border-gray-300">
+                <td className="px-4 py-3 font-semibold text-[#1976D2] w-1/4 border-r border-gray-300">
+                  Nomor HP <span className="text-red-500">*</span>
+                </td>
+                <td className="px-4 py-3 w-3/4">
+                  <div className="flex items-center">
+                    <span className="inline-flex items-center px-3 py-2 rounded-l-lg border-2 border-r-0 border-[#2196F3] bg-[#E3F2FD] text-[#1976D2] font-bold text-base select-none" style={{ minWidth: 56, justifyContent: 'center' }}>+62</span>
+                    <input
+                      type="tel"
+                      name="handphone"
+                      value={form.handphone.replace(/^\+?62/, '')}
+                      onChange={e => {
+                        const value = '+62' + e.target.value.replace(/^0+/, '');
+                        setForm(f => {
+                          const updated = { ...f, handphone: value };
+                          if (typeof window !== 'undefined') {
+                            localStorage.setItem('alumni_profile_form', JSON.stringify(updated));
+                          }
+                          return updated;
+                        });
+                        profileStore.setForm({ handphone: value });
+                      }}
+                      className="w-full border-2 border-l-0 border-[#2196F3] rounded-r-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#2196F3] focus:border-[#2196F3] bg-white shadow-sm transition-all hover:shadow-md"
+                      placeholder="Nomor HP tanpa 0 di depan"
+                      required
+                      style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                      inputMode="numeric"
+                    />
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-b-2xl border-t border-gray-200">
+          <div className="text-center">
+            {!saved ? (
+              <button type="submit" className="bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-8 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-semibold text-lg tracking-wide transition-all flex items-center gap-3 mx-auto hover:shadow-xl hover:scale-105">
+                <Save size={20} />
+                {Number.isInteger(Number(form.id)) && form.id !== "" ? "Update Profil" : "Simpan Profil"}
+              </button>
+            ) : (
+              <button type="button" onClick={() => router.push("/alumni/evaluasi")} className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-3 rounded-xl shadow-lg hover:from-green-600 hover:to-green-500 font-semibold text-lg tracking-wide transition-all flex items-center gap-3 mx-auto hover:shadow-xl hover:scale-105">
+                Lanjut ke Survey
+                <ArrowRight size={20} />
+              </button>
+            )}
+          </div>
         </div>
       </form>
     </>

@@ -39,6 +39,23 @@ const pieColors = [
 ];
 
 export default function DashboardCharts() {
+  // Add custom styles for scrollbar
+  const customScrollbarStyle = `
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(156, 163, 175, 0.1);
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: linear-gradient(to bottom, #8b5cf6, #a855f7);
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(to bottom, #7c3aed, #9333ea);
+    }
+  `;
   const [pelatihanData, setPelatihanData] = useState<{ name: string; jumlah: number }[]>([]);
   const [instansiData, setInstansiData] = useState<{ name: string; jumlah: number }[]>([]);
   const [jenisInstansiData, setJenisInstansiData] = useState<{ name: string; value: number }[]>([]);
@@ -86,7 +103,9 @@ export default function DashboardCharts() {
 
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-10 px-4">
+    <>
+      <style dangerouslySetInnerHTML={{ __html: customScrollbarStyle }} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-10 px-4">
 
       {/* Chart 1: Distribusi Instansi (Bar Vertikal) */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
@@ -134,111 +153,132 @@ export default function DashboardCharts() {
       </div>
 
       {/* Chart 2: Jenis Instansi (Pie + Legend) */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
-        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-          <span className="w-3 h-3 bg-purple-500 rounded-full mr-2"></span>
-          Jenis Instansi
-        </h3>
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-6 w-full">
-          <div className="w-full flex flex-row items-center justify-center gap-6">
-            {/* Pie Chart */}
-            <div className="flex justify-center" style={{ minWidth: 300 }}>
-              <PieChart width={300} height={300}>
-                <Pie
-                  data={jenisInstansiData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  innerRadius={60}
-                  isAnimationActive
-                  animationDuration={1000}
-                >
-                  {jenisInstansiData.map((entry, idx) => (
-                    <Cell
-                      key={`cell-${idx}`}
-                      fill={pieColors[idx % pieColors.length]}
-                      stroke="#fff"
-                      strokeWidth={2}
-                      className="hover:opacity-90 transition-opacity cursor-pointer"
-                    />
-                  ))}
-                  <LabelList
-                    dataKey="value"
-                    position="inside"
-                    content={({ x, y, value, index }) => {
-                      const total = jenisInstansiData.reduce((sum, d) => sum + d.value, 0);
-                      const percent = total > 0 ? ((value as number) / total * 100).toFixed(1) : "0";
-                      const label = typeof index === "number" && jenisInstansiData[index] ? jenisInstansiData[index].name : "";
-                      return (
-                        <text
-                          x={x}
-                          y={y}
-                          textAnchor="middle"
-                          fill="#fff"
-                          fontWeight="bold"
-                          fontSize={13}
-                          alignmentBaseline="middle"
-                          style={{ pointerEvents: "none" }}
-                        >
-                          {label}
-                          {"\n"}
-                          {value} ({percent}%)
-                        </text>
-                      );
-                    }}
-                  />
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#f9fafb",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                  }}
-                />
-              </PieChart>
+      <div className="bg-gradient-to-br from-white/90 via-purple-50/30 to-indigo-50/40 backdrop-blur-sm rounded-3xl shadow-xl border border-purple-200/50 hover:shadow-2xl transition-all duration-500 p-8 flex flex-col relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-2xl"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-400/10 to-purple-400/10 rounded-full blur-xl"></div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center justify-center mb-6">
+            <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-3 rounded-2xl shadow-lg mr-4">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 3v5h5"/>
+                <path d="M21 21v-5h-5"/>
+                <path d="M21 3v5h-5"/>
+                <path d="M3 21v-5h5"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
             </div>
-            {/* Label di samping donat */}
-            <div className="flex flex-col justify-center max-h-72 overflow-y-auto scrollbar-thin" style={{ minWidth: 220 }}>
-              <div className="mb-2 text-xs text-gray-500 font-medium">
-                <span className="inline-block mr-2">Keterangan warna:</span>
-                {jenisInstansiData.map((entry, idx) => (
-                  <span key={entry.name} className="inline-flex items-center mr-3">
-                    <span style={{ backgroundColor: pieColors[idx % pieColors.length], width: 14, height: 14, display: "inline-block", borderRadius: 3, marginRight: 4, border: "1px solid #eee" }}></span>
-                    <span>{entry.name}</span>
-                  </span>
-                ))}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {jenisInstansiData.map((entry, idx) => {
-                  const total = jenisInstansiData.reduce((sum, d) => sum + d.value, 0);
-                  const percent = total > 0 ? ((entry.value / total) * 100).toFixed(1) : "0";
-                  return (
-                    <div
-                      key={entry.name}
-                      className="flex items-center p-3 rounded-xl shadow-sm bg-gradient-to-r from-white to-gray-50 border border-gray-200 hover:shadow-md transition-all group cursor-pointer"
-                      style={{ minWidth: 0 }}
+            <div>
+              <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                Distribusi Jenis Instansi
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">Klasifikasi alumni berdasarkan jenis instansi</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-center w-full">
+            {/* Compact Layout: Chart + Legend Side by Side */}
+            <div className="flex flex-col lg:flex-row items-center gap-4 w-full max-w-5xl">
+              
+              {/* Pie Chart - Compact Size */}
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/15 to-pink-400/15 rounded-full blur-lg scale-110"></div>
+                <div className="relative">
+                  <PieChart width={260} height={260}>
+                    <defs>
+                      {jenisInstansiData.map((entry, idx) => (
+                        <linearGradient key={`gradient-${idx}`} id={`gradient-${idx}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor={pieColors[idx % pieColors.length]} stopOpacity={1} />
+                          <stop offset="100%" stopColor={pieColors[idx % pieColors.length]} stopOpacity={0.75} />
+                        </linearGradient>
+                      ))}
+                    </defs>
+                    <Pie
+                      data={jenisInstansiData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={90}
+                      innerRadius={50}
+                      paddingAngle={2}
+                      isAnimationActive
+                      animationDuration={1200}
                     >
-                      <span
-                        className="w-5 h-5 rounded-lg mr-3 flex-shrink-0 border-2 border-white shadow"
-                        style={{ backgroundColor: pieColors[idx % pieColors.length] }}
-                      ></span>
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-semibold text-gray-800 group-hover:text-blue-600 text-sm truncate">
-                          {entry.name}
-                        </span>
-                        <span className="text-xs text-gray-500 truncate">
-                          {entry.value} alumni
-                        </span>
-                      </div>
-                      <span className="ml-auto text-xs font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">
-                        {percent}%
-                      </span>
-                    </div>
-                  );
-                })}
+                      {jenisInstansiData.map((entry, idx) => (
+                        <Cell
+                          key={`cell-${idx}`}
+                          fill={`url(#gradient-${idx})`}
+                          stroke="#fff"
+                          strokeWidth={2}
+                          className="hover:opacity-90 transition-all duration-300 cursor-pointer"
+                          style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }}
+                        />
+                      ))}
+                    </Pie>
+                    
+                    {/* Center text */}
+                    <text x="50%" y="47%" textAnchor="middle" className="fill-gray-600 text-xs font-medium">
+                      Total Alumni
+                    </text>
+                    <text x="50%" y="57%" textAnchor="middle" className="fill-purple-600 text-lg font-bold">
+                      {jenisInstansiData.reduce((sum, d) => sum + d.value, 0)}
+                    </text>
+                    
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "rgba(255,255,255,0.95)",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "8px",
+                        boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+                        backdropFilter: "blur(8px)",
+                      }}
+                      formatter={(value, name) => [
+                        <span key="value" style={{ color: '#6366f1', fontWeight: '600' }}>{value} alumni</span>,
+                        <span key="name" style={{ color: '#374151' }}>{name}</span>
+                      ]}
+                    />
+                  </PieChart>
+                </div>
+              </div>
+              
+              {/* Legend with More Space for Text */}
+              <div className="flex-1 min-w-0 lg:pl-6">
+                <h4 className="text-base font-semibold text-gray-800 mb-3">Keterangan</h4>
+                
+                <div className="space-y-2">
+                  {jenisInstansiData
+                    .sort((a, b) => b.value - a.value)
+                    .map((entry) => {
+                      const total = jenisInstansiData.reduce((sum, d) => sum + d.value, 0);
+                      const percent = total > 0 ? ((entry.value / total) * 100).toFixed(1) : "0";
+                      const originalIndex = jenisInstansiData.findIndex(item => item.name === entry.name);
+                      
+                      return (
+                        <div
+                          key={entry.name}
+                          className="flex items-start p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          <div 
+                            className="w-4 h-4 rounded-full flex-shrink-0 mt-0.5 mr-3"
+                            style={{ 
+                              backgroundColor: pieColors[originalIndex % pieColors.length]
+                            }}
+                          ></div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-gray-800 leading-tight">
+                              {entry.name}
+                            </div>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className="text-xs text-gray-600">{entry.value} alumni</span>
+                              <span className="text-sm font-semibold text-purple-600">{percent}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
               </div>
             </div>
           </div>
@@ -251,60 +291,58 @@ export default function DashboardCharts() {
           <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
           Alumni per Pelatihan
         </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={pelatihanData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <XAxis
-              dataKey="name"
-              stroke="#6b7280"
-              tick={props => (
-                <text
-                  {...props}
-                  fontSize={12}
-                  textAnchor="end"
-                  transform={`rotate(-30,${props.x},${props.y})`}
-                >
-                  {props.payload.value}
-                </text>
-              )}
-              interval={0}
-              height={70}
-            />
-            <YAxis stroke="#6b7280" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#f9fafb",
-                border: "1px solid #e5e7eb",
-                borderRadius: "8px",
-                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-              }}
-            />
-            <Bar dataKey="jumlah" radius={[8, 8, 0, 0]}>
-              {pelatihanData.map((entry, idx) => (
-                <Cell
-                  key={`pelatihan-bar-cell-${idx}`}
-                  fill={pieColors[idx % pieColors.length]}
-                  opacity={0.85}
-                  className="hover:opacity-100 transition-opacity duration-300"
-                />
-              ))}
-              <LabelList
-                dataKey="jumlah"
-                position="top"
-                fill="#4b5563"
-                fontSize={12}
-                fontWeight="bold"
-                formatter={(label: React.ReactNode) => {
-                  const value = typeof label === "number" ? label : Number(label);
-                  const total = pelatihanData.reduce((sum, d) => sum + d.jumlah, 0);
-                  const percent = total > 0 && value ? ((value / total) * 100).toFixed(1) : "0";
-                  return `${value} (${percent}%)`;
+        <div className="w-full overflow-x-auto">
+          <ResponsiveContainer width="100%" height={Math.max(300, pelatihanData.length * 50)}>
+            <BarChart
+              data={pelatihanData}
+              layout="vertical"
+              margin={{ top: 20, right: 50, left: 20, bottom: 20 }}
+            >
+              <XAxis type="number" stroke="#6b7280" />
+              <YAxis 
+                dataKey="name" 
+                type="category" 
+                width={200} 
+                stroke="#6b7280" 
+                tick={{ fontSize: 12 }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#f9fafb",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
                 }}
               />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+              <Bar dataKey="jumlah" radius={[0, 8, 8, 0]}>
+                {pelatihanData.map((entry, idx) => (
+                  <Cell
+                    key={`pelatihan-bar-cell-${idx}`}
+                    fill={pieColors[idx % pieColors.length]}
+                    opacity={0.85}
+                    className="hover:opacity-100 transition-opacity duration-300"
+                  />
+                ))}
+                <LabelList
+                  dataKey="jumlah"
+                  position="right"
+                  fill="#4b5563"
+                  fontSize={12}
+                  fontWeight="bold"
+                  formatter={(label: React.ReactNode) => {
+                    const value = typeof label === "number" ? label : Number(label);
+                    const total = pelatihanData.reduce((sum, d) => sum + d.jumlah, 0);
+                    const percent = total > 0 && value ? ((value / total) * 100).toFixed(1) : "0";
+                    return `${value} (${percent}%)`;
+                  }}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-    </div>
+      </div>
+    </>
   );
 }
