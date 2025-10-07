@@ -37,7 +37,17 @@ export default function LoginPage() {
         const data = await res.json();
         setNama(data.user.nama || null); // simpan nama ke zustand
         toast.success(`Login berhasil. Selamat datang, ${data.user.nama}!`);
-        router.push("/admin");
+        
+        // Redirect berdasarkan role_id
+        if (data.user.roleId === 1) {
+          router.push("/admin");
+        } else if (data.user.roleId === 2) {
+          // Untuk role_id 2, redirect ke /[slug] berdasarkan username
+          router.push(`/${data.user.username}`);
+        } else {
+          // Default redirect jika ada role lain
+          router.push("/admin");
+        }
       } else {
         alert("Login gagal. Periksa username dan password Anda.");
       }

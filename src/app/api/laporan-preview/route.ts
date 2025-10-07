@@ -8,7 +8,7 @@ export async function GET() {
     if (reviewRes.ok) {
       reviewData = await reviewRes.json();
     }
-  } catch (e) {
+  } catch (_e) {
     reviewData = null;
   }
   // Fetch waktu data from API
@@ -18,7 +18,7 @@ export async function GET() {
     if (waktuRes.ok) {
       waktuData = await waktuRes.json();
     }
-  } catch (e) {
+  } catch (_e) {
     waktuData = null;
   }
   // Fetch sikap data from API
@@ -28,7 +28,7 @@ export async function GET() {
     if (sikapRes.ok) {
       sikapData = await sikapRes.json();
     }
-  } catch (e) {
+  } catch (_e) {
     sikapData = null;
   }
   // Fetch dukungan data from API
@@ -38,7 +38,7 @@ export async function GET() {
     if (dukunganRes.ok) {
       dukunganData = await dukunganRes.json();
     }
-  } catch (e) {
+  } catch (_e) {
     dukunganData = null;
   }
   // Data dari /api/summarycard

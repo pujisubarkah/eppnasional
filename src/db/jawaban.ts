@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, jsonb, timestamp } from 'drizzle-orm/pg-core';
+import { serial, integer, jsonb, timestamp } from 'drizzle-orm/pg-core';
 import { eppnSchema } from './eppn-schema';
 
 export const jawaban = eppnSchema.table('answers_json', {

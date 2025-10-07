@@ -4,14 +4,14 @@ import { usePathname } from "next/navigation";
 import { BarChart2, BookOpen, Users, Smile, Clock, Star, MessageCircle } from "lucide-react";
 
 const menu = [
-  { href: "/[slug]", label: "Ringkasan", icon: <BarChart2 size={18} /> },
-  { href: "/[slug]/materi", label: "Materi", icon: <BookOpen size={18} /> },
-  { href: "/[slug]/dukungan-lingkungan", label: "Dukungan Lingkungan", icon: <Users size={18} /> },
-  { href: "/[slug]/sikap-perilaku", label: "Sikap Perilaku", icon: <Smile size={18} /> },
-  { href: "/[slug]/kesesuaian-waktu", label: "Kesesuaian Waktu dan Manfaat", icon: <Clock size={18} /> },
-  { href: "/[slug]/saran-masukan", label: "Saran dan Masukan", icon: <MessageCircle size={18} /> },
-  { href: "/[slug]/peer-review", label: "Peer Review", icon: <Star size={18} /> },
-   { href: "/[slug]/laporan", label: "Laporan", icon: <BookOpen size={18} /> }, // 👉 baru
+  { href: "/admin", label: "Ringkasan", icon: <BarChart2 size={18} /> },
+  { href: "/admin/materi", label: "Materi", icon: <BookOpen size={18} /> },
+  { href: "/admin/dukungan-lingkungan", label: "Dukungan Lingkungan", icon: <Users size={18} /> },
+  { href: "/admin/sikap-perilaku", label: "Sikap Perilaku", icon: <Smile size={18} /> },
+  { href: "/admin/kesesuaian-waktu", label: "Kesesuaian Waktu dan Manfaat", icon: <Clock size={18} /> },
+  { href: "/admin/saran-masukan", label: "Saran dan Masukan", icon: <MessageCircle size={18} /> },
+  { href: "/admin/peer-review", label: "Peer Review", icon: <Star size={18} /> },
+   { href: "/admin/laporan", label: "Laporan", icon: <BookOpen size={18} /> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

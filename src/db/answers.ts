@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
+import { serial, integer, text, timestamp } from "drizzle-orm/pg-core";
 import { eppnSchema } from './eppn-schema';
 
 export const answers = eppnSchema.table("answers", {

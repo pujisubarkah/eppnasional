@@ -1,5 +1,5 @@
 // schema/agenda.ts
-import { pgTable, integer } from 'drizzle-orm/pg-core';
+import { integer } from 'drizzle-orm/pg-core';
 import { pelatihan } from './pelatihan';
 import { agenda } from './agenda';
 import { eppnSchema } from './eppn-schema';

@@ -22,12 +22,22 @@ export default function SlugLayout({ children }: { children: React.ReactNode }) 
     <div className="flex min-h-screen bg-[#F8FAFB]">
       <aside className="w-60 bg-white border-r border-[#E3F2FD] flex flex-col py-8 px-4 shadow-lg">
         <div className="mb-8 text-2xl font-bold text-[#1976D2] text-center tracking-wide">
-          {baseSlug ? baseSlug.charAt(0).toUpperCase() + baseSlug.slice(1) : 'Dashboard'} Panel
+          {(baseSlug && baseSlug !== '[slug]') 
+            ? baseSlug.charAt(0).toUpperCase() + baseSlug.slice(1) + ' Panel'
+            : 'Dashboard Panel'
+          }
         </div>
         <nav className="flex flex-col gap-2">
           {menuItems.map((item) => {
-            const href = item.slug === "" ? `/${baseSlug}` : `/${baseSlug}/${item.slug}`;
+            // Pastikan baseSlug adalah string yang valid, bukan [slug]
+            const validSlug = baseSlug && baseSlug !== '[slug]' ? baseSlug : '';
+            const href = item.slug === "" 
+              ? `/${validSlug}` 
+              : `/${validSlug}/${item.slug}`;
             const isActive = pathname === href;
+            
+            // Jangan render jika slug tidak valid
+            if (!validSlug) return null;
             
             return (
               <Link

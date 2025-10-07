@@ -59,32 +59,6 @@ export default function SikapPerilakuPage() {
     fetchData();
   }, []);
 
-  // Aggregate all pelatihan data
-  function aggregateAll(pelatihans: PelatihanData[]) {
-    // Helper to sum arrays by kategori
-    // Aggregate for all pelatihan
-    const allSikap: Record<string, number> = {};
-    const allKinerja: Record<string, number> = {};
-    const allEkonomi: Record<string, number> = {};
-    const allTema: Record<string, number> = {};
-    const allTransformasi: Record<string, number> = {};
-    const allSubBidang: Record<string, number> = {};
-    pelatihans.forEach(p => {
-      p.sikapData.forEach(d => { allSikap[d.kategori] = (allSikap[d.kategori] || 0) + d.jumlah; });
-      p.kinerjaData.forEach(d => { allKinerja[d.kategori] = (allKinerja[d.kategori] || 0) + d.jumlah; });
-      p.ekonomiData.forEach(d => { allEkonomi[d.kategori] = (allEkonomi[d.kategori] || 0) + d.jumlah; });
-      p.temaData.forEach(d => { allTema[d.kategori] = (allTema[d.kategori] || 0) + d.jumlah; });
-      p.transformasiData.forEach(d => { allTransformasi[d.kategori] = (allTransformasi[d.kategori] || 0) + d.jumlah; });
-      p.subBidangData.forEach(d => { allSubBidang[d.kategori] = (allSubBidang[d.kategori] || 0) + d.jumlah; });
-    });
-    setSikapData(Object.entries(allSikap).filter(([, jumlah]) => jumlah > 0).map(([kategori, jumlah]) => ({ kategori, jumlah })));
-    setKinerjaData(Object.entries(allKinerja).filter(([, jumlah]) => jumlah > 0).map(([kategori, jumlah]) => ({ kategori, jumlah })));
-    setEkonomiData(Object.entries(allEkonomi).filter(([, value]) => value > 0).map(([kategori, value]) => ({ kategori, value })));
-    setTemaData(Object.entries(allTema).filter(([, value]) => value > 0).map(([kategori, value]) => ({ kategori, value })));
-    setTransformasiData(Object.entries(allTransformasi).filter(([, value]) => value > 0).map(([kategori, value]) => ({ kategori, value })));
-    setSubBidangData(Object.entries(allSubBidang).filter(([, value]) => value > 0).map(([kategori, value]) => ({ kategori, value })));
-  }
-
   // Handle filter change
   function handlePelatihanChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = e.target.value;

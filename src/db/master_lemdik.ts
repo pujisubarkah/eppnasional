@@ -1,5 +1,5 @@
 // server/database/schema/provinsi.ts
-import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
+import { serial, varchar } from 'drizzle-orm/pg-core';
 import { integer } from 'drizzle-orm/pg-core';
 import { provinsi } from './provinsi';
 import { eppnSchema } from './eppn-schema';
