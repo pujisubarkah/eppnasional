@@ -38,8 +38,9 @@ export async function POST(req: Request) {
       user: {
         id: user.id,
         username: user.username,
-        nama: user.nama, // pastikan field ini ada di tabel users
-        roleId: user.roleId
+        nama: user.nama,
+        roleId: user.roleId,
+        lemdikId: user.lemdikId
       }
     });
 

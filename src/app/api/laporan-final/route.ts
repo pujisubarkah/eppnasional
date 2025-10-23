@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Document, Packer, Paragraph, TextRun } from "docx";
+import { Document, Packer, Paragraph } from "docx";
 
 export async function GET() {
   const doc = new Document({

@@ -186,6 +186,34 @@ export default function MateriPage() {
             </p>
           </div>
         </div>
+        {/* Export Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => {
+              // Build CSV from filteredTable
+              const headers = ["Pelatihan ID", "Nama Pelatihan", "Top Relevan (comma-separated)", "Top Tidak Relevan (comma-separated)"];
+              const rows = filteredTable.map(r => [
+                r.pelatihanId,
+                `"${String(r.namaPelatihan).replace(/"/g, '""')}"`,
+                `"${r.relevan.slice(0,10).join(', ').replace(/"/g, '""')}"`,
+                `"${r.tidakRelevan.slice(0,10).join(', ').replace(/"/g, '""')}"`,
+              ]);
+              const csvContent = [headers, ...rows].map(r => r.join(",")).join("\n");
+              const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `materi_export_${new Date().toISOString().slice(0,10)}.csv`;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              URL.revokeObjectURL(url);
+            }}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
+          >
+            Export CSV
+          </button>
+        </div>
 
         {/* Filter Section */}
         <div className="bg-white rounded-xl shadow-md p-6 border border-[#E3F2FD] mb-6">

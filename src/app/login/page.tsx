@@ -22,7 +22,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { nama, setNama, clearNama } = useNamaProfileStore();
+  const { nama, setUser, clearUser } = useNamaProfileStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +35,14 @@ export default function LoginPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setNama(data.user.nama || null); // simpan nama ke zustand
+        // Simpan seluruh user data ke zustand termasuk lemdikId
+        setUser({
+          id: data.user.id,
+          username: data.user.username,
+          nama: data.user.nama,
+          roleId: data.user.roleId,
+          lemdikId: data.user.lemdikId
+        });
         toast.success(`Login berhasil. Selamat datang, ${data.user.nama}!`);
         
         // Redirect berdasarkan role_id
@@ -57,7 +64,7 @@ export default function LoginPage() {
   };
 
   const handleLogout = () => {
-    clearNama();
+    clearUser();
     toast.success("Logout berhasil.");
     router.push("/login");
   };

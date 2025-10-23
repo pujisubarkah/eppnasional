@@ -242,6 +242,52 @@ function DukunganLingkunganPage() {
             </div>
           </div>
         </div>
+        {/* Export Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => {
+              try {
+                const headers = ["Pertanyaan", "Nama Pelatihan", "1 - Sangat Tidak Setuju", "2 - Tidak Setuju", "3 - Setuju", "4 - Sangat Setuju"];
+                type ExportRow = {
+                  pertanyaan: string;
+                  namaPelatihan: string;
+                  s1: string;
+                  s2: string;
+                  s3: string;
+                  s4: string;
+                };
+
+                const dataToExport: ExportRow[] = (filteredChartData as Array<ChartRow & { namaPelatihan?: string }>).map(r => ({
+                  pertanyaan: String(r.pertanyaan ?? "").replace(/\r?\n/g, ' '),
+                  namaPelatihan: String(r.namaPelatihan ?? 'all').replace(/\r?\n/g, ' '),
+                  s1: String(r["1 - Sangat Tidak Setuju"] ?? 0),
+                  s2: String(r["2 - Tidak Setuju"] ?? 0),
+                  s3: String(r["3 - Setuju"] ?? 0),
+                  s4: String(r["4 - Sangat Setuju"] ?? 0),
+                }));
+
+                const escapeCell = (v: string) => `"${v.replace(/"/g, '""')}"`;
+                const rows: string[] = dataToExport.map(r => [r.pertanyaan, r.namaPelatihan, r.s1, r.s2, r.s3, r.s4].map(c => escapeCell(c)).join(','));
+                const csv = [headers.map(escapeCell).join(','), ...rows].join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `dukungan_export_${new Date().toISOString().slice(0,10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+              } catch (err) {
+                console.error(err);
+                alert('Gagal membuat file CSV');
+              }
+            }}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
+          >
+            Export CSV
+          </button>
+        </div>
 
         {/* Chart Section */}
         <div className="bg-white rounded-xl shadow-lg p-6 border border-[#E3F2FD] mb-8">

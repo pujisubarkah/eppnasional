@@ -89,6 +89,10 @@ export default function SikapPerilakuPage() {
   function handlePelatihanChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = e.target.value;
     setSelectedPelatihan(val);
+    if (val === 'all') {
+      aggregateAll(pelatihanList);
+      return;
+    }
     const found = pelatihanList.find(p => String(p.pelatihanId) === val);
     setSikapData(found?.sikapData.filter(d => d.jumlah > 0) || []);
     setKinerjaData(found?.kinerjaData.filter(d => d.jumlah > 0) || []);
@@ -143,6 +147,7 @@ const COLORS = [
               value={selectedPelatihan}
               onChange={handlePelatihanChange}
             >
+              <option value="all">📊 Semua Pelatihan</option>
               {pelatihanList.map((p) => (
                 <option key={p.pelatihanId ?? 'null'} value={p.pelatihanId ?? 'null'}>🎯 {p.namaPelatihan || 'Tidak diketahui'}</option>
               ))}
@@ -151,6 +156,69 @@ const COLORS = [
               Pelatihan: <span className="font-semibold text-[#1976D2]">{pelatihanList.find(p => String(p.pelatihanId) === selectedPelatihan)?.namaPelatihan || 'Tidak diketahui'}</span>
             </div>
           </div>
+        </div>
+        {/* Export Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => {
+              try {
+                const lines: string[] = [];
+                const esc = (s: string) => `"${s.replace(/"/g, '""') }"`;
+
+                // Sikap
+                lines.push(esc('SECTION: Sikap'));
+                lines.push([esc('Kategori'), esc('Jumlah')].join(','));
+                sikapData.forEach(d => lines.push([esc(d.kategori), String(d.jumlah)].join(',')));
+                lines.push('');
+
+                // Kinerja
+                lines.push(esc('SECTION: Kinerja'));
+                lines.push([esc('Kategori'), esc('Jumlah')].join(','));
+                kinerjaData.forEach(d => lines.push([esc(d.kategori), String(d.jumlah)].join(',')));
+                lines.push('');
+
+                // Ekonomi
+                lines.push(esc('SECTION: Ekonomi'));
+                lines.push([esc('Kategori'), esc('Jumlah')].join(','));
+                ekonomiData.forEach(d => lines.push([esc(d.kategori), String(d.value)].join(',')));
+                lines.push('');
+
+                // Tema
+                lines.push(esc('SECTION: Tema'));
+                lines.push([esc('Kategori'), esc('Jumlah')].join(','));
+                temaData.forEach(d => lines.push([esc(d.kategori), String(d.value)].join(',')));
+                lines.push('');
+
+                // Transformasi
+                lines.push(esc('SECTION: Transformasi'));
+                lines.push([esc('Kategori'), esc('Jumlah')].join(','));
+                transformasiData.forEach(d => lines.push([esc(d.kategori), String(d.value)].join(',')));
+                lines.push('');
+
+                // Sub Bidang
+                lines.push(esc('SECTION: SubBidang'));
+                lines.push([esc('Kategori'), esc('Jumlah')].join(','));
+                subBidangData.forEach(d => lines.push([esc(d.kategori), String(d.value)].join(',')));
+
+                const csv = lines.join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sikap_export_${new Date().toISOString().slice(0,10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+              } catch (err) {
+                console.error(err);
+                alert('Gagal membuat file CSV');
+              }
+            }}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
+          >
+            Export CSV
+          </button>
         </div>
         {loading ? (
           <div className="bg-white rounded-xl shadow-lg p-12 border border-[#E3F2FD] text-center">

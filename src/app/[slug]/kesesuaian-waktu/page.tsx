@@ -156,6 +156,36 @@ export default function KesesuaianWaktuPage() {
             </div>
           </div>
         </div>
+        {/* Export Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => {
+              try {
+                const pelName = selectedPelatihan === 'all' ? 'Semua Pelatihan' : (pelatihanList.find(p => String(p.pelatihanId) === selectedPelatihan)?.namaPelatihan ?? selectedPelatihan);
+                const headers = ['Pelatihan', 'Kategori', 'Tidak Setuju', 'Setuju'];
+                const rows = chartData.map(r => [pelName, r.kategori, String(r.negatif), String(r.positif)]);
+                const escapeCell = (v: string) => `"${v.replace(/"/g, '""')}"`;
+                const csv = [headers.map(escapeCell).join(','), ...rows.map(r => r.map(c => escapeCell(String(c))).join(','))].join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `kesesuaian_waktu_${new Date().toISOString().slice(0,10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+              } catch (err) {
+                console.error(err);
+                alert('Gagal membuat file CSV');
+              }
+            }}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
+          >
+            Export CSV
+          </button>
+        </div>
+
         {/* Chart Section */}
         <div className="bg-white rounded-xl shadow-lg border border-[#E3F2FD] overflow-hidden">
           <div className="bg-gradient-to-r from-[#1976D2] to-[#1565C0] p-6">

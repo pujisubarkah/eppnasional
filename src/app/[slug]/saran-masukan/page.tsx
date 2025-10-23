@@ -272,6 +272,56 @@ export default function SaranMasukanPage() {
             </div>
           </div>
         </div>
+      {/* Export Button */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => {
+            try {
+              const pelName = selectedPelatihan === 'all' ? 'Semua Pelatihan' : (apiData?.pelatihanList?.find(p => String(p.pelatihanId) === selectedPelatihan)?.namaPelatihan ?? selectedPelatihan);
+              const headers = ['No', 'Pelatihan', 'Kategori', 'Teks Saran & Masukan'];
+              const rows = (filteredTabData as string[]).map((t, i) => [String(i+1), pelName, activeTab, t.replace(/\r?\n/g, ' ')]);
+              const escapeCell = (v: string) => `"${v.replace(/"/g, '""')}"`;
+              const csvParts: string[] = [];
+              csvParts.push(headers.map(escapeCell).join(','));
+              for (const r of rows) csvParts.push(r.map(c => escapeCell(String(c))).join(','));
+
+              // Append top bigrams and trigrams for the active tab if available
+              const ngram = currentData.ngram as Record<string, Ngram> | undefined;
+              if (ngram && ngram[activeTab]) {
+                csvParts.push('');
+                csvParts.push(escapeCell('SECTION: Top Bigrams'));
+                csvParts.push([escapeCell('Phrase'), escapeCell('Frequency')].join(','));
+                const bigramEntries = Object.entries(ngram[activeTab].bigram || {}).sort((a,b) => b[1]-a[1]).slice(0,50);
+                bigramEntries.forEach(([phrase, freq]) => csvParts.push([escapeCell(phrase), String(freq)].join(',')));
+
+                csvParts.push('');
+                csvParts.push(escapeCell('SECTION: Top Trigrams'));
+                csvParts.push([escapeCell('Phrase'), escapeCell('Frequency')].join(','));
+                const trigramEntries = Object.entries(ngram[activeTab].trigram || {}).sort((a,b) => b[1]-a[1]).slice(0,50);
+                trigramEntries.forEach(([phrase, freq]) => csvParts.push([escapeCell(phrase), String(freq)].join(',')));
+              }
+
+              const csv = csvParts.join('\n');
+              const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `saran_export_${new Date().toISOString().slice(0,10)}.csv`;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              URL.revokeObjectURL(url);
+            } catch (err) {
+              console.error(err);
+              alert('Gagal membuat file CSV');
+            }
+          }}
+          className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
+        >
+          Export CSV
+        </button>
+      </div>
+
       {/* Word Cloud */}
       <div className="bg-white rounded-xl shadow p-6 border border-[#E3F2FD] mb-8">
         <h2 className="text-lg font-semibold mb-2 text-[#1976D2]">Word Cloud Saran & Masukan</h2>

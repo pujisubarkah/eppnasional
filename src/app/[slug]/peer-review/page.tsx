@@ -154,6 +154,42 @@ export default function PeerReviewPage() {
               Visualisasi Data Peer Review
             </h2>
           </div>
+          {/* Export Button */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={() => {
+                try {
+                  const pelName = selectedPelatihan === 'all' ? 'Semua Pelatihan' : (pelatihanList.find(p => String(p.pelatihanId) === selectedPelatihan)?.namaPelatihan ?? selectedPelatihan);
+                  const headers = ['Question', 'Answer', 'Count', 'Pelatihan'];
+                  const rows: string[][] = [];
+                  chartData.forEach(item => {
+                    const q = String(item.question || '');
+                    Object.keys(item).filter(k => k !== 'question').forEach(ans => {
+                      const cnt = item[ans] as number | string | undefined;
+                      rows.push([q, ans, String(cnt ?? 0), pelName]);
+                    });
+                  });
+                  const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
+                  const csv = [headers.map(esc).join(','), ...rows.map(r => r.map(c => esc(String(c))).join(','))].join('\n');
+                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `peerreview_export_${new Date().toISOString().slice(0,10)}.csv`;
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  URL.revokeObjectURL(url);
+                } catch (err) {
+                  console.error(err);
+                  alert('Gagal membuat file CSV');
+                }
+              }}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
+            >
+              Export CSV
+            </button>
+          </div>
           <div className="p-6">
             {chartData.length > 0 ? (
               <div className="space-y-8">

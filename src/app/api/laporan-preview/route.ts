@@ -8,7 +8,7 @@ export async function GET() {
     if (reviewRes.ok) {
       reviewData = await reviewRes.json();
     }
-  } catch (_e) {
+  } catch {
     reviewData = null;
   }
   // Fetch waktu data from API
@@ -18,7 +18,7 @@ export async function GET() {
     if (waktuRes.ok) {
       waktuData = await waktuRes.json();
     }
-  } catch (_e) {
+  } catch {
     waktuData = null;
   }
   // Fetch sikap data from API
@@ -28,7 +28,7 @@ export async function GET() {
     if (sikapRes.ok) {
       sikapData = await sikapRes.json();
     }
-  } catch (_e) {
+  } catch {
     sikapData = null;
   }
   // Fetch dukungan data from API
@@ -38,15 +38,28 @@ export async function GET() {
     if (dukunganRes.ok) {
       dukunganData = await dukunganRes.json();
     }
-  } catch (_e) {
+  } catch {
     dukunganData = null;
   }
-  // Data dari /api/summarycard
-  const summarycard = {
-    totalResponden: 265,
-    tahunPelatihan: { 2021: 61, 2022: 38, 2023: 37, 2024: 94 },
-    totalInstansi: 48,
-  };
+  // Data dari https://eppnasional.lan.go.id/api/summarycard (ambil live)
+  let summarycard = null;
+  try {
+    const scRes = await fetch("https://eppnasional.lan.go.id/api/summarycard", { cache: "no-store" });
+    if (scRes.ok) {
+      const scJson = await scRes.json();
+      if (scJson && scJson.summary) summarycard = scJson.summary;
+    }
+  } catch {
+    summarycard = null;
+  }
+  if (!summarycard) {
+    // fallback jika remote tidak tersedia
+    summarycard = {
+      totalResponden: 265,
+      tahunPelatihan: { 2021: 61, 2022: 38, 2023: 37, 2024: 94 },
+      totalInstansi: 48,
+    };
+  }
   const today = new Date();
   const bulan = today.toLocaleString("id-ID", { month: "long" });
   const tahun = today.getFullYear();
