@@ -43,8 +43,10 @@ export default function ProfileForm() {
   const [pelatihanList, setPelatihanList] = useState<Pelatihan[]>([]);
   const [jabatanList, setJabatanList] = useState<Jabatan[]>([]);
   const [tahunPelatihanList, setTahunPelatihanList] = useState<TahunPelatihan[]>([]);
-  // Removed unused setLemdikList
+  // Lemdik lists and search query for searchable dropdown
+  const [lemdikList, setLemdikList] = useState<Lemdik[]>([]);
   const [filteredLemdikList, setFilteredLemdikList] = useState<Lemdik[]>([]);
+  const [lemdikQuery, setLemdikQuery] = useState<string>("");
   const [saved, setSaved] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
@@ -128,9 +130,10 @@ export default function ProfileForm() {
         const tahunRes = await fetch("/api/tahun_pelatihan");
         setTahunPelatihanList(await tahunRes.json());
         const lemdikRes = await fetch("/api/master_lemdik");
-        const lemdikJson = await lemdikRes.json();
-        // setLemdikList removed
-        setFilteredLemdikList(lemdikJson.data);
+  const lemdikJson = await lemdikRes.json();
+  // store both full list and filtered list
+  setLemdikList(lemdikJson.data || []);
+  setFilteredLemdikList(lemdikJson.data || []);
       } catch {
         // handle error
       }
@@ -213,6 +216,11 @@ export default function ProfileForm() {
       return updated;
     });
     profileStore.setForm({ [name]: value }); // update ke zustand
+    // if selecting lembagaPenyelenggara, clear any search query and reset filtered list
+    if (name === "lembagaPenyelenggara") {
+      setLemdikQuery("");
+      setFilteredLemdikList(lemdikList);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -569,6 +577,21 @@ export default function ProfileForm() {
                       </span>
                     </SelectTrigger>
                     <SelectContent className="rounded-lg shadow-xl bg-white/95 backdrop-blur-sm border-2 border-[#90CAF9]/20 p-1 animate-in fade-in-80 zoom-in-95 max-h-64 overflow-y-auto">
+                      <div className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={lemdikQuery}
+                          onChange={(e) => {
+                            const q = e.target.value;
+                            setLemdikQuery(q);
+                            const filtered = lemdikList.filter(item => item.namalemdik.toLowerCase().includes(q.toLowerCase()));
+                            setFilteredLemdikList(filtered);
+                          }}
+                          placeholder="Cari lembaga penyelenggara..."
+                          className="w-full px-3 py-2 border border-[#E3F2FD] rounded-md focus:outline-none focus:ring-2 focus:ring-[#2196F3]"
+                          autoFocus
+                        />
+                      </div>
                       {filteredLemdikList.length === 0 ? (
                         <div className="px-3 py-2 text-gray-400">Data belum tersedia</div>
                       ) : (
