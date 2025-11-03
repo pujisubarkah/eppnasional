@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -8,6 +8,8 @@ import DashboardMap from "@/components/DashboardMap";
 import DashboardCharts from "@/components/DashboardCharts";
 
 export default function Home() {
+  const [showModal, setShowModal] = useState(false);
+
   // Clear all relevant localStorage keys on homepage load
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -24,6 +26,14 @@ export default function Home() {
     }
   }, []);
 
+  const handleSurveyClick = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-300 px-4 mt-24">
       {/* Navbar removed, handled in layout */}
@@ -36,18 +46,24 @@ export default function Home() {
           <Image src="/alumni.png" alt="Alumni" width={100} height={100} className="mb-4 drop-shadow-lg" />
           <h2 className="text-2xl font-bold text-[#1976D2] mb-2">Survei Alumni</h2>
           <p className="text-gray-700 mb-4">Survei ini khusus untuk alumni pelatihan LAN RI tahun 2021–2024. Silakan isi jika Anda adalah alumni pelatihan tersebut.</p>
-          <Link href="/alumni/profile" className="inline-block bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-8 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition">
+          <button 
+            onClick={handleSurveyClick}
+            className="inline-block bg-gradient-to-r from-red-500 to-red-700 text-white px-8 py-3 rounded-xl shadow-lg hover:from-red-600 hover:to-red-800 font-bold text-lg tracking-wide transition cursor-pointer"
+          >
             Isi Survei Alumni
-          </Link>
+          </button>
         </div>
         {/* Card Atasan/Rekan/Bawahan */}
         <div className="bg-white/90 rounded-3xl shadow-lg p-8 flex flex-col items-center text-center border-2 border-[#2196F3] outline-2 outline-[#2196F3] hover:shadow-2xl transition-all duration-300">
           <Image src="/atasan.png" alt="Atasan/Rekan/Bawahan" width={100} height={100} className="mb-4 drop-shadow-lg" />
           <h2 className="text-2xl font-bold text-[#1976D2] mb-2">Survei Atasan/Rekan/Bawahan</h2>
           <p className="text-gray-700 mb-4">Survei ini untuk atasan, rekan kerja, atau bawahan alumni pelatihan LAN RI tahun 2021–2024. Silakan isi jika Anda ingin menilai alumni.</p>
-          <Link href="/review/profile" className="inline-block bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-8 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition">
+          <button 
+            onClick={handleSurveyClick}
+            className="inline-block bg-gradient-to-r from-red-500 to-red-700 text-white px-8 py-3 rounded-xl shadow-lg hover:from-red-600 hover:to-red-800 font-bold text-lg tracking-wide transition cursor-pointer"
+          >
             Isi Survei Atasan/Rekan/Bawahan
-          </Link>
+          </button>
         </div>
       </section>
 
@@ -78,6 +94,30 @@ export default function Home() {
       </section>
 
       {/* Footer removed, handled in layout */}
+
+      {/* Custom Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-10 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+            <div className="p-6 text-center">
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                Maaf Survei Telah Ditutup
+              </h2>
+              
+              <p className="text-gray-600 mb-4">
+                Terima kasih buat Anda yang telah berpartisipasi
+              </p>
+              
+              <button
+                onClick={closeModal}
+                className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
