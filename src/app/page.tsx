@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import DashboardSummaryCard from "@/components/DashboardSummaryCard";
 import DashboardMap from "@/components/DashboardMap";
@@ -9,6 +10,8 @@ import DashboardCharts from "@/components/DashboardCharts";
 
 export default function Home() {
   const [showModal, setShowModal] = useState(false);
+  const [isSurveyOpen, setIsSurveyOpen] = useState(true); // Set ke true jika survei dibuka
+  const router = useRouter();
 
   // Clear all relevant localStorage keys on homepage load
   useEffect(() => {
@@ -26,8 +29,18 @@ export default function Home() {
     }
   }, []);
 
-  const handleSurveyClick = () => {
-    setShowModal(true);
+  const handleSurveyClick = (surveyType: 'alumni' | 'review') => {
+    if (isSurveyOpen) {
+      // Jika survei dibuka, arahkan ke form
+      if (surveyType === 'alumni') {
+        router.push('/alumni/profile');
+      } else {
+        router.push('/review/profile');
+      }
+    } else {
+      // Jika survei ditutup, tampilkan modal
+      setShowModal(true);
+    }
   };
 
   const closeModal = () => {
@@ -47,8 +60,8 @@ export default function Home() {
           <h2 className="text-2xl font-bold text-[#1976D2] mb-2">Survei Alumni</h2>
           <p className="text-gray-700 mb-4">Survei ini khusus untuk alumni pelatihan LAN RI tahun 2021–2024. Silakan isi jika Anda adalah alumni pelatihan tersebut.</p>
           <button 
-            onClick={handleSurveyClick}
-            className="inline-block bg-gradient-to-r from-red-500 to-red-700 text-white px-8 py-3 rounded-xl shadow-lg hover:from-red-600 hover:to-red-800 font-bold text-lg tracking-wide transition cursor-pointer"
+            onClick={() => handleSurveyClick('alumni')}
+            className="inline-block bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-8 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition cursor-pointer"
           >
             Isi Survei Alumni
           </button>
@@ -59,8 +72,8 @@ export default function Home() {
           <h2 className="text-2xl font-bold text-[#1976D2] mb-2">Survei Atasan/Rekan/Bawahan</h2>
           <p className="text-gray-700 mb-4">Survei ini untuk atasan, rekan kerja, atau bawahan alumni pelatihan LAN RI tahun 2021–2024. Silakan isi jika Anda ingin menilai alumni.</p>
           <button 
-            onClick={handleSurveyClick}
-            className="inline-block bg-gradient-to-r from-red-500 to-red-700 text-white px-8 py-3 rounded-xl shadow-lg hover:from-red-600 hover:to-red-800 font-bold text-lg tracking-wide transition cursor-pointer"
+            onClick={() => handleSurveyClick('review')}
+            className="inline-block bg-gradient-to-r from-[#2196F3] to-[#1976D2] text-white px-8 py-3 rounded-xl shadow-lg hover:from-[#1976D2] hover:to-[#2196F3] font-bold text-lg tracking-wide transition cursor-pointer"
           >
             Isi Survei Atasan/Rekan/Bawahan
           </button>
