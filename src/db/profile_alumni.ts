@@ -14,6 +14,7 @@ export const alumni = eppnSchema.table('informasi_profile', {
   tahunPelatihanId: integer('tahun_pelatihan_id'),
   lemdik: varchar('lemdik', { length: 255 }),
   handphone: varchar('telepon', { length: 30 }),
+  telepon: varchar("telepon", { length: 50 }).notNull().default(""),
   createdAt: timestamp('created_at').defaultNow(),
   name: varchar('nama', { length: 255 }),
   hubungan: varchar('hubungan', { length: 100 }),

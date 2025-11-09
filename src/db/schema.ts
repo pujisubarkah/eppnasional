@@ -12,3 +12,6 @@ export * from './sub_agenda';
 export { answers as answersFromAnswers } from './answers';
 export * from './users';
 export * from './roles';
+export { instansi } from "./instansi";
+export { questionOptions } from "./question_options";
+export { answersJson } from "./answersJson";

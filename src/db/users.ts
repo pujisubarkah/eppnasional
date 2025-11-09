@@ -1,13 +1,14 @@
-import { serial, varchar, integer } from 'drizzle-orm/pg-core';
-import { eppnSchema } from './eppn-schema';
-import { roles } from './roles'; // Import dari roles
-import { lemdik } from './master_lemdik'; // Import dari master_lemdik
+import { pgTable, serial, varchar, text, timestamp } from "drizzle-orm/pg-core";
 
-export const users = eppnSchema.table('users', {
-  id: serial('id').primaryKey(),
-  username: varchar('username').notNull(),
-  password: varchar('password').notNull(),
-  roleId: integer('role_id').notNull().references(() => roles.id),
-  nama: varchar('nama').notNull(),
-  lemdikId: integer('lemdik_id').references(() => lemdik.id)
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  nip: varchar("nip", { length: 50 }),
+  instansi: varchar("instansi", { length: 255 }),
+  unit_kerja: varchar("unit_kerja", { length: 255 }),
+  password: text("password"),
+  role: varchar("role", { length: 50 }).default("user"),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
 });
