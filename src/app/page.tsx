@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -10,7 +9,7 @@ import DashboardCharts from "@/components/DashboardCharts";
 
 export default function Home() {
   const [showModal, setShowModal] = useState(false);
-  const [isSurveyOpen, setIsSurveyOpen] = useState(true); // Set ke true jika survei dibuka
+  const [isSurveyOpen] = useState(true); // Set ke true jika survei dibuka
   const router = useRouter();
 
   // Clear all relevant localStorage keys on homepage load

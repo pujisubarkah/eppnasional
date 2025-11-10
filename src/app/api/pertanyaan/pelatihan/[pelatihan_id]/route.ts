@@ -76,7 +76,10 @@ export async function GET(
       .where(eq(question_options.question_id, pertanyaanId));
 
     optionsWithSubAgenda = rawOptions.map(opt => ({
-      ...opt,
+      id: opt.id,
+      question_id: opt.question_id,
+      option_text: opt.option_text,
+      option_value: opt.option_value === null ? 0 : Number(opt.option_value),
       sub_agenda_name: opt.sub_agenda_name ?? '',
     }));
   }

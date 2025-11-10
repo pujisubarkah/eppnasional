@@ -61,7 +61,7 @@ export async function GET() {
         created_at: jawaban.created_at,
         userName: alumni.namaAlumni,
         userNip: alumni.nipNrpNik,
-        userPhone: (alumni as unknown as any).telepon,
+        userPhone: alumni.handphone,
         userInstansiId: alumni.instansiId,
         userInstansiKategoriId: alumni.instansiKategoriId,
         userTahunPelatihanId: alumni.tahunPelatihanId,
@@ -159,60 +159,60 @@ export async function GET() {
       if (!row) continue;
       try {
         const instansiId = coalesceNumber(
-          (row as any).userInstansiId,
-          (row as any).user_instansi_id,
-          (row as any).instansiId,
-          (row as any).instansi_id
+          row['userInstansiId'],
+          row['user_instansi_id'],
+          row['instansiId'],
+          row['instansi_id']
         );
         const instansiKategoriId = coalesceNumber(
-          (row as any).userInstansiKategoriId,
-          (row as any).user_instansi_kategori_id,
-          (row as any).instansiKategoriId,
-          (row as any).instansi_kategori_id
+          row['userInstansiKategoriId'],
+          row['user_instansi_kategori_id'],
+          row['instansiKategoriId'],
+          row['instansi_kategori_id']
         );
         const tahunPelatihanId = coalesceNumber(
-          (row as any).userTahunPelatihanId,
-          (row as any).user_tahun_pelatihan_id,
-          (row as any).tahunPelatihanId,
-          (row as any).tahun_pelatihan_id
+          row['userTahunPelatihanId'],
+          row['user_tahun_pelatihan_id'],
+          row['tahunPelatihanId'],
+          row['tahun_pelatihan_id']
         );
         const pelatihanId = coalesceNumber(
-          (row as any).userPelatihanId,
-          (row as any).user_pelatihan_id,
-          (row as any).pelatihanId,
-          (row as any).pelatihan_id
+          row['userPelatihanId'],
+          row['user_pelatihan_id'],
+          row['pelatihanId'],
+          row['pelatihan_id']
         );
         const domisiliId = coalesceNumber(
-          (row as any).userDomisiliId,
-          (row as any).user_domisili_id,
-          (row as any).domisiliId,
-          (row as any).domisili_id
+          row['userDomisiliId'],
+          row['user_domisili_id'],
+          row['domisiliId'],
+          row['domisili_id']
         );
         const jabatanId = coalesceNumber(
-          (row as any).userJabatanId,
-          (row as any).jabatanId,
-          (row as any).jabatan_id
+          row['userJabatanId'],
+          row['jabatanId'],
+          row['jabatan_id']
         );
-        const categoryId = coalesceNumber(row.category_id, (row as any).categoryId) ?? 0;
+        const categoryId = coalesceNumber(row['category_id'], row['categoryId']) ?? 0;
 
         transformedData.push({
-          id: Number(row.id ?? 0),
-          user_id: Number(row.user_id ?? 0),
-          created_at: (row as any).created_at ?? "",
-          answers: normalizeAnswers((row as any).answers),
+          id: Number(row['id'] ?? 0),
+          user_id: Number(row['user_id'] ?? 0),
+          created_at: coalesceString(row['created_at']) ?? "",
+          answers: normalizeAnswers(row['answers']),
           category_id: categoryId,
           user: {
-            name: coalesceString((row as any).userName, (row as any).nama_alumni),
+            name: coalesceString(row['userName'], row['nama_alumni']),
             email: "",
-            nip: coalesceString((row as any).userNip, (row as any).nip_nrp_nik),
-            telepon: coalesceString((row as any).userPhone, (row as any).telepon),
+            nip: coalesceString(row['userNip'], row['nip_nrp_nik']),
+            telepon: coalesceString(row['userPhone'], row['telepon']),
             instansi: instansiId !== null ? instansiMap.get(instansiId) ?? String(instansiId) : "",
             instansi_id: instansiId,
             instansi_kategori_id: instansiKategoriId,
             tahun_pelatihan_id: tahunPelatihanId,
             pelatihan_id: pelatihanId,
             domisili_id: domisiliId,
-            lemdik: coalesceString((row as any).userLemdik, (row as any).lemdik, (row as any).user_lemdik),
+            lemdik: coalesceString(row['userLemdik'], row['lemdik'], row['user_lemdik']),
             jabatan: jabatanId !== null ? jabatanMap.get(jabatanId) ?? String(jabatanId) : "",
           },
           category: {

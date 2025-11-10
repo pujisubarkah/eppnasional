@@ -26,6 +26,10 @@ export async function POST(req: Request) {
     }
 
     // Cek kecocokan password
+    if (!user.password) {
+      return NextResponse.json({ error: 'Password tidak tersedia untuk user ini' }, { status: 500 });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -37,10 +41,12 @@ export async function POST(req: Request) {
       message: 'Login berhasil!',
       user: {
         id: user.id,
-        username: user.username,
-        nama: user.nama,
-        roleId: user.roleId,
-        lemdikId: user.lemdikId
+        name: user.name,
+        email: user.email,
+        nip: user.nip,
+        instansi: user.instansi,
+        unitKerja: user.unit_kerja,
+        role: user.role
       }
     });
 
