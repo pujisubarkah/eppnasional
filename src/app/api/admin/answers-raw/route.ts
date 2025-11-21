@@ -106,6 +106,54 @@ export async function GET() {
       jabatanMap.set(id, coalesceString(row.nama_jabatan, row.nama));
     }
 
+    // NEW: pelatihan (id, nama)
+    const pelatihanRows = toArraySafe<Record<string, unknown>>(
+      (await db.execute(sql`select id, nama from eppn.pelatihan`)).rows
+    );
+    const pelatihanMap = new Map<number, string>();
+    for (const row of pelatihanRows) {
+      if (!row) continue;
+      const id = coalesceNumber(row.id, row.pelatihan_id, row.pelatihanId);
+      if (id === null) continue;
+      pelatihanMap.set(id, coalesceString(row.nama, row.name));
+    }
+
+    // NEW: tahun_pelatihan (id, tahun)
+    const tahunPelatihanRows = toArraySafe<Record<string, unknown>>(
+      (await db.execute(sql`select id, tahun from eppn.tahun_pelatihan`)).rows
+    );
+    const tahunPelatihanMap = new Map<number, string>();
+    for (const row of tahunPelatihanRows) {
+      if (!row) continue;
+      const id = coalesceNumber(row.id, row.tahun_pelatihan_id, row.tahunPelatihanId);
+      if (id === null) continue;
+      tahunPelatihanMap.set(id, coalesceString(row.tahun, row.year));
+    }
+
+    // NEW: provinsi (domisili) id -> nama
+    const provinsiRows = toArraySafe<Record<string, unknown>>(
+      (await db.execute(sql`select id, nama from eppn.provinsi`)).rows
+    );
+    const provinsiMap = new Map<number, string>();
+    for (const row of provinsiRows) {
+      if (!row) continue;
+      const id = coalesceNumber(row.id, row.provinsi_id, row.provinsiId);
+      if (id === null) continue;
+      provinsiMap.set(id, coalesceString(row.nama, row.name));
+    }
+
+    // NEW: instansi_kategori id -> kat_instansi
+    const instansiKategoriRows = toArraySafe<Record<string, unknown>>(
+      (await db.execute(sql`select id, kat_instansi from eppn.instansi_kategori`)).rows
+    );
+    const instansiKategoriMap = new Map<number, string>();
+    for (const row of instansiKategoriRows) {
+      if (!row) continue;
+      const id = coalesceNumber(row.id, row.instansi_kategori_id, row.instansiKategoriId);
+      if (id === null) continue;
+      instansiKategoriMap.set(id, coalesceString(row.kat_instansi, row.nama_kategori));
+    }
+
     const questionRows = toArraySafe<Record<string, unknown>>(
       (await db.execute(sql`select * from eppn.question_options`)).rows
     );
@@ -150,6 +198,12 @@ export async function GET() {
         domisili_id: number | null;
         lemdik: string;
         jabatan: string;
+        // NEW fields:
+        pelatihan: string;
+        tahun_pelatihan: string;
+        // NEW:
+        domisili: string;
+        instansi_kategori: string;
       };
       category: { name: string };
       questions: Array<{ question_key: string; question_text: string }>;
@@ -214,6 +268,12 @@ export async function GET() {
             domisili_id: domisiliId,
             lemdik: coalesceString(row['userLemdik'], row['lemdik'], row['user_lemdik']),
             jabatan: jabatanId !== null ? jabatanMap.get(jabatanId) ?? String(jabatanId) : "",
+            // NEW: include names derived from maps
+            pelatihan: pelatihanId !== null ? pelatihanMap.get(pelatihanId) ?? String(pelatihanId) : "",
+            tahun_pelatihan: tahunPelatihanId !== null ? tahunPelatihanMap.get(tahunPelatihanId) ?? String(tahunPelatihanId) : "",
+            // NEW name fields:
+            domisili: domisiliId !== null ? provinsiMap.get(domisiliId) ?? String(domisiliId) : "",
+            instansi_kategori: instansiKategoriId !== null ? instansiKategoriMap.get(instansiKategoriId) ?? String(instansiKategoriId) : "",
           },
           category: {
             name: categoryMap.get(categoryId) ?? "",

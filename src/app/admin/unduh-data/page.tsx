@@ -25,6 +25,10 @@ interface AnswerData {
     pelatihan_id: number | null;
     domisili_id: number | null;
     lemdik: string;
+    pelatihan: string;
+    tahun_pelatihan: string;
+    domisili: string;
+    instansi_kategori: string;
   };
   category?: {
     name: string;
@@ -82,9 +86,13 @@ export default function UnduhDataPage() {
         'Instansi',
         'Instansi ID',
         'Instansi Kategori ID',
+        'Instansi Kategori',
         'Tahun Pelatihan ID',
+        'Tahun Pelatihan',
         'Pelatihan ID',
+        'Pelatihan',
         'Domisili ID',
+        'Domisili',
         'Lemdik',
         'Jabatan',
         'Category ID',
@@ -145,9 +153,13 @@ export default function UnduhDataPage() {
             `"${row.user?.instansi || ''}"`,
             `"${row.user?.instansi_id ?? ''}"`,
             `"${row.user?.instansi_kategori_id ?? ''}"`,
+            `"${row.user?.instansi_kategori || ''}"`,
             `"${row.user?.tahun_pelatihan_id ?? ''}"`,
+            `"${row.user?.tahun_pelatihan || ''}"`,
             `"${row.user?.pelatihan_id ?? ''}"`,
+            `"${row.user?.pelatihan || ''}"`,
             `"${row.user?.domisili_id ?? ''}"`,
+            `"${row.user?.domisili || ''}"`,
             `"${row.user?.lemdik || ''}"`,
             `"${row.user?.jabatan || ''}"`,
             row.category_id,
