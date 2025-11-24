@@ -1,5 +1,5 @@
 "use client";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LabelList } from "recharts";
 
 
 import { useEffect, useState } from "react";
@@ -157,11 +157,13 @@ const COLORS = [
                 </h2>
               </div>
               <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={sikapData} layout="vertical" margin={{ left: 250 }}>
+                <BarChart data={sikapData} layout="vertical" margin={{ left: 250, right: 24 }}>
                   <XAxis type="number" allowDecimals={false} />
                   <YAxis type="category" dataKey="kategori" width={240} />
                   <Tooltip />
-                  <Bar dataKey="jumlah" fill="#1976D2" />
+                  <Bar dataKey="jumlah" fill="#1976D2">
+                    <LabelList dataKey="jumlah" position="right" />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -177,11 +179,13 @@ const COLORS = [
                 </h2>
               </div>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={kinerjaData} layout="vertical" margin={{ left: 250 }}>
+                <BarChart data={kinerjaData} layout="vertical" margin={{ left: 250, right: 24 }}>
                   <XAxis type="number" allowDecimals={false} />
                   <YAxis type="category" dataKey="kategori" width={240} />
                   <Tooltip />
-                  <Bar dataKey="jumlah" fill="#90CAF9" />
+                  <Bar dataKey="jumlah" fill="#90CAF9">
+                    <LabelList dataKey="jumlah" position="right" />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -274,11 +278,13 @@ const COLORS = [
               </div>
               <div className="p-6">
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={subBidangData} layout="vertical" margin={{ left: 300 }}>
+                  <BarChart data={subBidangData} layout="vertical" margin={{ left: 300, right: 32 }}>
                     <XAxis type="number" allowDecimals={false} />
                     <YAxis type="category" dataKey="kategori" width={290} />
                     <Tooltip />
-                    <Bar dataKey="value" fill="#42A5F5" />
+                    <Bar dataKey="value" fill="#42A5F5">
+                      <LabelList dataKey="value" position="right" />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
