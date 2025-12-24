@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart2, BookOpen, Users, Smile, Clock, Star, MessageCircle, Download } from "lucide-react";
+import { BarChart2, BookOpen, Users, Smile, Clock, Star, MessageCircle, Download, FileText } from "lucide-react";
 
 const menu = [
   { href: "/admin", label: "Ringkasan", icon: <BarChart2 size={18} /> },
@@ -12,6 +12,7 @@ const menu = [
   { href: "/admin/saran-masukan", label: "Saran dan Masukan", icon: <MessageCircle size={18} /> },
   { href: "/admin/peer-review", label: "Peer Review", icon: <Star size={18} /> },
    { href: "/admin/laporan", label: "Laporan", icon: <BookOpen size={18} /> },
+   { href: "/admin/hasil-survey", label: "Hasil Survey", icon: <FileText size={18} /> },
    { href: "/admin/unduh-data", label: "Unduh Data", icon: <Download size={18} /> },
 ];
 

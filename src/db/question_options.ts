@@ -1,5 +1,5 @@
 // server/database/schema/question_options.ts
-import { serial, integer, varchar, text, timestamp } from "drizzle-orm/pg-core";
+import { serial, integer, varchar, text } from "drizzle-orm/pg-core";
 import { pgSchema } from "drizzle-orm/pg-core";
 
 export const eppnSchema = pgSchema("eppn");

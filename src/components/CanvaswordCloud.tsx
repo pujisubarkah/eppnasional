@@ -19,16 +19,21 @@ export default function CanvasWordCloud({ words, width = 900, height = 400 }: Ca
 
   useEffect(() => {
     if (canvasRef.current && limitedWords.length > 0) {
-      WordCloud(canvasRef.current, {
-        list: limitedWords,
-        gridSize: 8,
-        weightFactor: 25,
-        fontFamily: 'Impact',
-        color: 'random-dark',
-        rotateRatio: 0.5,
-        rotationSteps: 2,
-        backgroundColor: '#f9f9f9',
-      });
+      try {
+        WordCloud(canvasRef.current, {
+          list: limitedWords,
+          gridSize: 8,
+          weightFactor: 25,
+          fontFamily: 'Impact',
+          color: 'random-dark',
+          rotateRatio: 0.5,
+          rotationSteps: 2,
+          backgroundColor: '#f9f9f9',
+        });
+      } catch (error) {
+        console.error('Error rendering word cloud:', error);
+        // Fallback: tampilkan pesan error atau canvas kosong
+      }
     }
   }, [limitedWords, width, height]);
 
