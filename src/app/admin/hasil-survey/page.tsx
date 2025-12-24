@@ -9,13 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Eye, Filter, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface Question {
-  id: number;
-  question_key: string;
-  question_text: string;
-  category_id: number;
-}
-
 const normalizeAnswers = (rawValue: unknown): Record<string, string> => {
   try {
     if (!rawValue) return {};
@@ -72,7 +65,6 @@ export default function HasilSurveyPage() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [loadingOptions, setLoadingOptions] = useState(true);
-  const [categoryQuestionsMap, setCategoryQuestionsMap] = useState<Record<number, Question[]>>({});
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -96,26 +88,7 @@ export default function HasilSurveyPage() {
   useEffect(() => {
     fetchData();
     fetchOptions();
-    fetchQuestions();
   }, []);
-
-  // Fetch all questions and group by category_id
-  const fetchQuestions = async () => {
-    try {
-      const res = await fetch('/api/questions');
-      if (!res.ok) throw new Error('Failed to fetch questions');
-      const questions: Question[] = await res.json();
-      const grouped: Record<number, Question[]> = {};
-      questions.forEach(q => {
-        if (!grouped[q.category_id]) grouped[q.category_id] = [];
-        grouped[q.category_id].push(q);
-      });
-      setCategoryQuestionsMap(grouped);
-    } catch (error) {
-      toast.error('Gagal memuat pertanyaan survey');
-      console.error(error);
-    }
-  };
 
   const fetchOptions = async () => {
     setLoadingOptions(true);
@@ -417,7 +390,7 @@ export default function HasilSurveyPage() {
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="ghost" size="sm" onClick={() => setSelectedUser(item)}>
-                              <Eye className="h-4 w-4" />
+                              <Eye className="h-5 w-5 text-blue-500 hover:text-blue-700" />
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-white border-2 border-gray-300 shadow-2xl">
@@ -429,24 +402,23 @@ export default function HasilSurveyPage() {
                             </DialogHeader>
                             <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
                               {selectedUser?.answers.map((answer, index) => {
-                                const categoryQuestions = categoryQuestionsMap[answer.category_id] || [];
                                 const answersObj = normalizeAnswers(answer.answers);
+                                const answerKeys = Object.keys(answersObj);
                                 return (
                                   <div key={index} className="border-2 border-gray-200 rounded-lg p-4 bg-white shadow-sm">
                                     <div className="font-medium text-sm text-gray-700 mb-4">
                                       Kategori: {data.find(d => d.category_id === answer.category_id)?.category?.name}
                                     </div>
                                     <div className="space-y-4">
-                                      {categoryQuestions.length === 0 ? (
-                                        <div className="text-sm text-gray-500">Pertanyaan untuk kategori ini tidak tersedia.</div>
+                                      {answerKeys.length === 0 ? (
+                                        <div className="text-sm text-gray-500">Tidak ada jawaban untuk kategori ini.</div>
                                       ) : (
-                                        categoryQuestions.map((question) => {
-                                          const userAnswer = answersObj[question.question_key];
+                                        answerKeys.map((key) => {
+                                          const userAnswer = answersObj[key];
                                           return (
-                                            <div key={question.question_key} className="border-b border-gray-100 pb-3 last:border-b-0">
-                                              <div className="font-medium text-sm mb-2">{question.question_text}</div>
-                                              <div className="text-sm text-gray-700 bg-gray-100 p-2 rounded">
-                                                Jawaban: {userAnswer || 'Tidak dijawab'}
+                                            <div key={key} className="border-b border-gray-100 pb-3 last:border-b-0">
+                                              <div className="text-sm text-blue-600 bg-gray-100 p-2 rounded">
+                                                {userAnswer || 'Tidak dijawab'}
                                               </div>
                                             </div>
                                           );
