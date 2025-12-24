@@ -7,7 +7,6 @@ import { useNamaProfileStore } from "@/lib/store/namaprofile";
 import Image from "next/image";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
-import lanLogo from "/public/lanri_.png";
 import { toast } from "sonner";
 
 
@@ -79,7 +78,7 @@ export default function LoginPage() {
         >
           <div className="flex flex-col items-center mb-2">
             <Image
-              src={lanLogo}
+              src="/lanri_.png"
               alt="Logo LAN"
               width={96}
               height={96}
