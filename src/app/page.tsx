@@ -79,6 +79,24 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Scrolling Thank You Message */}
+      <section className="w-full max-w-6xl mx-auto mb-8">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-lg overflow-hidden">
+          <div className="py-4 px-6">
+            <div className="relative overflow-hidden">
+              <div className="animate-marquee whitespace-nowrap">
+                <span className="text-white text-lg font-semibold mx-8">
+                  🎉 Terima Kasih Kepada Semua Responden Yang Telah Mengisi Survey Pasca Pelatihan LAN RI 2021-2024! Kontribusi Anda Sangat Berarti Untuk Pengembangan Pelatihan ASN di Indonesia 🇮🇩
+                </span>
+                <span className="text-white text-lg font-semibold mx-8">
+                  🎉 Terima Kasih Kepada Semua Responden Yang Telah Mengisi Survey Pasca Pelatihan LAN RI 2021-2024! Kontribusi Anda Sangat Berarti Untuk Pengembangan Pelatihan ASN di Indonesia 🇮🇩
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Info Cards Section */}
       <section className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
         <div className="bg-white/90 rounded-2xl shadow-lg border-2 border-[#2196F3] outline-2 outline-[#2196F3] p-8 flex flex-col items-center text-center">
