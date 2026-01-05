@@ -9,7 +9,7 @@ import DashboardCharts from "@/components/DashboardCharts";
 
 export default function Home() {
   const [showModal, setShowModal] = useState(false);
-  const [isSurveyOpen] = useState(true); // Set ke true jika survei dibuka
+  const [isSurveyOpen] = useState(false); // Set ke true jika survei dibuka
   const router = useRouter();
 
   // Clear all relevant localStorage keys on homepage load
