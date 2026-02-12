@@ -1,0 +1,164 @@
+/* Navbar Custom Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Debug untuk memastikan menu terlihat */
+.navbar-menu-panel {
+  min-height: 200px; /* Pastikan ada minimal height */
+}
+
+/* Fallback styles jika animasi tidak berfungsi */
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out forwards;
+  /* Fallback tanpa animasi */
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.animate-fade-in-backdrop {
+  animation: fadeInBackdrop 0.3s ease-out forwards;
+  /* Fallback tanpa animasi */
+  opacity: 1;
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.4s ease-out forwards;
+  /* Fallback tanpa animasi */
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Responsive breakpoints untuk navbar */
+@media (max-width: 640px) {
+  .navbar-mobile-panel {
+    width: 100vw;
+  }
+  
+  .navbar-logo-text {
+    font-size: 0.875rem; /* text-sm */
+  }
+  
+  .navbar-menu-title {
+    font-size: 1.125rem; /* text-lg */
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .navbar-tablet-panel {
+    width: 400px;
+  }
+  
+  .navbar-logo-text {
+    font-size: 1rem; /* text-base */
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .navbar-tablet-panel {
+    width: 480px;
+  }
+  
+  .navbar-logo-text {
+    font-size: 1.25rem; /* text-xl */
+  }
+}
+
+@media (min-width: 1025px) {
+  .navbar-logo-text {
+    font-size: 1.5rem; /* text-2xl */
+  }
+}
+
+/* Smooth scrolling untuk mobile menu */
+.navbar-menu-panel {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Glass morphism effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-effect-strong {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Hover effects */
+.nav-item-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.nav-item-hover:hover::before {
+  left: 100%;
+}
+
+/* Active state indicators */
+.active-link {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+}
+
+.inactive-link {
+  background: transparent;
+}
+
+/* Mobile safe area */
+@supports (padding: max(0px)) {
+  .navbar-mobile-safe {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
