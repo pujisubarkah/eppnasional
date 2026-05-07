@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { Toaster } from "sonner";
+import LayoutChrome from "@/components/LayoutChrome";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -20,12 +18,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
-        <Navbar />
-        <main className="mt-20">
-          {children}
-        </main>
-        <Footer />
-        <Toaster richColors position="top-center" />
+        <LayoutChrome>{children}</LayoutChrome>
       </body>
     </html>
   );
