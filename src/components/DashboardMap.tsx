@@ -26,7 +26,8 @@ function getColor(count: number) {
 }
 
 function cleanPath(path: string) {
-  return path ? path.replace(/^"|"$/g, "") : "";
+  if (!path) return "";
+  return path.replace(/^["\\]+|["\\]+$/g, "").trim();
 }
 
 export default function DashboardMap() {

@@ -14,13 +14,17 @@ export default function Navbar() {
   const { nama, clearNama } = useNamaProfileStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const displayName = mounted ? nama : null;
 
   const isActive = (path: string) =>
     pathname === path ? 'active-link' : 'inactive-link'
 
-  // Check screen size
+  // Check screen size and set mounted
   useEffect(() => {
+    setMounted(true);
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth <= 640);
     };
@@ -86,7 +90,7 @@ export default function Navbar() {
           <Link href="/kontak" className={`nav-link text-white font-semibold px-3 xl:px-4 py-2 rounded-lg transition-all duration-200 nav-item-hover ${isActive('/kontak')} hover:bg-white/20 hover:backdrop-blur-sm hover:shadow-lg hover:scale-105`}>Kontak</Link>
         </div>
         <div className="pl-2 xl:pl-4">
-          {!nama ? (
+          {!displayName ? (
             <Link href="/login" className="flex items-center gap-2 px-4 py-2.5 rounded-full glass-effect text-white font-bold shadow-xl hover:bg-gradient-to-r hover:from-white hover:to-white hover:text-[#1565C0] hover:scale-105 transition-all duration-300 nav-item-hover">
               <LogIn className="w-4 h-4" />
               <span className="hidden xl:inline">Login</span>
@@ -94,7 +98,7 @@ export default function Navbar() {
           ) : (
             <div className="relative" ref={dropdownRef}>
               <button onClick={() => setDropdownOpen((v) => !v)} className="flex items-center gap-2 px-4 py-2.5 rounded-full glass-effect text-white font-bold shadow-xl hover:bg-gradient-to-r hover:from-white hover:to-white hover:text-[#1565C0] hover:scale-105 transition-all duration-300 nav-item-hover">
-                <span className="max-w-32 truncate">{nama}</span>
+                <span className="max-w-32 truncate">{displayName}</span>
                 <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {dropdownOpen && (
@@ -219,7 +223,7 @@ export default function Navbar() {
                 <div className="my-4 border-t border-gray-200"></div>
                 
                 {/* User Actions */}
-                {!nama ? (
+                {!displayName ? (
                   <Link 
                     href="/login" 
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-[#1565C0] text-white font-medium shadow-md hover:bg-[#1976D2] hover:shadow-lg transition-all duration-200" 
@@ -232,7 +236,7 @@ export default function Navbar() {
                   <div className="space-y-2">
                     <div className="px-3 py-2 rounded-lg bg-[#F3F4F6] border border-gray-200">
                       <p className="text-[#6B7280] font-medium text-xs">Halo,</p>
-                      <p className="text-[#1565C0] font-semibold text-sm truncate">{nama}</p>
+                      <p className="text-[#1565C0] font-semibold text-sm truncate">{displayName}</p>
                     </div>
                     <button 
                       onClick={() => { handleLogout(); setDropdownOpen(false); }} 

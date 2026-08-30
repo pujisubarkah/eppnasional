@@ -59,6 +59,11 @@ export default function DashboardCharts() {
   const [pelatihanData, setPelatihanData] = useState<{ name: string; jumlah: number }[]>([]);
   const [instansiData, setInstansiData] = useState<{ name: string; jumlah: number }[]>([]);
   const [jenisInstansiData, setJenisInstansiData] = useState<{ name: string; value: number }[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Fetch data pelatihan
@@ -101,6 +106,12 @@ export default function DashboardCharts() {
       .catch((err) => console.error("Error fetching instansi data:", err));
   }, []);
 
+
+  if (!mounted) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-10 px-4 min-h-[300px]" />
+    );
+  }
 
   return (
     <>

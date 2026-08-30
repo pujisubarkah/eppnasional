@@ -45,35 +45,24 @@ export default function SaranMasukanPage() {
       localStorage.setItem("alumni_evaluasi_user_id", String(id));
     }
   }, [profileStore.id, router]);
-  // Restore from localStorage if available
-  const [materi, setMateri] = useState(() => {
+  // Restore from localStorage if available after mount
+  const [materi, setMateri] = useState("");
+  const [metode, setMetode] = useState("");
+  const [waktu, setWaktu] = useState("");
+  const [pengajar, setPengajar] = useState("");
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alumni_saranmasukan_materi");
-      if (saved) return saved;
+      const savedMateri = localStorage.getItem("alumni_saranmasukan_materi");
+      if (savedMateri) setMateri(savedMateri);
+      const savedMetode = localStorage.getItem("alumni_saranmasukan_metode");
+      if (savedMetode) setMetode(savedMetode);
+      const savedWaktu = localStorage.getItem("alumni_saranmasukan_waktu");
+      if (savedWaktu) setWaktu(savedWaktu);
+      const savedPengajar = localStorage.getItem("alumni_saranmasukan_pengajar");
+      if (savedPengajar) setPengajar(savedPengajar);
     }
-    return "";
-  });
-  const [metode, setMetode] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alumni_saranmasukan_metode");
-      if (saved) return saved;
-    }
-    return "";
-  });
-  const [waktu, setWaktu] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alumni_saranmasukan_waktu");
-      if (saved) return saved;
-    }
-    return "";
-  });
-  const [pengajar, setPengajar] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alumni_saranmasukan_pengajar");
-      if (saved) return saved;
-    }
-    return "";
-  });
+  }, []);
 
   // Simpan ke localStorage setiap kali berubah
   useEffect(() => {

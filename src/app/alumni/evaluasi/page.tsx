@@ -35,31 +35,25 @@ export default function EvaluasiPage() {
   // Ambil data dari globalStore (zustand)
   const profileStore = useProfileFormStore();
   const [nama, setNama] = useState<string>(profileStore.nama || "");
-  const [pelatihanId, setPelatihanId] = useState<number>(() => {
-    if (profileStore.pelatihan) return Number(profileStore.pelatihan);
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alumni_evaluasi_pelatihan_id");
-      if (saved) return Number(saved);
-    }
-    return 0;
-  });
+  const [pelatihanId, setPelatihanId] = useState<number>(0);
   const [userId, setUserId] = useState<string>("");
 
   // Local state for evaluasi
-  const [relevan, setRelevan] = useState<string[]>(() => {
+  const [relevan, setRelevan] = useState<string[]>([]);
+  const [tidakRelevan, setTidakRelevan] = useState<string[]>([]);
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alumni_evaluasi_relevan");
-      if (saved) return JSON.parse(saved);
+      try {
+        const savedRelevan = localStorage.getItem("alumni_evaluasi_relevan");
+        if (savedRelevan) setRelevan(JSON.parse(savedRelevan));
+      } catch {}
+      try {
+        const savedTidak = localStorage.getItem("alumni_evaluasi_tidakRelevan");
+        if (savedTidak) setTidakRelevan(JSON.parse(savedTidak));
+      } catch {}
     }
-    return [];
-  });
-  const [tidakRelevan, setTidakRelevan] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alumni_evaluasi_tidakRelevan");
-      if (saved) return JSON.parse(saved);
-    }
-    return [];
-  });
+  }, []);
 
   // Reset function
   const reset = useCallback(() => {
